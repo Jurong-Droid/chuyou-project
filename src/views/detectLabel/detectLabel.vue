@@ -11,7 +11,7 @@
             </div>
         </el-col>
         <el-col :span="21" v-loading="imgLoading" element-loading-text="拼命加载中...">
-            <el-row type="flex" :gutter="10" justify="center" style="height:40px" v-show="showPic">
+            <el-row type="flex" :gutter="10" justify="center" style="height:40px" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
                 <el-col :span="10"></el-col>
                 <el-col :span="12">
                     <div class="grid-content bg-purple">
@@ -82,12 +82,12 @@ export default {
         },
         getList() {
             //查询列表
-            if (!this.hasPerm("videoLive:list")) {
+            if (!this.hasPerm("detectLabel:list")) {
                 return;
             }
             this.listLoading = true;
             this.api({
-                url: "/detectLabel/listVideoCamera",
+                url: "/detectLabel/listCameraInfo",
                 method: "get",
             }).then((data) => {
                 this.listLoading = false;
@@ -101,7 +101,7 @@ export default {
                 this.showPic = true;
                 this.imgLoading = true;
                 this.api({
-                    url: "/detectLabel/startVideoLive",
+                    url: "/detectLabel/cameraLiveStart",
                     method: "get",
                     params: {
                         id: data.id
@@ -171,10 +171,10 @@ export default {
                     method: "post",
                     data: {
                         cameraId: this.cameraId,
-                        x: list[0].position.x,
-                        y: list[0].position.y,
-                        x1: list[0].position.x1,
-                        y1: list[0].position.y1
+                        x: this.percentToPoint(list[0].position.x),
+                        y: this.percentToPoint(list[0].position.y),
+                        x1: this.percentToPoint(list[0].position.x1),
+                        y1: this.percentToPoint(list[0].position.y1)
                     }
                 }).then(() => {
                     this.disabled = true;
@@ -208,6 +208,11 @@ export default {
                 flvPlayer.destroy();
                 flvPlayer = null;
             }
+        },
+        percentToPoint(percent) {
+            var str = percent.replace("%", "");
+            str = str / 100;
+            return str;
         }
     }
 };

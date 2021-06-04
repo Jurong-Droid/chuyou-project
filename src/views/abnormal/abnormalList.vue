@@ -22,7 +22,6 @@
                     <span>{{ scope.row.detectType }}</span>
                 </template>
             </el-table-column>
-            </el-table-column>
             <el-table-column align="center" label="异常信息" width="350">
                 <template slot-scope="scope">
                     <span style="color:red">{{ scope.row.expInfo }}</span>
