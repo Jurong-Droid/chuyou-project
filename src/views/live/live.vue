@@ -23,28 +23,28 @@
 import SplitScreen from "@/components/SplitScreen";
 export default {
     components: {
-        SplitScreen
+        SplitScreen,
     },
     data() {
         return {
-            filterText: '',
+            filterText: "",
             listLoading: false, //数据加载等待动画
             listQuery: {
                 id: null,
-                level: ""
+                level: "",
             },
             data: [],
             defaultProps: {
-                children: 'children',
-                label: 'name',
-                level: 'level'
-            }
+                children: "children",
+                label: "name",
+                level: "level",
+            },
         };
     },
     provide() {
         return {
-            searchParam: () => this.listQuery
-        }
+            searchParam: () => this.listQuery,
+        };
     },
     created() {
         this.getList();
@@ -52,7 +52,7 @@ export default {
     watch: {
         filterText(val) {
             this.$refs.tree.filter(val);
-        }
+        },
     },
 
     methods: {
@@ -62,29 +62,33 @@ export default {
         },
         getList() {
             //查询列表
-            if (!this.hasPerm("videoLive:list")) {
+            if (!this.hasPerm("cameraLive:list")) {
                 return;
             }
             this.listLoading = true;
             this.api({
-                url: "/videoLive/listVideoCamera",
-                method: "get",
-                // params: this.listQuery,
-            }).then((data) => {
-                this.listLoading = false;
-                this.data = data;
-                this.listQuery = {
-                    id: data[0].id,
-                    level: data[0].level
-                }
-            });
+                    url: "/cameraLive/listCameraInfo",
+                    method: "get",
+                    // params: this.listQuery,
+                })
+                .then((data) => {
+                    this.listLoading = false;
+                    this.data = data;
+                    this.listQuery = {
+                        id: data[0].id,
+                        level: data[0].level,
+                    };
+                })
+                .catch((err) => {
+                    this.listLoading = false;
+                });
         },
         clickNode(data, node, obj) {
             this.listQuery = {
                 id: data.id,
-                level: data.level
-            }
+                level: data.level,
+            };
         },
-    }
+    },
 };
 </script>

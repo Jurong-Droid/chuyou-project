@@ -114,14 +114,14 @@ export default {
     },
     methods: {
         getList() {
-            //查询列表
-            if (!this.hasPerm("videoLive:list")) {
+            //视频播放列表
+            if (!this.hasPerm("cameraLive:play")) {
                 return;
             }
             this.closePlayer();
             this.listLoading = true;
             this.api({
-                url: "/videoLive/listVideoLive",
+                url: "/cameraLive/listCameraLive",
                 method: "get",
                 params: this.listQuery,
             }).then((data) => {

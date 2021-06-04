@@ -29,30 +29,23 @@ export const asyncRouterMap = [
   {
     path: '/system',
     component: Layout,
-    redirect: '/system/article',
+    redirect: '/system/videoLive',
     name: '功能模块',
     meta: {title: '功能模块', icon: 'tree'},
     children: [
-      // {
-      //   path: 'article',
-      //   name: '文章',
-      //   component: _import('article/article'),
-      //   meta: {title: '文章', icon: 'example'},
-      //   menu: 'article'
-      // },
       {
-        path: 'videoLive',
+        path: 'cameraLive',
         name: '直播',
         component: _import('live/live'),
         meta: {title: '直播', icon: 'live'},
-        menu: 'videoLive'
+        menu: 'cameraLive'
       },
       {
-        path: 'videoRecord',
-        name: '录播',
-        component: _import('record/recordList'),
-        meta: {title: '录播', icon: 'video'},
-        menu: 'videoRecord'
+        path: 'abnormalInfo',
+        name: '异常记录',
+        component: _import('abnormal/abnormalList'),
+        meta: {title: '异常记录', icon: 'warn'},
+        menu: 'abnormalInfo'
       },
       {
         path: 'detectLabel',
