@@ -10,14 +10,15 @@
                 </el-tree>
             </div>
         </el-col>
-        <el-col :span="21" v-loading="imgLoading" element-loading-text="拼命加载中...">
-            <el-row type="flex" :gutter="10" justify="center" style="height:40px" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
+        <el-col :span="21" v-loading="imgLoading" element-loading-text="正在截取直播画面...">
+            <el-row type="flex" :gutter="10" justify="center" style="height: 40px" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
                 <el-col :span="10"></el-col>
                 <el-col :span="12">
                     <div class="grid-content bg-purple">
                         <el-button-group>
                             <el-button :disabled="disabled" size="mini" @click="markerSave()">保存</el-button>
-                            <el-button size="mini" @click="markerclear()">清除</el-button>
+                            <el-button :disabled="!disabled" size="mini" @click="markerEdit()">修改</el-button>
+                            <el-button size="mini" @click="markerclear()">全部清除</el-button>
                         </el-button-group>
                     </div>
                 </el-col>
@@ -27,7 +28,7 @@
                 <div class="video-wrapper" :style="videoclass" v-show="showVideo">
                     <video ref="videoElement" muted controls width="100%" height="100%"></video>
                 </div>
-                <ui-marker v-if="showPic" ref="aiPanel-editor" class="ai-observer" :ratio="4/3" :imgUrl="imgUrl" :readOnly="readOnly" @vmarker:onAnnoAdded="onAnnoAdded">
+                <ui-marker v-if="showPic" ref="aiPanel-editor" class="ai-observer" :ratio="4/3" :imgUrl="imgUrl" :readOnly="readOnly" @vmarker:onAnnoAdded="onAnnoAdded" @vmarker:onAnnoRemoved="onAnnoRemoved">
                 </ui-marker>
             </el-container>
         </el-col>
@@ -40,30 +41,34 @@ import flvjs from "flv.js";
 //参考文档https://vmarker.sagocloud.com/doc/
 import {
     AIMarker
-} from 'Vue-Picture-BD-Marker'
+} from "Vue-Picture-BD-Marker";
 export default {
     components: {
-        'ui-marker': AIMarker
+        "ui-marker": AIMarker,
     },
     data() {
         return {
-            filterText: '',
+            filterText: "",
             listLoading: false, //数据加载等待动画
             imgLoading: false, //数据加载等待动画
             showPic: false,
             imgUrl: "",
             disabled: false, //按钮是否禁用
             readOnly: false, //矩形框标注是否可编辑
+            maxNum: 3, //可标记的矩形框最大个数
+            tagNum: 0, //可标记的矩形框当前数量
+            newDataNum: 0, //新数据的数量 若存在新数据则可以保存
+            makerManage: null, //maker操作对象
             // 显示视频播放
             showVideo: false,
             videoclass: "padding-bottom: 58.25%; position: relative; margin: 0px auto; overflow: hidden;",
             cameraId: null,
             data: [],
             defaultProps: {
-                children: 'children',
-                label: 'name',
-                level: 'level'
-            }
+                children: "children",
+                label: "name",
+                level: "level",
+            },
         };
     },
     created() {
@@ -72,7 +77,7 @@ export default {
     watch: {
         filterText(val) {
             this.$refs.tree.filter(val);
-        }
+        },
     },
 
     methods: {
@@ -104,20 +109,20 @@ export default {
                     url: "/detectLabel/cameraLiveStart",
                     method: "get",
                     params: {
-                        id: data.id
+                        id: data.id,
                     },
                 }).then((data) => {
                     if (flvjs.isSupported()) {
                         const videoElement = this.$refs.videoElement;
                         this.flvPlayer = flvjs.createPlayer({
-                            type: 'flv',
+                            type: "flv",
                             // enableWorker: true, //浏览器端开启flv.js的worker,多进程运行flv.js
                             // isLive: true, //直播模式
                             // hasAudio: true, //开启音频
                             // hasVideo: true,
                             // stashInitialSize: 128,
                             // enableStashBuffer: false, //播放flv时，设置是否启用播放缓存，只在直播起作用。
-                            url: data.httpUrl
+                            url: data.httpUrl,
                         });
                         this.flvPlayer.attachMediaElement(videoElement);
                         try {
@@ -126,78 +131,31 @@ export default {
                         } catch (error) {
                             console.log(error);
                         }
-                        videoElement.currentTime = 5 //必须设置视频当前时长，要不然会黑屏
+                        videoElement.currentTime = 5; //必须设置视频当前时长，要不然会黑屏
                         const output = document.getElementById("output");
                         // 创建画布准备截图
-                        const canvas = document.createElement('canvas')
+                        const canvas = document.createElement("canvas");
 
-                        videoElement.setAttribute('crossOrigin', 'anonymous')
+                        videoElement.setAttribute("crossOrigin", "anonymous");
                         // 设置画布的宽高
-                        canvas.width = videoElement.clientWidth
-                        canvas.height = videoElement.clientHeight
+                        canvas.width = videoElement.clientWidth;
+                        canvas.height = videoElement.clientHeight;
                         // 图片绘制
-                        videoElement.onloadeddata = (() => {
-                            canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height)
-                            const dataURL = canvas.toDataURL('image/jpeg');
+                        videoElement.onloadeddata = () => {
+                            canvas.getContext("2d").drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                            const dataURL = canvas.toDataURL("image/jpeg");
                             this.imgUrl = dataURL;
 
                             this.showVideo = false;
                             this.imgLoading = false;
-                            // console.log(img)
+
                             this.destoryVideo(this.flvPlayer);
-                        })
-
+                            //查询该摄像头是否原来有标注矩形框
+                            this.listRectangle();
+                        };
                     }
                 });
             }
-        },
-        markerclear() {
-            if (!this.readOnly) {
-                this.$refs['aiPanel-editor'].getMarker().clearData();
-            } else {
-                this.$alert('标注框已保存不能清除！', '提示', {
-                    confirmButtonText: '确定'
-                });
-            }
-
-        },
-        markerSave() {
-            if (!this.disabled) {
-                this.readOnly = true;
-                let list = this.$refs['aiPanel-editor'].getMarker().getData();
-                console.log(list[0]);
-                this.api({
-                    url: "/detectLabel/saveRectangle",
-                    method: "post",
-                    data: {
-                        cameraId: this.cameraId,
-                        x: this.percentToPoint(list[0].position.x),
-                        y: this.percentToPoint(list[0].position.y),
-                        x1: this.percentToPoint(list[0].position.x1),
-                        y1: this.percentToPoint(list[0].position.y1)
-                    }
-                }).then(() => {
-                    this.disabled = true;
-                    this.$alert('保存成功', '提示', {
-                        confirmButtonText: '确定',
-                        callback: action => {
-                            this.$message({
-                                type: 'success',
-                                message: `保存成功！`
-                            });
-                        }
-                    });
-                })
-            }
-
-        },
-        //当画完一个标注框时回调
-        onAnnoAdded() {
-
-            this.$refs['aiPanel-editor'].getMarker().setTag({
-                tagName: "入侵检测区域",
-                tag: "0x0001"
-            });
         },
         destoryVideo(flvPlayer) {
             if (flvPlayer) {
@@ -209,11 +167,163 @@ export default {
                 flvPlayer = null;
             }
         },
-        percentToPoint(percent) {
-            var str = percent.replace("%", "");
-            str = str / 100;
-            return str;
-        }
-    }
+        listRectangle() {
+            this.tagNum = 0;
+            this.makerManage = this.$refs["aiPanel-editor"].getMarker();
+            this.api({
+                url: "/detectLabel/listRectangle",
+                method: "get",
+                params: {
+                    cameraId: this.cameraId,
+                },
+            }).then((data) => {
+                if (data.length > 0) {
+                    //加载原有标记框数据
+                    this.makerManage.renderData(data);
+                    this.disabled = true;
+                    this.readOnly = true;
+                }
+            });
+        },
+        markerSave() {
+            if (!this.disabled) {
+                let list = this.makerManage.getData();
+                if (list.length == 0) {
+                    this.$alert("无数据可保存！", "提示", {
+                        confirmButtonText: "确定",
+                    });
+                    return;
+                }
+                for (let i in list) {
+                    list[i].cameraId = this.cameraId;
+                }
+                this.api({
+                    url: "/detectLabel/saveRectangle",
+                    method: "post",
+                    data: list,
+                }).then(() => {
+                    this.newDataNum = 0;
+                    this.readOnly = true;
+                    this.disabled = true;
+                    //删除原有的，重新从后端查询数据再渲染矩形框
+                    this.makerManage.clearData();
+                    this.listRectangle();
+                    this.$message({
+                        type: "success",
+                        message: `保存成功！`,
+                    });
+
+                });
+            }
+        },
+        markerEdit() {
+            this.disabled = false;
+            if (!this.disabled) {
+                this.readOnly = false;
+            }
+        },
+        markerclear() {
+            this.$confirm("此操作将删除所有标注, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            }).then(() => {
+                this.api({
+                    url: "/detectLabel/removeRectangleAll",
+                    method: "post",
+                    data: {
+                        cameraId: this.cameraId,
+                    },
+                }).then((data) => {
+                    this.makerManage.clearData();
+                    this.tagNum = 0;
+                    this.readOnly = false;
+                    this.disabled = false;
+                    this.$message({
+                        type: "success",
+                        message: "删除成功!",
+                    });
+                });
+            }).catch(() => {
+                this.$message({
+                    type: "info",
+                    message: "已取消删除",
+                });
+            });
+        },
+        //监听事件 当画完一个标注框时回调
+        //Bug setTag方法在监听方法onAnnoAdded中会导致 再怎么调整大小或者位置 .getData() 就都只能是画框原始数据 onAnnoUpdated方法不触发
+        onAnnoAdded(data) {
+            this.tagNum++;
+            if (this.tagNum > this.maxNum) {
+                this.$alert(
+                    "已超过最大限制，当前可支持最大标注数量为" + this.maxNum + "个！", "提示", {
+                        confirmButtonText: "确定",
+                        type: "warning",
+                    }
+                );
+                //目前未找到删除单个方法，故将标注框先删除，再加载删除最后新画的List数据
+                let list = this.makerManage.getData();
+                list.pop();
+                this.makerManage.clearData();
+                this.tagNum = 0;
+                this.makerManage.renderData(list);
+                if (this.newDataNum == 0) {
+                    this.readOnly = true;
+                    this.disabled = true;
+                }
+
+                return;
+            }
+            if (!data.id) {
+                this.newDataNum++;
+            }
+        },
+        //删除单个标注时的操作逻辑
+        onAnnoRemoved(annoData) {
+            this.$confirm("此操作将删该标注, 是否继续?", "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning",
+            }).then(() => {
+                if (annoData.id) {
+                    this.api({
+                        url: "/detectLabel/removeRectangleById",
+                        method: "post",
+                        data: {
+                            cameraId: this.cameraId,
+                            id: annoData.id,
+                        },
+                    }).then((data) => {
+                        this.tagNum--;
+                        this.$message({
+                            type: "success",
+                            message: "删除成功!",
+                        });
+                    });
+                } else {
+                    this.tagNum--;
+                    this.newDataNum--;
+                }
+                if (this.newDataNum == 0) {
+                    this.readOnly = true;
+                    this.disabled = true;
+                }
+
+            }).catch(() => {
+                this.$message({
+                    type: "info",
+                    message: "已取消删除",
+                });
+                //若取消删除则添加回去
+                let list = this.makerManage.getData();
+                list.push(annoData);
+                this.makerManage.clearData();
+                this.tagNum = 0;
+                this.makerManage.renderData(list);
+            });
+        },
+
+    },
 };
 </script>
