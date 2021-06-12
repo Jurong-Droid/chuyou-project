@@ -22,7 +22,7 @@
     "nprogress": "0.2.0",
     "video.js": "^7.11.8",
     "vue": "2.6.10",
-    "vue-picture-bd-marker": "^1.4.1",
+    "vue-picture-bd-marker": "^1.4.1-beta02",
     "vue-router": "3.0.6",
     "vue-uuid": "^2.0.2",
     "vue-video-player": "^5.0.2",

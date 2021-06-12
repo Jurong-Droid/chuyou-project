@@ -12,8 +12,8 @@
         </el-col>
         <el-col :span="21" v-loading="imgLoading" element-loading-text="正在截取直播画面...">
             <el-row type="flex" :gutter="10" justify="center" style="height: 40px" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
-                <el-col :span="10"></el-col>
-                <el-col :span="12">
+                <el-col :span="5"></el-col>
+                <el-col :span="8">
                     <div class="grid-content bg-purple">
                         <el-button-group>
                             <el-button :disabled="disabled" size="mini" @click="markerSave()">保存</el-button>
@@ -22,13 +22,22 @@
                         </el-button-group>
                     </div>
                 </el-col>
-                <el-col :span="4"> </el-col>
+                <el-col :span="8"> 
+                    <div class="detectFunc" v-show="showSelect">
+                        请选择检查方法：
+                        <el-select size="mini" v-model="value" placeholder="请选择" @change="selectChange(value)">
+                            <el-option v-for="item in options" :key="item.id" :label="item.detectFuncName" :value="item">
+                            </el-option>
+                        </el-select>
+                    </div>
+
+                </el-col>
             </el-row>
             <el-container class="center">
                 <div class="video-wrapper" :style="videoclass" v-show="showVideo">
                     <video ref="videoElement" muted controls width="100%" height="100%"></video>
                 </div>
-                <ui-marker v-if="showPic" ref="aiPanel-editor" class="ai-observer" :ratio="4/3" :imgUrl="imgUrl" :readOnly="readOnly" @vmarker:onAnnoAdded="onAnnoAdded" @vmarker:onAnnoRemoved="onAnnoRemoved">
+                <ui-marker v-if="showPic" ref="aiPanel-editor" class="ai-observer" :ratio="4/3" :imgUrl="imgUrl" :readOnly="readOnly" @vmarker:onAnnoAdded="onAnnoAdded" @vmarker:onAnnoRemoved="onAnnoRemoved" @vmarker:onAnnoSelected="onAnnoSelected">
                 </ui-marker>
             </el-container>
         </el-col>
@@ -55,7 +64,7 @@ export default {
             imgUrl: "",
             disabled: false, //按钮是否禁用
             readOnly: false, //矩形框标注是否可编辑
-            maxNum: 3, //可标记的矩形框最大个数
+            maxNum: 5, //可标记的矩形框最大个数
             tagNum: 0, //可标记的矩形框当前数量
             newDataNum: 0, //新数据的数量 若存在新数据则可以保存
             makerManage: null, //maker操作对象
@@ -69,17 +78,25 @@ export default {
                 label: "name",
                 level: "level",
             },
+            options: [],
+            detectTypeIdList: [],
+            value: '',
+            showSelect: false
         };
     },
     created() {
         this.getList();
+        this.getDetectFuncList();
+    },
+    mounted() {
+        console.log(11);
+        console.log(document);
     },
     watch: {
         filterText(val) {
             this.$refs.tree.filter(val);
-        },
+        }
     },
-
     methods: {
         filterNode(value, data) {
             if (!value) return true;
@@ -129,7 +146,7 @@ export default {
                             this.flvPlayer.load();
                             this.flvPlayer.play();
                         } catch (error) {
-                            console.log(error);
+                            console.error(error);
                         }
                         videoElement.currentTime = 5; //必须设置视频当前时长，要不然会黑屏
                         const output = document.getElementById("output");
@@ -159,17 +176,23 @@ export default {
         },
         destoryVideo(flvPlayer) {
             if (flvPlayer) {
-                console.log("close flvPlayer......");
-                flvPlayer.pause();
-                flvPlayer.unload();
-                flvPlayer.detachMediaElement();
-                flvPlayer.destroy();
-                flvPlayer = null;
+                try {
+                    console.log("close flvPlayer......");
+                    flvPlayer.pause();
+                    flvPlayer.unload();
+                    flvPlayer.detachMediaElement();
+                    flvPlayer.destroy();
+                    flvPlayer = null;
+                } catch (error) {
+                    console.error(error);
+                    flvPlayer = null;
+                }
             }
         },
         listRectangle() {
             this.tagNum = 0;
             this.makerManage = this.$refs["aiPanel-editor"].getMarker();
+            this.makerManage.clearData();
             this.api({
                 url: "/detectLabel/listRectangle",
                 method: "get",
@@ -180,10 +203,41 @@ export default {
                 if (data.length > 0) {
                     //加载原有标记框数据
                     this.makerManage.renderData(data);
+                    //给标记框赋上对应的颜色
+                    this.setTagColor('annotation', data);
                     this.disabled = true;
                     this.readOnly = true;
+                } else {
+                    this.disabled = false;
+                    this.readOnly = false;
                 }
             });
+        },
+        getDetectFuncList() {
+            this.api({
+                url: "/detectLabel/listDetectFunc",
+                method: "get"
+
+            }).then((data) => {
+                this.options = data;
+                for (let i = 0; i < data.length; i++) {
+                    this.detectTypeIdList.push(data[i].id);
+                }
+            });
+        },
+        selectChange(item) {
+            this.makerManage.setTag({
+                tagName: item.detectFuncName,
+                tag: item.id
+            });
+            this.$message({
+                type: "warning",
+                message: "确定类型成功，请保存！",
+            });
+            this.value = "";
+            this.showSelect = false;
+            //给标记框赋上对应的颜色
+            this.setTagColor('selected', [item]);
         },
         markerSave() {
             if (!this.disabled) {
@@ -194,7 +248,14 @@ export default {
                     });
                     return;
                 }
-                for (let i in list) {
+                for (let i = 0; i < list.length; i++) {
+                    if (this.detectTypeIdList.indexOf(parseInt(list[i].tag)) < 0) {
+                        this.$alert("请确认所有标注框已选择检测方法！", "提示", {
+                            confirmButtonText: "确定",
+                            type: "warning"
+                        });
+                        return;
+                    }
                     list[i].cameraId = this.cameraId;
                 }
                 this.api({
@@ -203,8 +264,6 @@ export default {
                     data: list,
                 }).then(() => {
                     this.newDataNum = 0;
-                    this.readOnly = true;
-                    this.disabled = true;
                     //删除原有的，重新从后端查询数据再渲染矩形框
                     this.makerManage.clearData();
                     this.listRectangle();
@@ -217,10 +276,8 @@ export default {
             }
         },
         markerEdit() {
+            this.readOnly = false;
             this.disabled = false;
-            if (!this.disabled) {
-                this.readOnly = false;
-            }
         },
         markerclear() {
             this.$confirm("此操作将删除所有标注, 是否继续?", "提示", {
@@ -237,6 +294,7 @@ export default {
                 }).then((data) => {
                     this.makerManage.clearData();
                     this.tagNum = 0;
+                    this.newDataNum = 0;
                     this.readOnly = false;
                     this.disabled = false;
                     this.$message({
@@ -253,7 +311,7 @@ export default {
         },
         //监听事件 当画完一个标注框时回调
         //Bug setTag方法在监听方法onAnnoAdded中会导致 再怎么调整大小或者位置 .getData() 就都只能是画框原始数据 onAnnoUpdated方法不触发
-        onAnnoAdded(data) {
+        onAnnoAdded(annoData) {
             this.tagNum++;
             if (this.tagNum > this.maxNum) {
                 this.$alert(
@@ -268,6 +326,8 @@ export default {
                 this.makerManage.clearData();
                 this.tagNum = 0;
                 this.makerManage.renderData(list);
+                //给标记框赋上对应的颜色
+                this.setTagColor('annotation', list);
                 if (this.newDataNum == 0) {
                     this.readOnly = true;
                     this.disabled = true;
@@ -275,16 +335,16 @@ export default {
 
                 return;
             }
-            if (!data.id) {
+            if (!annoData.id) {
                 this.newDataNum++;
             }
         },
-        //删除单个标注时的操作逻辑
+        //删除单个标注时触发的事件
         onAnnoRemoved(annoData) {
             this.$confirm("此操作将删该标注, 是否继续?", "提示", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
-                type: "warning",
+                type: "warning"
             }).then(() => {
                 if (annoData.id) {
                     this.api({
@@ -296,6 +356,10 @@ export default {
                         },
                     }).then((data) => {
                         this.tagNum--;
+                        if (this.newDataNum == 0 && this.tagNum > 0) {
+                            this.readOnly = true;
+                            this.disabled = true;
+                        }
                         this.$message({
                             type: "success",
                             message: "删除成功!",
@@ -304,10 +368,6 @@ export default {
                 } else {
                     this.tagNum--;
                     this.newDataNum--;
-                }
-                if (this.newDataNum == 0) {
-                    this.readOnly = true;
-                    this.disabled = true;
                 }
 
             }).catch(() => {
@@ -321,9 +381,31 @@ export default {
                 this.makerManage.clearData();
                 this.tagNum = 0;
                 this.makerManage.renderData(list);
+                //给标记框赋上对应的颜色
+                this.setTagColor('annotation', list);
             });
         },
+        //单机标注框时触发的事件
+        onAnnoSelected(annoData) {
+            this.showSelect = true;
 
-    },
+        },
+        //给标注框添加检测方法对应的颜色  cls 选择的Class名称  list 标注信息数据
+        setTagColor(cls, list) {
+            let divList = this.makerManage.marker.layer.querySelectorAll(`.` + cls);
+            for (let i = 0; i < divList.length; i++) {
+                if (list[i].tagColor) {
+                    divList[i].style.backgroundColor = list[i].tagColor;
+                    divList[i].style.opacity = 0.5;
+                }
+            }
+        }
+    }
 };
 </script>
+
+<style scoped>
+.detectFunc {
+    font-size: 12px;
+}
+</style>>
