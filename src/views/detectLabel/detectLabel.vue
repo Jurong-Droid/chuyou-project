@@ -396,7 +396,8 @@ export default {
             for (let i = 0; i < divList.length; i++) {
                 if (list[i].tagColor) {
                     divList[i].style.backgroundColor = list[i].tagColor;
-                    divList[i].style.opacity = 0.5;
+                    divList[i].style.opacity = list[i].opacity;
+                    console.log(list[i].tagColor);
                 }
             }
         }
