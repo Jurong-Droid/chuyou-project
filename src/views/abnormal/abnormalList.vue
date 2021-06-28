@@ -1,38 +1,22 @@
 <template>
 <div class="app-container">
     <div>
-        <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row>
+        <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row>
             <el-table-column align="center" label="序号" width="80">
                 <template slot-scope="scope">
                     <span v-text="getIndex(scope.$index)"> </span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" label="视频名" width="240">
-                <template slot-scope="scope">
-                    <span>{{ scope.row.name }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" label="摄像头名称" width="200">
-                <template slot-scope="scope">
-                    <span>{{ scope.row.camName }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" label="检测类型" width="150">
-                <template slot-scope="scope">
-                    <span>{{ scope.row.detectType }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" label="异常信息" width="350">
+            <el-table-column align="center" label="视频名" prop="name" width="300" />
+            <el-table-column align="center" label="摄像头名称" prop="camName" width="200" />
+            <el-table-column align="center" label="检测类型" prop="detectType" width="150" />
+            <el-table-column align="center" label="异常信息" width="600">
                 <template slot-scope="scope">
                     <span style="color:red">{{ scope.row.expInfo }}</span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" label="创建时间" width="180">
-                <template slot-scope="scope">
-                    <span>{{ scope.row.createTime }}</span>
-                </template>
-            </el-table-column>
-            <el-table-column align="center" label="管理" width="200" v-if="hasPerm('abnormalInfo:start')">
+            <el-table-column align="center" label="创建时间" prop="createTime" width="180" />
+            <el-table-column align="center" label="管理" width="265" v-if="hasPerm('abnormalInfo:start')">
                 <template slot-scope="scope">
                     <el-button @click="playMv(scope.row)">
                         <svg-icon icon-class="play" />

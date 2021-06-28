@@ -88,10 +88,6 @@ export default {
         this.getList();
         this.getDetectFuncList();
     },
-    mounted() {
-        console.log(11);
-        console.log(document);
-    },
     watch: {
         filterText(val) {
             this.$refs.tree.filter(val);
@@ -215,7 +211,7 @@ export default {
         },
         getDetectFuncList() {
             this.api({
-                url: "/detectLabel/listDetectFunc",
+                url: "/detectFunc/listDetectFuncAll",
                 method: "get"
 
             }).then((data) => {
@@ -230,10 +226,7 @@ export default {
                 tagName: item.detectFuncName,
                 tag: item.id
             });
-            this.$message({
-                type: "warning",
-                message: "确定类型成功，请保存！",
-            });
+            this.$message.warning('确定类型成功，请保存！');
             this.value = "";
             this.showSelect = false;
             //给标记框赋上对应的颜色
@@ -267,11 +260,7 @@ export default {
                     //删除原有的，重新从后端查询数据再渲染矩形框
                     this.makerManage.clearData();
                     this.listRectangle();
-                    this.$message({
-                        type: "success",
-                        message: `保存成功！`,
-                    });
-
+                    this.$message.success('保存成功！');
                 });
             }
         },
@@ -297,16 +286,11 @@ export default {
                     this.newDataNum = 0;
                     this.readOnly = false;
                     this.disabled = false;
-                    this.$message({
-                        type: "success",
-                        message: "删除成功!",
-                    });
+                    this.$message.success('删除成功！');
+
                 });
             }).catch(() => {
-                this.$message({
-                    type: "info",
-                    message: "已取消删除",
-                });
+                this.$message.info('已取消删除');
             });
         },
         //监听事件 当画完一个标注框时回调
@@ -360,10 +344,7 @@ export default {
                             this.readOnly = true;
                             this.disabled = true;
                         }
-                        this.$message({
-                            type: "success",
-                            message: "删除成功!",
-                        });
+                        this.$message.success('删除成功！');
                     });
                 } else {
                     this.tagNum--;
@@ -371,10 +352,7 @@ export default {
                 }
 
             }).catch(() => {
-                this.$message({
-                    type: "info",
-                    message: "已取消删除",
-                });
+                this.$message.info('已取消删除');
                 //若取消删除则添加回去
                 let list = this.makerManage.getData();
                 list.push(annoData);
@@ -395,9 +373,8 @@ export default {
             let divList = this.makerManage.marker.layer.querySelectorAll(`.` + cls);
             for (let i = 0; i < divList.length; i++) {
                 if (list[i].tagColor) {
-                    divList[i].style.backgroundColor = list[i].tagColor;
+                    divList[i].style.background = list[i].tagColor;
                     divList[i].style.opacity = list[i].opacity;
-                    console.log(list[i].tagColor);
                 }
             }
         }

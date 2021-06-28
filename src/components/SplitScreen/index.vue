@@ -74,12 +74,10 @@ export default {
     },
     created() {
         this.title = this.foo;
-        console.log(this.title);
         let that = this;
         window.onresize = function () {
             if (!that.checkFull()) {
                 // 退出全屏后要执行的动作
-                console.log("退出全屏")
                 that.fullscreen = false;
                 for (let n = 1; n <= that.fornum; n++) {
                     document.getElementById('videoid' + n).style = "padding-bottom: 40.25%; position: relative; margin: 0px auto; overflow: hidden;";
