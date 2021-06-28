@@ -22,7 +22,7 @@
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="菜单&权限" >
+        <el-table-column align="center" label="菜单&权限">
             <template slot-scope="scope">
                 <el-tag v-if="scope.row.roleName===adminName" type="success">全部</el-tag>
                 <div v-else>
@@ -56,8 +56,8 @@
                         <el-button size="mini" :type="isMenuNone(_index)?'':(isMenuAll(_index)?'success':'primary')" style="width:80px;" @click="checkAll(_index)">{{menu.menuName}}</el-button>
                     </span>
                     <div style="display: inline-block;margin-left:20px;">
-                        <el-checkbox-group v-model="tempRole.permissions">
-                            <el-checkbox v-for="perm in menu.permissions" :label="perm.id" @change="checkRequired(perm,_index)" :key="perm.id">
+                        <el-checkbox-group v-model="tempRole.permissionIds">
+                            <el-checkbox v-for="perm in menu.permissions" :label="perm.permissionId" @change="checkRequired(perm,_index)" :key="perm.id">
                                 <span :class="{requiredPerm:perm.requiredPerm===1}">{{perm.permissionName}}</span>
                             </el-checkbox>
                         </el-checkbox-group>
@@ -91,7 +91,7 @@ export default {
             tempRole: {
                 roleName: '',
                 roleId: '',
-                permissions: [],
+                permissionIds: [],
             },
             adminName: '管理员'
         }
@@ -129,7 +129,7 @@ export default {
             //显示新增对话框
             this.tempRole.roleName = '';
             this.tempRole.roleId = '';
-            this.tempRole.permissions = [];
+            this.tempRole.permissionIds = [];
             this.dialogStatus = "create"
             this.dialogFormVisible = true
         },
@@ -137,11 +137,11 @@ export default {
             let role = this.list[$index];
             this.tempRole.roleName = role.roleName;
             this.tempRole.roleId = role.roleId;
-            this.tempRole.permissions = [];
+            this.tempRole.permissionIds = [];
             for (let i = 0; i < role.menus.length; i++) {
                 let perm = role.menus[i].permissions;
                 for (let j = 0; j < perm.length; j++) {
-                    this.tempRole.permissions.push(perm[j].permissionId);
+                    this.tempRole.permissionIds.push(perm[j].permissionId);
                 }
             }
             this.dialogStatus = "update"
@@ -162,6 +162,7 @@ export default {
             }).then(() => {
                 this.getList();
                 this.dialogFormVisible = false
+                this.$message.success('新增成功！');
             })
         },
         updateRole() {
@@ -179,11 +180,12 @@ export default {
             }).then(() => {
                 this.getList();
                 this.dialogFormVisible = false
+                this.$message.success('更新成功！');
             })
         },
         checkPermissionNum() {
             //校验至少有一种权限
-            if (this.tempRole.permissions.length === 0) {
+            if (this.tempRole.permissionIds.length === 0) {
                 this.$message.error("请至少选择一种权限");
                 return false;
             }
@@ -216,13 +218,14 @@ export default {
             }).then(() => {
                 let role = _vue.list[$index];
                 _vue.api({
-                    url: "/user/deleteRole",
+                    url: "/role/deleteRole",
                     method: "post",
                     data: {
                         roleId: role.roleId
                     }
                 }).then(() => {
                     _vue.getList()
+                    _vue.$message.success('删除成功!')
                 }).catch(e => {})
             })
         },
@@ -231,7 +234,7 @@ export default {
             let menu = this.allPermission[_index].permissions;
             let result = true;
             for (let j = 0; j < menu.length; j++) {
-                if (this.tempRole.permissions.indexOf(menu[j].id) > -1) {
+                if (this.tempRole.permissionIds.indexOf(menu[j].permissionId) > -1) {
                     result = false;
                     break;
                 }
@@ -243,7 +246,7 @@ export default {
             let menu = this.allPermission[_index].permissions;
             let result = true;
             for (let j = 0; j < menu.length; j++) {
-                if (this.tempRole.permissions.indexOf(menu[j].id) < 0) {
+                if (this.tempRole.permissionIds.indexOf(menu[j].permissionId) < 0) {
                     result = false;
                     break;
                 }
@@ -265,16 +268,16 @@ export default {
             //全部选中
             let menu = this.allPermission[_index].permissions;
             for (let j = 0; j < menu.length; j++) {
-                this.addUnique(menu[j].id, this.tempRole.permissions)
+                this.addUnique(menu[j].permissionId, this.tempRole.permissionIds)
             }
         },
         noPerm(_index) {
             //全部取消选中
             let menu = this.allPermission[_index].permissions;
             for (let j = 0; j < menu.length; j++) {
-                let idIndex = this.tempRole.permissions.indexOf(menu[j].id);
+                let idIndex = this.tempRole.permissionIds.indexOf(menu[j].permissionId);
                 if (idIndex > -1) {
-                    this.tempRole.permissions.splice(idIndex, 1);
+                    this.tempRole.permissionIds.splice(idIndex, 1);
                 }
             }
         },
@@ -287,8 +290,8 @@ export default {
         },
         checkRequired(_perm, _index) {
             //本方法会在勾选状态改变之后触发
-            let permId = _perm.id;
-            if (this.tempRole.permissions.indexOf(permId) > -1) {
+            let permId = _perm.permissionId;
+            if (this.tempRole.permissionIds.indexOf(permId) > -1) {
                 //选中事件
                 //如果之前未勾选本权限,现在勾选完之后,tempRole里就会包含本id
                 //那么就要将必选的权限勾上
@@ -309,7 +312,7 @@ export default {
                 let perm = menu[j];
                 if (perm.requiredPerm === 1) {
                     //找到本菜单的必选权限,将其勾上
-                    this.addUnique(perm.id, this.tempRole.permissions)
+                    this.addUnique(perm.permissionId, this.tempRole.permissionIds)
                 }
             }
         }

@@ -217,6 +217,7 @@ export default {
             }).then(() => {
                 this.getList();
                 this.dialogFormVisible = false
+                this.$message.success('新增成功！');
             })
         },
         updateUser() {
@@ -228,8 +229,8 @@ export default {
                 method: "post",
                 data: this.tempUser
             }).then(() => {
-                this.$message.success('修改成功')
-                this.dialogFormVisible = false
+                this.$message.success('更新成功！');
+                this.dialogFormVisible = false;
                 _vue.getList();
             })
         },
@@ -249,6 +250,7 @@ export default {
                     }
                 }).then(() => {
                     _vue.getList()
+                    _vue.$message.success('删除成功!')
                 }).catch(() => {
                     _vue.$message.error("删除失败")
                 })

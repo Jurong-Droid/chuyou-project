@@ -166,7 +166,7 @@ export default {
             });
         },
         saveDetectFunc() {
-            //保存新文章
+            //保存
             this.api({
                 url: "/detectFunc/saveDetectFunc",
                 method: "post",
