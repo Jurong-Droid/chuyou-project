@@ -98,7 +98,12 @@ export default {
         },
         playMv(record) {
             this.showVideo = true;
-            this.video_url = process.env.BASE_URL + "/abnormalInfo/startAbnormalInfo?id=" + record.id;
+            console.log(window.location.origin);
+            if (process.env.NODE_ENV !== 'production') {
+                this.video_url = process.env.BASE_URL + "/abnormalInfo/startAbnormalInfo?id=" + record.id;
+            } else {
+                this.video_url = window.location.origin + "/abnormalInfo/startAbnormalInfo?id=" + record.id;
+            }
         },
         //关闭mv界面
         closeMv() {
