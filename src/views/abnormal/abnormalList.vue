@@ -2,23 +2,23 @@
 <div class="app-container">
     <div>
         <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row>
-            <el-table-column align="center" label="序号" width="80">
+            <el-table-column align="center" label="序号" min-width="5">
                 <template slot-scope="scope">
                     <span v-text="getIndex(scope.$index)"> </span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" label="视频名" prop="name" width="300" />
-            <el-table-column align="center" label="摄像头名称" prop="camName" width="200" />
-            <el-table-column align="center" label="检测类型" prop="detectType" width="150" />
-            <el-table-column align="center" label="异常信息" width="600">
+            <el-table-column align="center" label="视频名" prop="name" min-width="15" />
+            <el-table-column align="center" label="摄像头名称" prop="camName" min-width="15" />
+            <el-table-column align="center" label="检测类型" prop="detectType" min-width="10" />
+            <el-table-column align="center" label="异常信息" min-width="30">
                 <template slot-scope="scope">
                     <span style="color:red">{{ scope.row.expInfo }}</span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" label="创建时间" prop="createTime" width="180" />
-            <el-table-column align="center" label="管理" width="265" v-if="hasPerm('abnormalInfo:start')">
+            <el-table-column align="center" label="创建时间" prop="createTime" min-width="10" />
+            <el-table-column align="center" label="管理" min-width="15" v-if="hasPerm('abnormalInfo:start')">
                 <template slot-scope="scope">
-                    <el-button @click="playMv(scope.row)">
+                    <el-button size="mini" @click="playMv(scope.row)">
                         <svg-icon icon-class="play" />
                     </el-button>
                 </template>

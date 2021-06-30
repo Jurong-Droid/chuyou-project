@@ -16,8 +16,8 @@
                 <el-col :span="8">
                     <div class="grid-content bg-purple">
                         <el-button-group>
-                            <el-button :disabled="disabled" size="mini" @click="markerSave()">保存</el-button>
-                            <el-button :disabled="!disabled" size="mini" @click="markerEdit()">修改</el-button>
+                            <el-button size="mini" :disabled="disabled" @click="markerSave()">保存</el-button>
+                            <el-button size="mini" :disabled="!disabled" @click="markerEdit()">修改</el-button>
                             <el-button size="mini" @click="markerclear()">全部清除</el-button>
                         </el-button-group>
                     </div>

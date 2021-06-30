@@ -9,13 +9,6 @@
                     <el-button size="mini" :type="classtype2" @click="splitScreen(4)">四分屏</el-button>
                     <el-button size="mini" :type="classtype3" @click="splitScreen(9)">九分屏</el-button>
                     <el-button size="mini" :type="classtype4" @click="splitScreen(16)">十六分屏</el-button>
-                    <el-button size="mini">
-                        <div class="btn-fullscreen" @click="handleFullScreen">
-                            <el-tooltip effect="dark" :content="fullscreen?`取消全屏`:`全屏`" placement="bottom">
-                                <i class="el-icon-rank"></i>
-                            </el-tooltip>
-                        </div>
-                    </el-button>
                 </el-button-group>
             </div>
         </el-col>
@@ -39,7 +32,6 @@
             </el-pagination>
         </el-main>
     </el-container>
-
 </div>
 </template>
 
@@ -62,7 +54,7 @@ export default {
             fornum: 4,
             clonum: 12,
             dialogFormVisible: false,
-            videoclass: "padding-bottom: 62.25%; position: relative; margin: 0px auto; overflow: hidden;",
+            videoclass: "padding-bottom: 54.25%; position: relative; margin: 0px auto; overflow: hidden;",
             classtype1: '',
             classtype2: 'primary',
             classtype3: '',
@@ -70,23 +62,6 @@ export default {
             listObj: [],
             flvPlayerList: []
 
-        }
-    },
-    created() {
-        this.title = this.foo;
-        let that = this;
-        window.onresize = function () {
-            if (!that.checkFull()) {
-                // 退出全屏后要执行的动作
-                that.fullscreen = false;
-                for (let n = 1; n <= that.fornum; n++) {
-                    document.getElementById('videoid' + n).style = "padding-bottom: 40.25%; position: relative; margin: 0px auto; overflow: hidden;";
-                }
-            } else {
-                for (let n = 1; n <= that.fornum; n++) {
-                    document.getElementById('videoid' + n).style = "padding-bottom: 52.25%; position: relative; margin: 0px auto; overflow: hidden;";
-                }
-            }
         }
     },
     computed: {
@@ -162,51 +137,6 @@ export default {
                 this.clonum = 6;
             }
 
-        },
-        checkFull() {
-            //判断浏览器是否处于全屏状态 （需要考虑兼容问题）
-            //火狐浏览器
-            var isFull = document.mozFullScreen ||
-                document.fullScreen ||
-                //谷歌浏览器及Webkit内核浏览器
-                document.webkitIsFullScreen ||
-                document.webkitRequestFullScreen ||
-                document.mozRequestFullScreen ||
-                document.msFullscreenEnabled
-            if (isFull === undefined) {
-                isFull = false
-            }
-            return isFull;
-        },
-
-        // 全屏事件
-        handleFullScreen() {
-            let element = document.documentElement;
-            let that = this;
-            if (this.fullscreen) {
-
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitCancelFullScreen) {
-                    document.webkitCancelFullScreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            } else {
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullScreen) {
-                    element.webkitRequestFullScreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.msRequestFullscreen) {
-                    // IE11
-                    element.msRequestFullscreen();
-                }
-            }
-            this.fullscreen = !this.fullscreen;
         },
         //加载视频播放
         initPlayer() {
@@ -292,52 +222,12 @@ export default {
 </script>
 
 <style scoped>
-body {
-    overflow-x: hidden;
-    /* overflow-y: hidden; */
-
-}
-
-html,
-body {
-    height: 100%;
-    margin: 0;
-    overflow-x: hidden;
-}
-
 .video-wrapper {
     position: relative;
     top: 0px;
     bottom: 0px;
     left: 0px;
     right: 0px;
-}
-
-.alt {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    background: #000;
-    color: #fff;
-    text-align: center;
-}
-
-.selectchannel {
-    position: absolute;
-    right: 5px;
-    top: 5px;
-}
-
-.table-c table {
-    border-right: 2px solid #fff;
-    border-bottom: 2px solid #fff;
-}
-
-.table-c table td {
-    border-left: 2px solid #fff;
-    border-top: 2px solid #fff
 }
 
 /* 

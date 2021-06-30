@@ -3,42 +3,44 @@
     <div class="filter-container">
         <el-form>
             <el-form-item>
-                <el-button type="success" icon="plus" v-permission="'role:add'" @click="showCreate">添加角色
+                <el-button size="mini" :plain='true' type="success" icon="plus" v-permission="'role:add'" @click="showCreate">添加角色
                 </el-button>
             </el-form-item>
         </el-form>
     </div>
     <el-table :data="list" v-loading="listLoading" border fit highlight-current-row>
-        <el-table-column align="center" label="序号" width="80">
+        <el-table-column align="center" label="序号" min-width="5">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="角色" prop="roleName" width="150"></el-table-column>
-        <el-table-column align="center" label="用户" width="300">
+        <el-table-column align="center" label="角色" prop="roleName" min-width="10"></el-table-column>
+        <el-table-column align="center" label="用户" min-width="15">
             <template slot-scope="scope">
                 <div v-for="user in scope.row.users" :key="user.userId">
                     <div v-text="user.username" style="display: inline-block;vertical-align: middle;"></div>
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="菜单&权限">
+        <el-table-column align="center" label="菜单&权限" min-width="35">
             <template slot-scope="scope">
                 <el-tag v-if="scope.row.roleName===adminName" type="success">全部</el-tag>
                 <div v-else>
                     <div v-for="menu in scope.row.menus" :key="menu.menuCode" style="text-align: left">
                         <span style="width: 100px;display: inline-block;text-align: right ">{{menu.menuName}}</span>
-                        <el-tag v-for="perm in menu.permissions" :key="perm.permissionName" v-text="perm.permissionName" style="margin-right: 3px;" type="primary"></el-tag>
+                        <el-tag v-for="perm in menu.permissions" :key="perm.permissionName" v-text="perm.permissionName" style="margin-right: 5px;" type="primary"></el-tag>
                     </div>
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="管理" width="220">
+          <el-table-column align="center" label="创建时间" prop="createTime"  min-width="10"></el-table-column>
+        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
+        <el-table-column align="center" label="管理" min-width="15">
             <template slot-scope="scope">
                 <div v-if="scope.row.roleName!=='管理员'">
-                    <el-button size="mini" type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'role:update'">修改
+                    <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'role:update'">修改
                     </el-button>
-                    <el-button size="mini" type="danger" icon="delete" @click="removeRole(scope.$index)" v-permission="'role:delete'">删除
+                    <el-button size="mini" :plain='true' type="danger" icon="delete" @click="removeRole(scope.$index)" v-permission="'role:delete'">删除
                     </el-button>
                 </div>
             </template>
@@ -57,7 +59,7 @@
                     </span>
                     <div style="display: inline-block;margin-left:20px;">
                         <el-checkbox-group v-model="tempRole.permissionIds">
-                            <el-checkbox v-for="perm in menu.permissions" :label="perm.permissionId" @change="checkRequired(perm,_index)" :key="perm.id">
+                            <el-checkbox v-for="perm in menu.permissions" :label="perm.permissionId" @change="checkRequired(perm,_index)" :key="perm.permissionId">
                                 <span :class="{requiredPerm:perm.requiredPerm===1}">{{perm.permissionName}}</span>
                             </el-checkbox>
                         </el-checkbox-group>

@@ -64,40 +64,40 @@ export const asyncRouterMap = [{
         menu: 'abnormalInfo'
       },
       {
-        path: 'detectLabel',
-        name: '检测标注',
-        component: () => import('@/views/detectLabel/detectLabel'),
-        meta: {
-          title: '检测标注',
-          icon: 'label'
-        },
-        menu: 'detectLabel'
-      }, {
         path: '/system/config',
         name: '配置管理',
-        component: () => import('@/views/config/index'),
+        component: () => import('@/views/config'),
         meta: {
           title: '配置管理',
-          icon: 'label'
+          icon: 'config'
         },
         children: [{
+          path: 'cameraInfo',
+          name: '摄像头信息',
+          component: () => import('@/views/config/cameraInfo'),
+          meta: {
+            title: '摄像头信息',
+            icon: 'monitor'
+          },
+          menu: 'cameraInfo'
+        }, {
           path: 'detectFunc',
           name: '检测方法',
-          component: () => import('@/views/config/detectFunc/index'),
+          component: () => import('@/views/config/detectFunc'),
           meta: {
             title: '检测方法',
-            icon: 'label'
+            icon: 'detect'
           },
           menu: 'detectFunc'
         }, {
-          path: 'cameraInfo',
-          name: '摄像头信息',
-          component: () => import('@/views/abnormal/abnormalList'),
+          path: 'detectLabel',
+          name: '检测标注',
+          component: () => import('@/views/config/detectLabel'),
           meta: {
-            title: '异常记录',
-            icon: 'warn'
+            title: '检测标注',
+            icon: 'label'
           },
-          menu: 'cameraInfo'
+          menu: 'detectLabel'
         }]
 
       }

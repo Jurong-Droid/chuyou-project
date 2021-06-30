@@ -9,18 +9,19 @@
         </el-form>
     </div>
     <el-table :data="list" v-loading="listLoading" border fit highlight-current-row :cell-style="cellStyle">
-        <el-table-column align="center" label="序号" width="80">
+        <el-table-column align="center" label="序号" min-width="5">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" prop="detectFuncName" label="检测方法名称" width="300"></el-table-column>
-        <el-table-column align="center" prop="funcFor" label="检测方法说明" width="745" />
-        <el-table-column align="center" label="标注框展示" width="300" />
-        <el-table-column align="center" label="管理" width="350">
+        <el-table-column align="center" prop="detectFuncName" label="检测方法名称" min-width="20"></el-table-column>
+        <el-table-column align="center" prop="funcFor" label="检测方法说明" min-width="30" />
+        <el-table-column align="center" label="标注框展示" min-width="20" />
+        <el-table-column align="center" prop="opacity" label="标注框透明度" min-width="10" />
+        <el-table-column align="center" label="管理" min-width="15">
             <template slot-scope="scope">
-                <el-button size="mini" plain="true" type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'detectFunc:operate'">修改</el-button>
-                <el-button size="mini" plain="true" type="danger" icon="delete" @click="deleteDetectFunc(scope.$index)" v-permission="'detectFunc:operate'">删除</el-button>
+                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'detectFunc:operate'">修改</el-button>
+                <el-button size="mini" :plain='true' type="danger" icon="delete" @click="deleteDetectFunc(scope.$index)" v-permission="'detectFunc:operate'">删除</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -36,7 +37,7 @@
                 <el-input type="textarea" style="width:100%" show-word-limit v-model="tempDetectFuncVo.funcFor" maxlength="100" placeholder="请输入内容">
                 </el-input>
             </el-form-item>
-            <el-form-item label="标注框颜色透明度" required>
+            <el-form-item label="标注框颜色" required>
                 <el-color-picker v-model="tempDetectFuncVo.tagColor" show-alpha :predefine="predefineColors"></el-color-picker>
             </el-form-item>
         </el-form>

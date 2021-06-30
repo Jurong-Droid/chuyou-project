@@ -3,7 +3,8 @@
     <div class="filter-container">
         <el-form>
             <el-form-item>
-                <el-button size="mini" :plain='true' type="primary" icon="plus" v-permission="'user:add'" @click="showCreate">添加用户</el-button>
+                <el-button type="primary" icon="plus" v-permission="'cameraInfo:add'" @click="showCreate">添加
+                </el-button>
             </el-form-item>
         </el-form>
     </div>
@@ -13,54 +14,56 @@
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="用户名" prop="username" min-width="10"></el-table-column>
-        <el-table-column align="center" label="手机号码" prop="phone" min-width="10"></el-table-column>
-        <el-table-column align="center" label="电子邮箱" prop="email" min-width="15"></el-table-column>
-        <el-table-column align="center" label="角色" min-width="20">
+        <el-table-column align="center" label="摄像头名称" prop="cameraName" min-width="15"></el-table-column>
+        <el-table-column align="center" label="区域名称" prop="areaName" min-width="10"></el-table-column>
+        <el-table-column align="center" label="ip" prop="ip" min-width="10"></el-table-column>
+        <el-table-column align="center" label="rtsp地址" prop="rtsp" min-width="20"></el-table-column>
+        <el-table-column align="center" label="角色" min-width="15">
             <template slot-scope="scope">
                 <div style="margin-right: 4px;display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
-                    <el-tag type="success" v-text="i.roleName" v-if="i.roleId===1"></el-tag>
-                    <el-tag type="primary" v-text="i.roleName" v-else></el-tag>
+                    <el-tag type="primary" v-text="i.roleName"></el-tag>
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="创建时间" prop="createTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="20">
             <template slot-scope="scope">
-                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'user:update'">修改</el-button>
-                <el-button size="mini" :plain='true' type="danger" icon="delete" v-if="scope.row.userId!=userId " @click="removeUser(scope.$index)" v-permission="'user:delete'">删除</el-button>
+                <el-button type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'cameraInfo:update'">修改</el-button>
+                <el-button type="danger" icon="delete" @click="removeUser(scope.$index)" v-permission="'cameraInfo:delete'">删除</el-button>
             </template>
         </el-table-column>
     </el-table>
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form class="small-space" :model="tempUser" label-position="left" label-width="80px" style='width: 300px; margin-left:50px;'>
-            <el-form-item label="用户名" required v-if="dialogStatus==='create'">
-                <el-input type="text" v-model="tempUser.username">
+        <el-form class="small-space" :model="tempCamera" label-position="left" label-width="120px" style='width: 600px; margin-left:50px;'>
+            <el-form-item label="摄像头名称" required>
+                <el-input type="text" v-model="tempCamera.cameraName">
                 </el-input>
             </el-form-item>
-            <el-form-item label="密码" v-if="dialogStatus==='create'" required>
-                <el-input type="password" v-model="tempUser.password">
-                </el-input>
+            <el-form-item label="区域名称" required>
+                <el-select v-model="tempCamera.areaId" placeholder="请选择区域信息" style="width: 300px">
+                    <el-option v-for="item in areas" :key="item.id" :label="item.areaName" :value="item.id">
+                    </el-option>
+                </el-select>
             </el-form-item>
-            <el-form-item label="新密码" v-else>
-                <el-input type="password" v-model="tempUser.password" placeholder="不填则表示不修改">
-                </el-input>
-            </el-form-item>
+
             <el-form-item label="角色" required>
-                <el-select v-model="tempUser.roleIds" multiple placeholder="支持多角色" style="width: 300px">
+                <el-select v-model="tempCamera.roleIds" multiple placeholder="支持多角色" style="width: 300px">
                     <el-option v-for="item in roles" :key="item.roleId" :label="item.roleName" :value="item.roleId">
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="手机号码" required>
-                <el-input type="text" v-model="tempUser.phone">
+            <el-form-item label="ip地址">
+                <el-input type="text" v-model="tempCamera.ip">
                 </el-input>
             </el-form-item>
-            <el-form-item label="电子邮箱" required>
-                <el-input type="text" v-model="tempUser.email">
+            <el-form-item label="rtsp地址" required>
+                <el-input type="textarea" autosize v-model="tempCamera.rtsp" placeholder="摄像头的rtsp直播流源">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="设备访问密码">
+                <el-input type="text" v-model="tempCamera.password">
                 </el-input>
             </el-form-item>
         </el-form>
@@ -74,10 +77,6 @@
 </template>
 
 <script>
-import {
-    mapGetters
-} from 'vuex'
-
 export default {
     data() {
         return {
@@ -89,33 +88,31 @@ export default {
                 pageRow: 50, //每页条数
             },
             roles: [], //角色列表
+            areas: [], //区域列表
             dialogStatus: 'create',
             dialogFormVisible: false,
             textMap: {
                 update: '编辑',
-                create: '新建用户'
+                create: '新建'
             },
-            tempUser: {
-                username: null,
+            tempCamera: {
+                id: null,
+                areaId: null,
+                areaName: null,
+                cameraName: null,
+                ip: null,
+                rtsp: null,
                 password: null,
-                phone: null,
-                email: null,
-                avatar: null,
-                roleIds: [],
-                userId: null
+                roleIds: []
             }
         }
     },
     created() {
         this.getList();
-        if (this.hasPerm('user:add') || this.hasPerm('user:update')) {
+        if (this.hasPerm('cameraInfo:add') || this.hasPerm('cameraInfo:update')) {
             this.getAllRoles();
+            this.getAllAreas();
         }
-    },
-    computed: {
-        ...mapGetters([
-            'userId'
-        ])
     },
     methods: {
         getAllRoles() {
@@ -126,11 +123,19 @@ export default {
                 this.roles = data;
             })
         },
+        getAllAreas() {
+            this.api({
+                url: "/cameraInfo/getAllAreas",
+                method: "get"
+            }).then(data => {
+                this.areas = data;
+            })
+        },
         getList() {
             //查询列表
             this.listLoading = true;
             this.api({
-                url: "/user/list",
+                url: "/cameraInfo/listCamera",
                 method: "get",
                 params: this.listQuery
             }).then(data => {
@@ -160,44 +165,44 @@ export default {
         },
         showCreate() {
             //显示新增对话框
-            this.tempUser.username = null;
-            this.tempUser.password = null;
-            this.tempUser.phone = null;
-            this.tempUser.email = null;
-            this.tempUser.roleIds = [];
-            this.tempUser.userId = null;
+            this.tempCamera.areaId = "";
+            this.tempCamera.areaName = "";
+            this.tempCamera.cameraName = "";
+            this.tempCamera.ip = "";
+            this.tempCamera.rtsp = "";
+            this.tempCamera.password = "";
+            this.tempCamera.roleIds = [];
             this.dialogStatus = "create"
             this.dialogFormVisible = true
         },
         showUpdate($index) {
-            let user = this.list[$index];
-            this.tempUser.username = user.username;
-            this.tempUser.phone = user.phone;
-            this.tempUser.email = user.email;
-            this.tempUser.roleIds = user.roles.map(x => x.roleId);
-            this.tempUser.userId = user.userId;
-            this.tempUser.password = null;
+            let camera = this.list[$index];
+            this.tempCamera.id = camera.id;
+            this.tempCamera.areaId = camera.areaId;
+            this.tempCamera.areaName = camera.areaName;
+            this.tempCamera.cameraName = camera.cameraName;
+            this.tempCamera.ip = camera.ip;
+            this.tempCamera.rtsp = camera.rtsp;
+            this.tempCamera.password = camera.password;
+            this.tempCamera.roleIds = camera.roles.map(x => x.roleId);
             this.dialogStatus = "update"
             this.dialogFormVisible = true
         },
-        validate(isCreate) {
-            let u = this.tempUser
-            if (isCreate && u.username.trim().length === 0) {
-                this.$message.warning('请填写用户名')
+        validate() {
+            let u = this.tempCamera
+            if (u.areaId.length === 0) {
+                this.$message.warning('请选择区域信息')
                 return false
             }
-            if (isCreate && u.password.length === 0) {
-                this.$message.warning('请填写密码')
+            if (u.cameraName.trim().length === 0) {
+                this.$message.warning('请填写摄像头名称')
                 return false
             }
-            if (u.phone.trim().length === 0) {
-                this.$message.warning('请填写手机号码')
+            if (u.rtsp.trim().length === 0) {
+                this.$message.warning('请填rtsp地址')
                 return false
             }
-            if (u.email.trim().length === 0) {
-                this.$message.warning('请填写邮箱')
-                return false
-            }
+
             if (u.roleIds.length === 0) {
                 this.$message.warning('请选择角色')
                 return false
@@ -205,12 +210,12 @@ export default {
             return true
         },
         createUser() {
-            if (!this.validate(true)) return
+            if (!this.validate()) return
             //添加新用户
             this.api({
-                url: "/user/addUser",
+                url: "/cameraInfo/addCamera",
                 method: "post",
-                data: this.tempUser
+                data: this.tempCamera
             }).then(() => {
                 this.getList();
                 this.dialogFormVisible = false
@@ -218,13 +223,13 @@ export default {
             })
         },
         updateUser() {
-            if (!this.validate(false)) return
+            if (!this.validate()) return
             //修改用户信息
             let _vue = this;
             this.api({
-                url: "/user/updateUser",
+                url: "/cameraInfo/updateCamera",
                 method: "post",
-                data: this.tempUser
+                data: this.tempCamera
             }).then(() => {
                 this.$message.success('更新成功！');
                 this.dialogFormVisible = false;
@@ -233,17 +238,17 @@ export default {
         },
         removeUser($index) {
             let _vue = this;
-            this.$confirm('确定删除此用户?', '提示', {
+            this.$confirm('确定删除此设备?', '提示', {
                 confirmButtonText: '确定',
                 showCancelButton: false,
                 type: 'warning'
             }).then(() => {
-                let user = _vue.list[$index];
+                let camera = _vue.list[$index];
                 _vue.api({
-                    url: "/user/deleteUser",
+                    url: "/cameraInfo/deleteCamera",
                     method: "post",
                     data: {
-                        userId: user.userId
+                        id: camera.id
                     }
                 }).then(() => {
                     _vue.getList()
