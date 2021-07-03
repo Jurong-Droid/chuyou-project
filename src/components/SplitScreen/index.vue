@@ -145,14 +145,6 @@ export default {
                 for (let n = 0; n < this.listObj.length; n++) {
                     const videoElement = videoElementList[n];
                     this.createVideo(videoElement, n);
-                    this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
-                        // alert("网络波动,正在尝试连接中...");
-                        if (this.flvPlayer) {
-                            this.reloadVideo(videoElement, n, this.flvPlayer);
-                        }
-                        // errType是 NetworkError时，对应errDetail有：Exception、HttpStatusCodeInvalid、ConnectingTimeout、EarlyEof、UnrecoverableEarlyEof
-                        // errType是 MediaError时，对应errDetail是MediaMSEError   或MEDIA_SOURCE_ENDED
-                    });
                     this.flvPlayerList.push(this.flvPlayer);
                 }
             }
@@ -174,10 +166,19 @@ export default {
                 autoCleanupSourceBuffer: true //自动清除缓存
             });
             this.flvPlayer.attachMediaElement(videoElement);
+            this.flvPlayer.load();
             if (this.listObj[n] && this.listObj[n].httpUrl !== null && this.listObj[n].httpUrl !== "") {
-                this.flvPlayer.load();
+
                 this.flvPlayer.play();
             }
+            this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
+                // alert("网络波动,正在尝试连接中...");
+                if (this.flvPlayer) {
+                    this.reloadVideo(videoElement, n, this.flvPlayer);
+                }
+                // errType是 NetworkError时，对应errDetail有：Exception、HttpStatusCodeInvalid、ConnectingTimeout、EarlyEof、UnrecoverableEarlyEof
+                // errType是 MediaError时，对应errDetail是MediaMSEError   或MEDIA_SOURCE_ENDED
+            });
         },
         reloadVideo(videoElement, n, flvPlayer) {
             this.destoryVideo(flvPlayer);

@@ -18,7 +18,7 @@
         <el-table-column align="center" label="用户" min-width="15">
             <template slot-scope="scope">
                 <div v-for="user in scope.row.users" :key="user.userId">
-                    <div v-text="user.username" style="display: inline-block;vertical-align: middle;"></div>
+                    <div v-text="user.username" style="display: inline-block;vertical-align: middle;margin-top: 4%;"></div>
                 </div>
             </template>
         </el-table-column>
@@ -26,14 +26,14 @@
             <template slot-scope="scope">
                 <el-tag v-if="scope.row.roleName===adminName" type="success">全部</el-tag>
                 <div v-else>
-                    <div v-for="menu in scope.row.menus" :key="menu.menuCode" style="text-align: left">
-                        <span style="width: 100px;display: inline-block;text-align: right ">{{menu.menuName}}</span>
-                        <el-tag v-for="perm in menu.permissions" :key="perm.permissionName" v-text="perm.permissionName" style="margin-right: 5px;" type="primary"></el-tag>
+                    <div v-for="menu in scope.row.menus" :key="menu.menuCode" style="text-align: left; margin-top: 1%;">
+                        <span style="width: 25%;display: inline-block;text-align: right ">{{menu.menuName}}</span>
+                        <el-tag v-for="perm in menu.permissions" :key="perm.permissionName" v-text="perm.permissionName" style="margin-right:2%;" type="primary"></el-tag>
                     </div>
                 </div>
             </template>
         </el-table-column>
-          <el-table-column align="center" label="创建时间" prop="createTime"  min-width="10"></el-table-column>
+        <el-table-column align="center" label="创建时间" prop="createTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="15">
             <template slot-scope="scope">
@@ -47,17 +47,17 @@
         </el-table-column>
     </el-table>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form class="small-space" :model="tempRole" label-position="left" label-width="100px" style='width: 600px; margin-left:50px;'>
+        <el-form class="small-space" :model="tempRole" label-position="left" label-width="auto">
             <el-form-item label="角色名称" required>
-                <el-input type="text" v-model="tempRole.roleName" style="width: 250px;">
+                <el-input type="text" v-model="tempRole.roleName" style="width: 40%;">
                 </el-input>
             </el-form-item>
             <el-form-item label="菜单&权限" required>
                 <div v-for=" (menu,_index) in allPermission" :key="menu.menuName">
-                    <span style="width: 100px;display: inline-block;">
-                        <el-button size="mini" :type="isMenuNone(_index)?'':(isMenuAll(_index)?'success':'primary')" style="width:80px;" @click="checkAll(_index)">{{menu.menuName}}</el-button>
+                    <span style="width:10%; display:inline-block;">
+                        <el-button size="mini" :type="isMenuNone(_index)?'':(isMenuAll(_index)?'success':'primary')" @click="checkAll(_index)">{{menu.menuName}}</el-button>
                     </span>
-                    <div style="display: inline-block;margin-left:20px;">
+                    <div style="display: inline-block;margin-left:2%;">
                         <el-checkbox-group v-model="tempRole.permissionIds">
                             <el-checkbox v-for="perm in menu.permissions" :label="perm.permissionId" @change="checkRequired(perm,_index)" :key="perm.permissionId">
                                 <span :class="{requiredPerm:perm.requiredPerm===1}">{{perm.permissionName}}</span>

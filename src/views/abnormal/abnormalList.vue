@@ -117,11 +117,11 @@ export default {
 <style scoped>
 .video_con video {
     position: fixed;
-    width: 800px;
-    height: 546px;
+    width: 50%;
+    height: 60%;
     left: 50%;
-    top: 50%;
-    margin-top: -273px;
+    top: 40%;
+    margin-top: -10%;
     transform: translateX(-50%);
     z-index: 990;
 }

@@ -9,16 +9,16 @@
         </el-form>
     </div>
     <el-table :data="list" v-loading="listLoading" border fit highlight-current-row :cell-style="cellStyle">
-        <el-table-column align="center" label="序号" min-width="5">
+        <el-table-column align="center" label="序号" min-width="5%">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" prop="detectFuncName" label="检测方法名称" min-width="20"></el-table-column>
-        <el-table-column align="center" prop="funcFor" label="检测方法说明" min-width="30" />
-        <el-table-column align="center" label="标注框展示" min-width="20" />
-        <el-table-column align="center" prop="opacity" label="标注框透明度" min-width="10" />
-        <el-table-column align="center" label="管理" min-width="15">
+        <el-table-column align="center" prop="detectFuncName" label="检测方法名称" min-width="20%"></el-table-column>
+        <el-table-column align="center" prop="funcFor" label="检测方法说明" min-width="30%" />
+        <el-table-column align="center" label="标注框展示" min-width="20%" />
+        <el-table-column align="center" prop="opacity" label="标注框透明度" min-width="10%" />
+        <el-table-column align="center" label="管理" min-width="15%">
             <template slot-scope="scope">
                 <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'detectFunc:operate'">修改</el-button>
                 <el-button size="mini" :plain='true' type="danger" icon="delete" @click="deleteDetectFunc(scope.$index)" v-permission="'detectFunc:operate'">删除</el-button>
@@ -28,17 +28,17 @@
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form class="small-space" :model="tempDetectFuncVo" label-position="left" label-width="200px" style='width: 500px; margin-left:100px;'>
+        <el-form class="small-space" :model="tempDetectFuncVo" label-position="left" label-width="auto">
             <el-form-item label="检测方法名称" required>
-                <el-input type="text" autosize v-model="tempDetectFuncVo.detectFuncName" placeholder="请输入名称">
+                <el-input type="text" style="width:40%" autosize v-model="tempDetectFuncVo.detectFuncName" placeholder="请输入名称">
                 </el-input>
             </el-form-item>
             <el-form-item label="检测方法说明">
-                <el-input type="textarea" style="width:100%" show-word-limit v-model="tempDetectFuncVo.funcFor" maxlength="100" placeholder="请输入内容">
+                <el-input type="textarea" style="width:40%" show-word-limit v-model="tempDetectFuncVo.funcFor" maxlength="100" placeholder="请输入内容">
                 </el-input>
             </el-form-item>
             <el-form-item label="标注框颜色" required>
-                <el-color-picker v-model="tempDetectFuncVo.tagColor" show-alpha :predefine="predefineColors"></el-color-picker>
+                <el-color-picker  v-model="tempDetectFuncVo.tagColor" show-alpha :predefine="predefineColors"></el-color-picker>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">

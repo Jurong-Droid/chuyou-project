@@ -18,7 +18,7 @@
         <el-table-column align="center" label="电子邮箱" prop="email" min-width="15"></el-table-column>
         <el-table-column align="center" label="角色" min-width="20">
             <template slot-scope="scope">
-                <div style="margin-right: 4px;display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
+                <div style="margin-right:2%; display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
                     <el-tag type="success" v-text="i.roleName" v-if="i.roleId===1"></el-tag>
                     <el-tag type="primary" v-text="i.roleName" v-else></el-tag>
                 </div>
@@ -36,32 +36,27 @@
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form class="small-space" :model="tempUser" label-position="left" label-width="80px" style='width: 300px; margin-left:50px;'>
-            <el-form-item label="用户名" required v-if="dialogStatus==='create'">
-                <el-input type="text" v-model="tempUser.username">
-                </el-input>
+        <el-form class="small-space" :model="tempUser" label-position="left" label-width="auto">
+            <el-form-item label="用户名" v-if="dialogStatus==='create'" required>
+                <el-input type="text" v-model="tempUser.username" style="width:40%;" />
             </el-form-item>
             <el-form-item label="密码" v-if="dialogStatus==='create'" required>
-                <el-input type="password" v-model="tempUser.password">
-                </el-input>
+                <el-input type="password" v-model="tempUser.password" style="width:40%;" />
             </el-form-item>
             <el-form-item label="新密码" v-else>
-                <el-input type="password" v-model="tempUser.password" placeholder="不填则表示不修改">
-                </el-input>
+                <el-input type="password" v-model="tempUser.password" style="width:40%;" placeholder="不填则表示不修改" />
             </el-form-item>
             <el-form-item label="角色" required>
-                <el-select v-model="tempUser.roleIds" multiple placeholder="支持多角色" style="width: 300px">
+                <el-select v-model="tempUser.roleIds" multiple placeholder="支持多角色" style="width:40%;" >
                     <el-option v-for="item in roles" :key="item.roleId" :label="item.roleName" :value="item.roleId">
                     </el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="手机号码" required>
-                <el-input type="text" v-model="tempUser.phone">
-                </el-input>
+                <el-input type="text" v-model="tempUser.phone" style="width:40%;" />
             </el-form-item>
             <el-form-item label="电子邮箱" required>
-                <el-input type="text" v-model="tempUser.email">
-                </el-input>
+                <el-input type="text" v-model="tempUser.email" style="width:40%;" />
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">

@@ -11,7 +11,7 @@
             </div>
         </el-col>
         <el-col :span="21" v-loading="imgLoading" element-loading-text="正在截取直播画面...">
-            <el-row type="flex" :gutter="10" justify="center" style="height: 40px" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
+            <el-row type="flex" :gutter="10" justify="center" style="height: 5%" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
                 <el-col :span="5"></el-col>
                 <el-col :span="8">
                     <div class="grid-content bg-purple">

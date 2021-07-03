@@ -3,10 +3,8 @@
     <el-row type="flex" style="margin-bottom: -20px">
         <el-col :span="3" v-loading="listLoading" element-loading-text="数据加载中...">
             <div>
-                <el-input size="mini" placeholder="输入关键字进行过滤" v-model="filterText">
-                </el-input>
-
-                <el-tree class="filter-tree" :expand-on-click-node="false" :highlight-current="true" :data="data" :props="defaultProps" default-expand-all :filter-node-method="filterNode" @node-click="clickNode" ref="tree">
+                <el-input size="mini" placeholder="输入关键字进行过滤" v-model="filterText" />
+                <el-tree class="filter-tree" ref="tree" :data="data" node-key="name" :expand-on-click-node="false" :props="defaultProps" :filter-node-method="filterNode" @node-click="clickNode" highlight-current default-expand-all>
                 </el-tree>
             </div>
         </el-col>
@@ -54,7 +52,6 @@ export default {
             this.$refs.tree.filter(val);
         },
     },
-
     methods: {
         filterNode(value, data) {
             if (!value) return true;
@@ -67,21 +64,22 @@ export default {
             }
             this.listLoading = true;
             this.api({
-                    url: "/cameraLive/listCameraInfo",
-                    method: "get",
-                    // params: this.listQuery,
+                url: "/cameraLive/listCameraInfo",
+                method: "get",
+                // params: this.listQuery,
+            }).then((data) => {
+                this.listLoading = false;
+                this.data = data;
+                this.listQuery = {
+                    id: data[0].id,
+                    level: data[0].level,
+                };
+                this.$nextTick(function () {
+                    this.$refs.tree.setCurrentKey(data[0].name);
                 })
-                .then((data) => {
-                    this.listLoading = false;
-                    this.data = data;
-                    this.listQuery = {
-                        id: data[0].id,
-                        level: data[0].level,
-                    };
-                })
-                .catch((err) => {
-                    this.listLoading = false;
-                });
+            }).catch((err) => {
+                this.listLoading = false;
+            });
         },
         clickNode(data, node, obj) {
             this.listQuery = {
@@ -92,3 +90,22 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+/**高亮显示el-tree选中的节点 */
+.el-tree--highlight-current /deep/ .el-tree-node.is-current>.el-tree-node__content:before {
+    content: "";
+    background-color: rgb(64, 158, 255);
+    width: 4px;
+    height: 80%;
+    float: left;
+    position: absolute;
+
+}
+
+.el-tree--highlight-current /deep/ .el-tree-node.is-current>.el-tree-node__content {
+    background-color: rgb(255, 255, 255);
+    color: rgb(64, 158, 255);
+    position: relative;
+}
+</style>
