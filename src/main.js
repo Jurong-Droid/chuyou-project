@@ -9,8 +9,9 @@ import store from './store'
 import '@/icons' // icon
 import '@/permission' // 权限
 import {default as api} from './utils/api'
-import directives from "@/directives";
+import directives from "@/directives/permission";
 import {hasPermission} from "./utils/hasPermission"
+import 'default-passive-events' //Passive Event Listeners特性当前仅支持mousewheel/touch相关事件
 
 
 Vue.use(ElementUI, {locale})

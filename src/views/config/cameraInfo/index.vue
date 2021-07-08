@@ -1,19 +1,18 @@
 <template>
 <div class="app-container">
     <div class="filter-container">
-        <el-form>
-            <el-form-item>
-                <el-button type="primary" icon="plus" v-permission="'cameraInfo:add'" @click="showCreate">添加
-                </el-button>
-            </el-form-item>
-            <el-form-item label="摄像头名称">
-                <el-col :span="24">
-                    <el-input type="text" v-model="tempCamera.cameraName" />
-                </el-col>
-            </el-form-item>
-        </el-form>
+        <el-input size="mini" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="摄像头名称" clearable />
+        <el-select size="mini" v-model="listQuery.areaId" style="width:8%;" placeholder="区域名称" clearable>
+            <el-option v-for="item in areas" :key="item.id" :label="item.areaName" :value="item.id" />
+        </el-select>
+        <el-date-picker size="mini" v-model="updateValue" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
+        </el-date-picker>
+        <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
+            搜索
+        </el-button>
+        <el-button size="mini" type="primary" icon="plus" v-permission="'cameraInfo:add'" @click="showCreate">添加</el-button>
     </div>
-    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row>
+    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;">
         <el-table-column align="center" label="序号" min-width="5">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
@@ -47,8 +46,7 @@
             </el-form-item>
             <el-form-item label="区域名称" required>
                 <el-select v-model="tempCamera.areaId" placeholder="请选择区域信息" style="width: 40%">
-                    <el-option v-for="item in areas" :key="item.id" :label="item.areaName" :value="item.id">
-                    </el-option>
+                    <el-option v-for="item in areas" :key="item.id" :label="item.areaName" :value="item.id" />
                 </el-select>
             </el-form-item>
             <el-form-item label="角色" required>
@@ -80,7 +78,12 @@
 </template>
 
 <script>
+import waves from '@/directives/waves/index.js' // 水波纹指令
+const utils = require('@/utils/index')
 export default {
+    directives: {
+        waves
+    },
     data() {
         return {
             totalCount: 0, //分页组件--数据总条数
@@ -89,7 +92,12 @@ export default {
             listQuery: {
                 pageNum: 1, //页码
                 pageRow: 50, //每页条数
+                areaId: null,
+                cameraName: null,
+                updateTimeFrom: null,
+                updateTimeTo: null
             },
+            updateValue: [],
             roles: [], //角色列表
             areas: [], //区域列表
             dialogStatus: 'create',
@@ -107,7 +115,34 @@ export default {
                 rtsp: null,
                 password: null,
                 roleIds: []
-            }
+            },
+            pickerOptions: {
+                shortcuts: [{
+                    text: '最近一周',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }, {
+                    text: '最近一个月',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }, {
+                    text: '最近三个月',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }]
+            },
         }
     },
     created() {
@@ -115,6 +150,18 @@ export default {
         if (this.hasPerm('cameraInfo:add') || this.hasPerm('cameraInfo:update')) {
             this.getAllRoles();
             this.getAllAreas();
+        }
+    },
+    watch: {
+        updateValue(value) {
+            if (value) {
+                this.listQuery.updateTimeFrom = utils.parseTime(value[0]);
+                this.listQuery.updateTimeTo = utils.parseTime(value[1]);
+            } else {
+                this.listQuery.updateTimeFrom = null;
+                this.listQuery.updateTimeTo = null;
+            }
+
         }
     },
     methods: {
@@ -264,3 +311,9 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.el-range-input {
+    padding-bottom: 10px;
+}
+</style>
