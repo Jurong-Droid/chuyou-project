@@ -10,7 +10,7 @@
         </el-col>
         <el-col :span="21">
             <div>
-                <SplitScreen></SplitScreen>
+                <splitScreen></splitScreen>
             </div>
         </el-col>
     </el-row>

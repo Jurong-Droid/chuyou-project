@@ -35,6 +35,11 @@ export default new Router({
   routes: constantRouterMap
 })
 export const asyncRouterMap = [{
+    path: '/alarmPage',
+    name: 'alarmPage',
+    component: r => require.ensure([], () => r(require('../views/alarmPage/alarmPage')), 'alarmPage'),
+  },
+  {
     path: '/system',
     component: Layout,
     redirect: '/system/cameraLive',
@@ -98,6 +103,15 @@ export const asyncRouterMap = [{
             icon: 'label'
           },
           menu: 'detectLabel'
+        },{
+          path: 'analyticsModule',
+          name: '模型管理',
+          component: () => import('@/views/config/analyticsModule'),
+          meta: {
+            title: '模型管理',
+            icon: 'module'
+          },
+          menu: 'analyticsModule'
         }]
 
       }

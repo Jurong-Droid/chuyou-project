@@ -22,7 +22,8 @@
         <el-table-column align="center" label="区域名称" prop="areaName" min-width="10"></el-table-column>
         <el-table-column align="center" label="ip" prop="ip" min-width="10"></el-table-column>
         <el-table-column align="center" label="rtsp地址" prop="rtsp" min-width="20"></el-table-column>
-        <el-table-column align="center" label="角色" min-width="15">
+        <el-table-column align="center" label="报警间隔（分钟）" prop="alertStep" min-width="6"></el-table-column>
+        <el-table-column align="center" label="角色" min-width="14">
             <template slot-scope="scope">
                 <div style="margin-right: 2%;display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
                     <el-tag type="primary" v-text="i.roleName"></el-tag>
@@ -30,10 +31,10 @@
             </template>
         </el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="管理" min-width="20">
+        <el-table-column align="center" label="管理" min-width="15">
             <template slot-scope="scope">
                 <el-button type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'cameraInfo:update'">修改</el-button>
-                <el-button type="danger" icon="delete" @click="removeUser(scope.$index)" v-permission="'cameraInfo:delete'">删除</el-button>
+                <el-button type="danger" icon="delete" @click="deleteCamera(scope.$index)" v-permission="'cameraInfo:delete'">删除</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -67,11 +68,15 @@
                 <el-input type="password" v-model="tempCamera.password" style="width: 40%">
                 </el-input>
             </el-form-item>
+            <el-form-item label="报警间隔（分钟）" required>
+                <el-input type="text" v-model="tempCamera.alertStep" style="width: 40%" onkeyup="this.value = this.value.replace(/[^\d.]/g,'');" maxlength="11">
+                </el-input>
+            </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button v-if="dialogStatus==='create'" type="success" @click="createUser">创 建</el-button>
-            <el-button type="primary" v-else @click="updateUser">修 改</el-button>
+            <el-button v-if="dialogStatus==='create'" type="success" @click="addCamera">创 建</el-button>
+            <el-button type="primary" v-else @click="updateCamera">修 改</el-button>
         </div>
     </el-dialog>
 </div>
@@ -114,6 +119,7 @@ export default {
                 ip: null,
                 rtsp: null,
                 password: null,
+                alertStep: null,
                 roleIds: []
             },
             pickerOptions: {
@@ -221,6 +227,7 @@ export default {
             this.tempCamera.ip = "";
             this.tempCamera.rtsp = "";
             this.tempCamera.password = "";
+            this.tempCamera.alertStep = "";
             this.tempCamera.roleIds = [];
             this.dialogStatus = "create"
             this.dialogFormVisible = true
@@ -234,6 +241,7 @@ export default {
             this.tempCamera.ip = camera.ip;
             this.tempCamera.rtsp = camera.rtsp;
             this.tempCamera.password = camera.password;
+            this.tempCamera.alertStep = camera.alertStep;
             this.tempCamera.roleIds = camera.roles.map(x => x.roleId);
             this.dialogStatus = "update"
             this.dialogFormVisible = true
@@ -259,7 +267,7 @@ export default {
             }
             return true
         },
-        createUser() {
+        addCamera() {
             if (!this.validate()) return
             //添加新用户
             this.api({
@@ -272,7 +280,7 @@ export default {
                 this.$message.success('新增成功！');
             })
         },
-        updateUser() {
+        updateCamera() {
             if (!this.validate()) return
             //修改用户信息
             let _vue = this;
@@ -286,7 +294,7 @@ export default {
                 _vue.getList();
             })
         },
-        removeUser($index) {
+        deleteCamera($index) {
             let _vue = this;
             this.$confirm('确定删除此设备?', '提示', {
                 confirmButtonText: '确定',

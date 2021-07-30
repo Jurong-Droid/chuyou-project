@@ -1,0 +1,364 @@
+<template>
+<div class="app-container">
+    <div class="filter-container">
+        <el-input size="mini" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="摄像头名称" clearable />
+        <el-input size="mini" v-model="listQuery.moduleName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="模型名称" clearable />
+        <el-date-picker size="mini" v-model="updateValue" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
+        </el-date-picker>
+        <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
+            搜索
+        </el-button>
+        <el-button size="mini" type="primary" icon="plus" v-permission="'cameraInfo:add'" @click="showCreate">添加</el-button>
+    </div>
+    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;">
+        <el-table-column align="center" label="序号" min-width="5">
+            <template slot-scope="scope">
+                <span v-text="getIndex(scope.$index)"> </span>
+            </template>
+        </el-table-column>
+        <el-table-column align="center" label="摄像头名称" prop="cameraName" min-width="15"></el-table-column>
+        <el-table-column align="center" label="模型名称" prop="moduleName" min-width="10"></el-table-column>
+        <el-table-column align="center" label="模型类型" prop="moduleType" min-width="10"></el-table-column>
+        <el-table-column align="center" label="模型说明" prop="description" min-width="20"></el-table-column>
+        <el-table-column align="center" label="version" prop="version" min-width="10"></el-table-column>
+        <el-table-column align="center" label="状态" prop="status" min-width="6"></el-table-column>
+        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
+        <el-table-column align="center" label="管理" min-width="15">
+            <template slot-scope="scope">
+                <el-button size="mini" type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'cameraInfo:update'">修改</el-button>
+                <el-button size="mini" type="primary" icon="edit" @click="showUpload(scope.$index)" v-permission="'cameraInfo:update'">上传</el-button>
+                <el-button size="mini" type="danger" icon="delete" @click="releaseModule(scope.$index)" v-permission="'cameraInfo:delete'">发布</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
+    </el-pagination>
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+        <el-form class="small-space" :model="tempModule" label-position="left" label-width="auto">
+            <el-form-item label="摄像头名称" required>
+                <el-cascader v-model="tempModule.cameraId" :options="options" :props="defaultProps" filterable clearable placeholder="请选择摄像头信息" style="width: 40%" />
+            </el-form-item>
+            <el-form-item label="模型名称" required>
+                <el-input type="text" v-model="tempModule.moduleName" style="width: 40%" />
+            </el-form-item>
+            <el-form-item label="模型类型">
+                <el-input type="text" v-model="tempModule.moduleType" style="width: 40%" />
+            </el-form-item>
+            <el-form-item label="模型说明">
+                <el-input type="textarea" autosize v-model="tempModule.description" style="width: 40%">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="version">
+                <el-input type="text" v-model="tempModule.version" placeholder="模型的版本信息" style="width: 40%">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="发布命令">
+                <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以行号分隔" style="width: 40%">
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button v-if="dialogStatus==='create'" type="success" @click="createUser">创 建</el-button>
+            <el-button type="primary" v-else @click="updateUser">修 改</el-button>
+        </div>
+    </el-dialog>
+    <el-dialog title="模型上传" :visible.sync="uploadVisible" width="30%">
+        <span>
+            <el-upload ref="upload" style="width: 40%" drag multiple :auto-upload="false" :action="uploadUrl"  :limit="1" :data="uploadData" :file-list="fileList"
+            :before-upload="handleBeforeUpload" 
+            :before-remove="beforeRemove" 
+            :on-error="handleUploadError" 
+            :on-exceed="handleExceed" 
+            :on-success="handleUploadSuccess"
+            >
+                <el-button size="small" type="primary">点击上传</el-button>
+                <div slot="tip" class="el-upload__tip">一次文件不超过500MB</div>
+            </el-upload>
+        </span>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="uploadVisible = false">取 消</el-button>
+            <el-button type="primary" @click="handleUpload">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+</template>
+
+<script>
+import waves from '@/directives/waves/index.js' // 水波纹指令
+const utils = require('@/utils/index')
+export default {
+    directives: {
+        waves
+    },
+    data() {
+        return {
+            totalCount: 0, //分页组件--数据总条数
+            list: [], //表格的数据
+            listLoading: false, //数据加载等待动画
+            listQuery: {
+                pageNum: 1, //页码
+                pageRow: 50, //每页条数
+                areaId: null,
+                cameraName: null,
+                moduleName: null,
+                updateTimeFrom: null,
+                updateTimeTo: null
+            },
+            updateValue: [],
+            options: [], //摄像头信息列表
+            defaultProps: {
+                children: "children",
+                label: "name",
+                value: "id",
+                level: "level",
+                emitPath: false //在选中节点改变时，是否返回由该节点所在的各级菜单的值所组成的数组，若设置 false，则只返回该节点的值
+            },
+            dialogStatus: 'create',
+            dialogFormVisible: false,
+            textMap: {
+                update: '编辑',
+                create: '新建'
+            },
+            tempModule: {
+                id: null,
+                cameraId: null,
+                cameraName: null,
+                moduleName: null,
+                moduleType: null,
+                description: null,
+                version: null,
+                storagePath: null,
+                commandScript: null
+            },
+            uploadUrl: process.env.BASE_URL + '/analyticsModule/upload',
+            fileList: [],
+            uploadData: {
+                moduleId: null
+            },
+            uploadVisible: false,
+            pickerOptions: {
+                shortcuts: [{
+                    text: '最近一周',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }, {
+                    text: '最近一个月',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }, {
+                    text: '最近三个月',
+                    onClick(picker) {
+                        const end = new Date();
+                        const start = new Date();
+                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                        picker.$emit('pick', [start, end]);
+                    }
+                }]
+            },
+        }
+    },
+    created() {
+        this.getList();
+        if (this.hasPerm('analyticsModule:add') || this.hasPerm('analyticsModule:update')) {
+            this.getCameraList();
+        }
+    },
+    watch: {
+        updateValue(value) {
+            if (value) {
+                this.listQuery.updateTimeFrom = utils.parseTime(value[0]);
+                this.listQuery.updateTimeTo = utils.parseTime(value[1]);
+            } else {
+                this.listQuery.updateTimeFrom = null;
+                this.listQuery.updateTimeTo = null;
+            }
+
+        }
+    },
+    methods: {
+        getCameraList() {
+            this.api({
+                url: "/detectLabel/listCameraInfo",
+                method: "get"
+            }).then(data => {
+                this.options = data;
+            })
+        },
+        getList() {
+            //查询列表
+            this.listLoading = true;
+            this.api({
+                url: "/analyticsModule/listAnalyticsModule",
+                method: "get",
+                params: this.listQuery
+            }).then(data => {
+                this.listLoading = false;
+                this.list = data.list;
+                this.totalCount = data.totalCount;
+            })
+        },
+        handleSizeChange(val) {
+            //改变每页数量
+            this.listQuery.pageRow = val
+            this.handleFilter();
+        },
+        handleCurrentChange(val) {
+            //改变页码
+            this.listQuery.pageNum = val
+            this.getList();
+        },
+        handleFilter() {
+            //查询事件
+            this.listQuery.pageNum = 1
+            this.getList()
+        },
+        getIndex($index) {
+            //表格序号
+            return (this.listQuery.pageNum - 1) * this.listQuery.pageRow + $index + 1
+        },
+        showCreate() {
+            //显示新增对话框
+            this.tempModule.cameraId = "";
+            this.tempModule.moduleName = "";
+            this.tempModule.moduleType = "";
+            this.tempModule.description = "";
+            this.tempModule.version = "";
+            this.tempModule.storagePath = "";
+            this.tempModule.commandScript = "";
+            this.dialogStatus = "create"
+            this.dialogFormVisible = true
+        },
+        showUpdate($index) {
+            let module = this.list[$index];
+            if (module.status != '1' && module.status != '2' && module.status != '6') {
+                this.$message.warning('目前状态不能进行修改')
+                return false
+            }
+            this.tempModule.id = module.id;
+            this.tempModule.cameraId = module.cameraId;
+            this.tempModule.moduleName = module.moduleName;
+            this.tempModule.moduleType = module.moduleType;
+            this.tempModule.description = module.description;
+            this.tempModule.version = module.version;
+            this.tempModule.storagePath = module.storagePath;
+            this.tempModule.commandScript = module.commandScript;
+            this.dialogStatus = "update"
+            this.dialogFormVisible = true
+        },
+        showUpload($index) {
+            let module = this.list[$index];
+            if (module.status != '1' && module.status != '2' && module.status != '6') {
+                this.$message.warning('目前状态不能进行上传')
+                return false
+            }
+            this.uploadData.moduleId = module.id;
+            this.uploadVisible = true
+        },
+        validate() {
+            let u = this.tempModule
+            if (u.cameraId.length === 0) {
+                this.$message.warning('请选择摄像头信息')
+                return false
+            }
+            if (u.moduleName.trim().length === 0) {
+                this.$message.warning('请填写模型名称')
+                return false
+            }
+            return true
+        },
+        createUser() {
+            if (!this.validate()) return
+            //添加新用户
+            this.api({
+                url: "/analyticsModule/addAnalyticsModule",
+                method: "post",
+                data: this.tempModule
+            }).then(() => {
+                this.getList();
+                this.dialogFormVisible = false
+                this.$message.success('新增成功！');
+            })
+        },
+        updateUser() {
+            if (!this.validate()) return
+            //修改用户信息
+            this.api({
+                url: "/analyticsModule/updateAnalyticsModule",
+                method: "post",
+                data: this.tempModule
+            }).then(() => {
+                this.$message.success('更新成功！');
+                this.dialogFormVisible = false;
+                this.getList();
+            })
+        },
+        releaseModule($index) {
+            let _vue = this;
+            _vue.$confirm('确定发布模型?', '提示', {
+                confirmButtonText: '确定',
+                showCancelButton: false,
+                type: 'warning'
+            }).then(() => {
+                _vue.$message.success('发布成功!')
+
+            })
+        },
+        handleExceed(files, fileList) {
+            this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+        },
+        beforeRemove(file, fileList) {
+            return this.$confirm('确定移除 ${ file.name }?');
+        },
+        handleUploadError(error, file) {
+
+            this.$notify.error({
+                title: 'error',
+                message: '上传出错:' + error,
+                type: 'error',
+                position: 'bottom-right'
+            })
+        },
+        //上传前的校验 可限制文件的类型和大小
+        handleBeforeUpload(file) {
+            const isLt2M = file.size / 1024 / 1024 < 500;
+            if (!isLt2M) {
+                this.$message.error('上传头像图片大小不能超过 500MB!');
+            }
+            return isLt2M;
+        },
+        // 文件上传成功时的函数
+        handleUploadSuccess(res, file, fileList) {
+            if(res.code===200){
+                this.$message({
+                    message: '上传成功!',
+                    type: 'success'
+                });
+            }
+            this.$refs.upload.clearFiles();
+            this.uploadVisible =false;
+            this.getList();
+        },
+        // 弹窗里面确定按钮处理文件上传的函数
+        handleUpload () {
+        this.$refs.upload.submit();
+        this.uploadVisible = false;
+        },    
+
+    }
+}
+</script>
+
+<style scoped>
+.el-range-input {
+    padding-bottom: 10px;
+}
+</style>
