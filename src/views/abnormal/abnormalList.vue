@@ -18,7 +18,7 @@
             <el-table-column align="center" label="创建时间" prop="createTime" min-width="10" />
             <el-table-column align="center" label="管理" min-width="15" v-if="hasPerm('abnormalInfo:start')">
                 <template slot-scope="scope">
-                    <el-button size="mini" @click="playMv(scope.row)">
+                    <el-button size="mini" @click="playMv(scope.row.id)">
                         <svg-icon icon-class="play" />
                     </el-button>
                 </template>
@@ -75,6 +75,12 @@ export default {
                 this.listLoading = false;
                 this.list = data.list;
                 this.totalCount = data.totalCount;
+
+                //若是带有参数，则打开播放页面
+                let abnormalId = this.$route.params.id;
+                if (abnormalId) {
+                    this.playMv(abnormalId);
+                }
             });
         },
         handleSizeChange(val) {
@@ -96,19 +102,23 @@ export default {
             //表格序号
             return (this.listQuery.pageNum - 1) * this.listQuery.pageRow + $index + 1;
         },
-        playMv(record) {
+        playMv(id) {
             this.showVideo = true;
             console.log(window.location.origin);
             if (process.env.NODE_ENV !== 'production') {
-                this.video_url = process.env.BASE_URL + "/abnormalInfo/startAbnormalInfo?id=" + record.id;
+                this.video_url = process.env.BASE_URL + "/abnormalInfo/startAbnormalInfo?id=" + id;
             } else {
-                this.video_url = window.location.origin + "/abnormalInfo/startAbnormalInfo?id=" + record.id;
+                this.video_url = window.location.origin + "/abnormalInfo/startAbnormalInfo?id=" + id;
             }
         },
         //关闭mv界面
         closeMv() {
             this.showVideo = false;
             this.$refs.video.pause();
+            //router没有提供清空数据的方法 刷新可清楚数据 
+            if (this.$route.params.id) {
+                location.reload();
+            }
         },
     },
 };

@@ -6,7 +6,7 @@
         </div>
         <el-dropdown-menu slot="dropdown">
             <el-dropdown-item v-for="item of options" :key="item.id" :command="item">
-                {{item.promptInfo }}
+                <a style='color:rgb(186 63 103);'>{{item.promptInfo }}>>>> </a>
             </el-dropdown-item>
         </el-dropdown-menu>
     </el-dropdown>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import store from '@/store'
+import store from '@/store';
 export default {
     data() {
         return {
@@ -80,12 +80,17 @@ export default {
                     const data = JSON.parse(msg.data);
                     if (data.status === 'open') {
                         that.options.push(data);
-                        that.$notify({
+                        that.instance = that.$notify({
                             title: '异常警告',
+                            dangerouslyUseHTMLString: true,
                             // 这里也可以把返回信息加入到message中显示
-                            message: data.promptInfo,
+                            message: `<a style='color:rgb(186 63 103);text-decoration: underline;'>${data.promptInfo}>>>></a>`,
                             type: 'warning',
                             duration: 0,
+                            onClick: () => {
+                                that.handle(data);
+                                that.instance.close();
+                            }
                         })
                     } else if (data.status === 'close') {
                         that.options = that.options.filter((item) => {
@@ -116,7 +121,10 @@ export default {
         },
         handle(item) {
             this.$router.push({
-                path: item.jumpPath + '?cameraId' + item.camaraId
+                name: item.jumpPath,
+                params: {
+                    'id': item.foreignKey
+                }
             });
         }, // 关闭WebSocket连接
         closeWebSocket() {
@@ -127,3 +135,21 @@ export default {
 
 }
 </script>
+
+<style scoped>
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:active {
+    text-decoration: underline;
+}
+</style>

@@ -221,12 +221,14 @@ export default {
       this.camera.position.set(10, 90, 65);
       this.camera.lookAt(this.scene.position);
 
+      var scale=0.45
+      var heigh_scale=0.7
       //渲染
       this.renderer = new THREE.WebGLRenderer({
         alpha: true,
       }); //会在body里面生成一个canvas标签,
       this.renderer.setPixelRatio(window.devicePixelRatio); //为了兼容高清屏幕
-      this.renderer.setSize(window.innerWidth * 0.6, window.innerHeight);
+      this.renderer.setSize(window.innerWidth *scale, window.innerHeight*heigh_scale);
 
       const container = document.getElementById("container");
       container.appendChild(this.renderer.domElement);
@@ -242,7 +244,7 @@ export default {
 
       //标注渲染
       this.labelRenderer = new CSS2DRenderer();
-      this.labelRenderer.setSize(window.innerWidth * 0.6, window.innerHeight);
+      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight*heigh_scale);
       this.labelRenderer.domElement.style.position = "absolute";
       // this.labelRenderer.domElement.style.position = 'relative';
       this.labelRenderer.domElement.style.top = 0;
@@ -253,8 +255,8 @@ export default {
     onWindowResize() {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth * 0.6, window.innerHeight);
-      this.labelRenderer.setSize(window.innerWidth * 0.6, window.innerHeight);
+      this.renderer.setSize(window.innerWidth * scale, window.innerHeight*heigh_scale);
+      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight*heigh_scale);
     },
     animate() {
       requestAnimationFrame(this.animate);
@@ -285,7 +287,7 @@ export default {
               // obj.position.set(-40, -50, 10);
               obj.position.set(-40, -50, 10);
               // this.addSprite(-95, -55, -110, '/static/image/shoop.png', -70, '12号', obj, function () {
-              // });
+              // });src\views\dashboard\static
               // this.addSprite(-80, -65, -90, '/static/image/cloth.png', -52, '13号', obj, function () {
               // });
               // this.addSprite(-100, -45, -80, '/static/image/apple.png', -63, '14号', obj, function () {
@@ -1138,7 +1140,7 @@ export default {
   z-index: 222;
   text-align: center;
   line-height: 80px;
-  font-size: 60px;
+  font-size: 30px;
   /* color: #fff; */
   font-weight: bold;
   background-image:-webkit-linear-gradient(left,rgb(0,121,255),rgb(0,255,255),rgb(0,121,255)); 
@@ -1157,12 +1159,13 @@ export default {
   text-align: center; 
   display: block;
   color:#00ffff;
-  font-size: 30px;
+  font-size: 18px;
 }
 .content_style{
   text-align: center; 
   display: block;
   color:#00ffff;
+  font-size: 15px;
   
 }
 /* .progressBar >>> .el-progress-bar__outer {

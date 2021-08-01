@@ -243,8 +243,6 @@ export default {
                 }).then(() => {
                     _vue.getList()
                     _vue.$message.success('删除成功!')
-                }).catch(() => {
-                    _vue.$message.error("删除失败")
                 })
             })
         },

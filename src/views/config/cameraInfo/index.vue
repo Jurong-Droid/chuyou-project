@@ -72,6 +72,18 @@
                 <el-input type="text" v-model="tempCamera.alertStep" style="width: 40%" onkeyup="this.value = this.value.replace(/[^\d.]/g,'');" maxlength="11">
                 </el-input>
             </el-form-item>
+            <el-form-item label="边缘端的ssh地址">
+                <el-input type="text" v-model="tempCamera.edgeHost" placeholder="默认端口22,若不是,则格式为ip:port" style="width: 40%">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="边缘端系统的用户名">
+                <el-input type="text" autosize v-model="tempCamera.edgeUsername" style="width: 40%">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="边缘端系统的用户密码">
+                <el-input type="password" v-model="tempCamera.edgePassword" style="width: 40%">
+                </el-input>
+            </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -120,6 +132,9 @@ export default {
                 rtsp: null,
                 password: null,
                 alertStep: null,
+                edgeHost: null,
+                edgeUsername: null,
+                edgePassword: null,
                 roleIds: []
             },
             pickerOptions: {
@@ -198,6 +213,20 @@ export default {
                 this.listLoading = false;
                 this.list = data.list;
                 this.totalCount = data.totalCount;
+
+                //若是带有参数，则打开修改页面
+                let cameraId = this.$route.params.cameraId;
+                if (cameraId) {
+                    let i;
+                    for (i = 0; i < this.list.length; i++) {
+                        if (cameraId === this.list[i].id) {
+                            break;
+                        }
+                    }
+                    this.showUpdate(i);
+
+                }
+
             })
         },
         handleSizeChange(val) {
@@ -228,6 +257,9 @@ export default {
             this.tempCamera.rtsp = "";
             this.tempCamera.password = "";
             this.tempCamera.alertStep = "";
+            this.tempCamera.edgeHost = "";
+            this.tempCamera.edgeUsername = "";
+            this.tempCamera.edgePassword = "";
             this.tempCamera.roleIds = [];
             this.dialogStatus = "create"
             this.dialogFormVisible = true
@@ -242,6 +274,9 @@ export default {
             this.tempCamera.rtsp = camera.rtsp;
             this.tempCamera.password = camera.password;
             this.tempCamera.alertStep = camera.alertStep;
+            this.tempCamera.edgeHost = camera.edgeHost;
+            this.tempCamera.edgeUsername = camera.edgeUsername;
+            this.tempCamera.edgePassword = camera.edgePassword;
             this.tempCamera.roleIds = camera.roles.map(x => x.roleId);
             this.dialogStatus = "update"
             this.dialogFormVisible = true
@@ -291,7 +326,8 @@ export default {
             }).then(() => {
                 this.$message.success('更新成功！');
                 this.dialogFormVisible = false;
-                _vue.getList();
+                //router没有提供清空数据的方法 刷新可清楚数据 
+                location.reload();
             })
         },
         deleteCamera($index) {

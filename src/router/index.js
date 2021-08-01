@@ -43,14 +43,14 @@ export const asyncRouterMap = [{
     path: '/system',
     component: Layout,
     redirect: '/system/cameraLive',
-    name: '功能模块',
+    name: 'system',
     meta: {
       title: '功能模块',
       icon: 'tree'
     },
     children: [{
         path: 'cameraLive',
-        name: '直播',
+        name: 'cameraLive',
         component: () => import('@/views/live/live'),
         meta: {
           title: '直播',
@@ -60,7 +60,7 @@ export const asyncRouterMap = [{
       },
       {
         path: 'abnormalInfo',
-        name: '异常记录',
+        name: 'abnormalInfo',
         component: () => import('@/views/abnormal/abnormalList'),
         meta: {
           title: '异常记录',
@@ -70,7 +70,7 @@ export const asyncRouterMap = [{
       },
       {
         path: '/system/config',
-        name: '配置管理',
+        name: 'config',
         component: () => import('@/views/config'),
         meta: {
           title: '配置管理',
@@ -78,7 +78,7 @@ export const asyncRouterMap = [{
         },
         children: [{
           path: 'cameraInfo',
-          name: '摄像头信息',
+          name: 'cameraInfo',
           component: () => import('@/views/config/cameraInfo'),
           meta: {
             title: '摄像头信息',
@@ -87,7 +87,7 @@ export const asyncRouterMap = [{
           menu: 'cameraInfo'
         }, {
           path: 'detectFunc',
-          name: '检测方法',
+          name: 'detectFunc',
           component: () => import('@/views/config/detectFunc'),
           meta: {
             title: '检测方法',
@@ -96,7 +96,7 @@ export const asyncRouterMap = [{
           menu: 'detectFunc'
         }, {
           path: 'detectLabel',
-          name: '检测标注',
+          name: 'detectLabel',
           component: () => import('@/views/config/detectLabel'),
           meta: {
             title: '检测标注',
@@ -105,7 +105,7 @@ export const asyncRouterMap = [{
           menu: 'detectLabel'
         },{
           path: 'analyticsModule',
-          name: '模型管理',
+          name: 'analyticsModule',
           component: () => import('@/views/config/analyticsModule'),
           meta: {
             title: '模型管理',

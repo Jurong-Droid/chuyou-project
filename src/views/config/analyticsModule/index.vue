@@ -21,13 +21,17 @@
         <el-table-column align="center" label="模型类型" prop="moduleType" min-width="10"></el-table-column>
         <el-table-column align="center" label="模型说明" prop="description" min-width="20"></el-table-column>
         <el-table-column align="center" label="version" prop="version" min-width="10"></el-table-column>
-        <el-table-column align="center" label="状态" prop="status" min-width="6"></el-table-column>
+        <el-table-column align="center" label="状态" min-width="6">
+            <template slot-scope="scope">
+                <span>{{statusMap[scope.row.status]}}</span>
+            </template>
+        </el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="15">
             <template slot-scope="scope">
-                <el-button size="mini" type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'cameraInfo:update'">修改</el-button>
-                <el-button size="mini" type="primary" icon="edit" @click="showUpload(scope.$index)" v-permission="'cameraInfo:update'">上传</el-button>
-                <el-button size="mini" type="danger" icon="delete" @click="releaseModule(scope.$index)" v-permission="'cameraInfo:delete'">发布</el-button>
+                <el-button size="mini" type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'analyticsModule:add'">修改</el-button>
+                <el-button size="mini" type="primary" icon="edit" @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
+                <el-button size="mini" type="danger" icon="delete" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -53,32 +57,25 @@
                 </el-input>
             </el-form-item>
             <el-form-item label="发布命令">
-                <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以行号分隔" style="width: 40%">
+                <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以回车分隔" style="width: 40%">
                 </el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button v-if="dialogStatus==='create'" type="success" @click="createUser">创 建</el-button>
-            <el-button type="primary" v-else @click="updateUser">修 改</el-button>
+            <el-button v-if="dialogStatus==='create'" type="success" @click="createModule">创 建</el-button>
+            <el-button type="primary" v-else @click="updateModule">修 改</el-button>
         </div>
     </el-dialog>
     <el-dialog title="模型上传" :visible.sync="uploadVisible" width="30%">
-        <span>
-            <el-upload ref="upload" style="width: 40%" drag multiple :auto-upload="false" :action="uploadUrl"  :limit="1" :data="uploadData" :file-list="fileList"
-            :before-upload="handleBeforeUpload" 
-            :before-remove="beforeRemove" 
-            :on-error="handleUploadError" 
-            :on-exceed="handleExceed" 
-            :on-success="handleUploadSuccess"
-            >
-                <el-button size="small" type="primary">点击上传</el-button>
-                <div slot="tip" class="el-upload__tip">一次文件不超过500MB</div>
-            </el-upload>
-        </span>
+        <el-upload ref="upload" style="width: 40%" drag multiple :auto-upload="false" :action="uploadUrl" :limit="1" :data="uploadData" :file-list="fileList" :before-upload="handleBeforeUpload" :before-remove="beforeRemove" :on-error="handleUploadError" :on-exceed="handleExceed" :on-success="handleUploadSuccess">
+            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+            <el-button style="margin-left: 56%;" size="small" type="success" @click="handleUpload">上传到服务器</el-button>
+            <div style="white-space:nowrap" slot="tip" class="el-upload__tip">只能上传zip文件，且一次文件不超过500MB</div>
+        </el-upload>
+
         <span slot="footer" class="dialog-footer">
             <el-button @click="uploadVisible = false">取 消</el-button>
-            <el-button type="primary" @click="handleUpload">确 定</el-button>
         </span>
     </el-dialog>
 </div>
@@ -120,6 +117,14 @@ export default {
                 update: '编辑',
                 create: '新建'
             },
+            statusMap: {
+                '1': '创建',
+                2: '上传成功',
+                3: '同步成功',
+                4: '发布成功',
+                5: '同步失败',
+                6: '发布失败',
+            },
             tempModule: {
                 id: null,
                 cameraId: null,
@@ -131,7 +136,7 @@ export default {
                 storagePath: null,
                 commandScript: null
             },
-            uploadUrl: process.env.BASE_URL + '/analyticsModule/upload',
+            uploadUrl: process.env.NODE_ENV === 'production' ? '/analyticsModule/upload' : process.env.BASE_URL + '/analyticsModule/upload',
             fileList: [],
             uploadData: {
                 moduleId: null
@@ -275,7 +280,7 @@ export default {
             }
             return true
         },
-        createUser() {
+        createModule() {
             if (!this.validate()) return
             //添加新用户
             this.api({
@@ -288,7 +293,7 @@ export default {
                 this.$message.success('新增成功！');
             })
         },
-        updateUser() {
+        updateModule() {
             if (!this.validate()) return
             //修改用户信息
             this.api({
@@ -303,20 +308,54 @@ export default {
         },
         releaseModule($index) {
             let _vue = this;
+            let module = _vue.list[$index];
             _vue.$confirm('确定发布模型?', '提示', {
                 confirmButtonText: '确定',
                 showCancelButton: false,
                 type: 'warning'
             }).then(() => {
-                _vue.$message.success('发布成功!')
+                _vue.listLoading = true;
+                _vue.api({
+                    url: "/analyticsModule/releaseAnalyticsModule",
+                    method: "post",
+                    data: {
+                        id: module.id,
+                        cameraId: module.cameraId
+                    }
+                }).then((data) => {
+                    _vue.getList()
+                    this.$alert(`<el-row><el-col style="white-space: pre-wrap;">${data}</el-col></el-row> `, '执行结果', {
+                        dangerouslyUseHTMLString: true,
+                        confirmButtonText: '确定',
+                    });
+                }).catch(error => {
+                    _vue.listLoading = false;
+                    if (error.code === '10012') {
+                        _vue.instance = _vue.$notify({
+                            title: '系统提示',
+                            dangerouslyUseHTMLString: true,
+                            message: `<p> ${error.msg} </p><p style='color:#43c39d'>点击进行修改</p>`,
+                            duration: 0,
+                            onClick: () => {
+                                _vue.$router.replace({
+                                    name: 'cameraInfo',
+                                    params: {
+                                        'cameraId': module.cameraId
+                                    }
+                                });
+                                _vue.instance.close();
+                            }
+                        });
+                    }
 
+                })
             })
         },
         handleExceed(files, fileList) {
             this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
         },
         beforeRemove(file, fileList) {
-            return this.$confirm('确定移除 ${ file.name }?');
+            return this.$confirm(`确定移除 ${ file.name }?`);
         },
         handleUploadError(error, file) {
 
@@ -329,36 +368,43 @@ export default {
         },
         //上传前的校验 可限制文件的类型和大小
         handleBeforeUpload(file) {
+            console.log(file.type);
+            const isZip = file.type === 'application/zip';
             const isLt2M = file.size / 1024 / 1024 < 500;
-            if (!isLt2M) {
-                this.$message.error('上传头像图片大小不能超过 500MB!');
+            if (!isZip) {
+                this.$message.error('上传文件只能是zip格式的压缩包!');
             }
-            return isLt2M;
+            if (!isLt2M) {
+                this.$message.error('上传文件大小不能超过 500MB!');
+            }
+            return isZip && isLt2M;
         },
         // 文件上传成功时的函数
         handleUploadSuccess(res, file, fileList) {
-            if(res.code===200){
-                this.$message({
-                    message: '上传成功!',
-                    type: 'success'
-                });
+            if (res.code === '200') {
+                this.$message.success('上传成功！');
+            } else {
+                this.$message.error(res.msg);
             }
             this.$refs.upload.clearFiles();
-            this.uploadVisible =false;
+            this.uploadVisible = false;
             this.getList();
         },
         // 弹窗里面确定按钮处理文件上传的函数
-        handleUpload () {
-        this.$refs.upload.submit();
-        this.uploadVisible = false;
-        },    
+        handleUpload() {
+            this.$refs.upload.submit();
+        },
 
     }
 }
 </script>
 
-<style scoped>
+<style>
 .el-range-input {
     padding-bottom: 10px;
+}
+
+.el-message-box {
+    width: auto !important;
 }
 </style>
