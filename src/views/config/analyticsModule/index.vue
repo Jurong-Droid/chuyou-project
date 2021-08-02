@@ -244,10 +244,10 @@ export default {
         },
         showUpdate($index) {
             let module = this.list[$index];
-            if (module.status != '1' && module.status != '2' && module.status != '6') {
-                this.$message.warning('目前状态不能进行修改')
-                return false
-            }
+            // if (module.status != '1' && module.status != '2' && module.status != '6') {
+            //     this.$message.warning('目前状态不能进行修改')
+            //     return false
+            // }
             this.tempModule.id = module.id;
             this.tempModule.cameraId = module.cameraId;
             this.tempModule.moduleName = module.moduleName;
@@ -261,10 +261,10 @@ export default {
         },
         showUpload($index) {
             let module = this.list[$index];
-            if (module.status != '1' && module.status != '2' && module.status != '6') {
-                this.$message.warning('目前状态不能进行上传')
-                return false
-            }
+            // if (module.status != '1' && module.status != '2' && module.status != '6') {
+            //     this.$message.warning('目前状态不能进行上传')
+            //     return false
+            // }
             this.uploadData.moduleId = module.id;
             this.uploadVisible = true
         },
