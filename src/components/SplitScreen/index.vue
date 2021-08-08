@@ -185,14 +185,20 @@ export default {
             this.createVideo(videoElement, n);
         },
         destoryVideo(flvPlayer) {
-            if (flvPlayer) {
-                console.log("close flvPlayer......");
-                flvPlayer.pause();
-                flvPlayer.unload();
-                flvPlayer.detachMediaElement();
-                flvPlayer.destroy();
+            try {
+                if (flvPlayer) {
+                    console.log("close flvPlayer......");
+                    flvPlayer.pause();
+                    flvPlayer.unload();
+                    flvPlayer.detachMediaElement();
+                    flvPlayer.destroy();
+                    flvPlayer = null;
+                }
+            } catch (err) {
+                console.error(err);
                 flvPlayer = null;
             }
+
         },
 
         //中断直播播放流
