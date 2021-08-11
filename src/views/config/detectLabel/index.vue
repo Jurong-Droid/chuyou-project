@@ -113,7 +113,7 @@ export default {
             });
         },
         clickNode(data, node, obj) {
-            if (data.level && data.id) {
+            if (data.level === '2' && data.id) {
                 this.cameraId = data.id;
                 this.showVideo = true;
                 this.showPic = true;
