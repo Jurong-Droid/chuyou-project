@@ -181,8 +181,9 @@ export default {
             });
         },
         reloadVideo(videoElement, n, flvPlayer) {
-            this.destoryVideo(flvPlayer);
-            this.createVideo(videoElement, n);
+            videoElement.src = "";
+            // this.destoryVideo(flvPlayer);
+            // this.createVideo(videoElement, n);
         },
         destoryVideo(flvPlayer) {
             try {
@@ -204,6 +205,7 @@ export default {
         //中断直播播放流
         closePlayer() {
             for (let i in this.flvPlayerList) {
+                console.log(i);
                 this.destoryVideo(this.flvPlayerList[i]);
             }
             this.flvPlayerList = [];
