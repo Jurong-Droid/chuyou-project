@@ -77,6 +77,24 @@ export const asyncRouterMap = [{
           icon: 'config'
         },
         children: [{
+          path: 'edgeInfo',
+          name: 'edgeInfo',
+          component: () => import('@/views/config/edgeInfo'),
+          meta: {
+            title: '边缘端',
+            icon: 'server'
+          },
+          menu: 'edgeInfo'
+        }, {
+          path: '/edgeDetail',
+          name: 'edgeDetail',
+          hidden: true,
+          meta: {
+            title: '边缘端详情',
+            icon: 'server'
+          },
+          component: () => import('@/views/config/edgeInfo/detail')
+        }, {
           path: 'cameraInfo',
           name: 'cameraInfo',
           component: () => import('@/views/config/cameraInfo'),
@@ -85,6 +103,15 @@ export const asyncRouterMap = [{
             icon: 'monitor'
           },
           menu: 'cameraInfo'
+        }, {
+          path: '/cameraDetail',
+          name: 'cameraDetail',
+          hidden: true,
+          meta: {
+            title: '摄像头信息详情',
+            icon: 'monitor'
+          },
+          component: () => import('@/views/config/cameraInfo/detail')
         }, {
           path: 'detectFunc',
           name: 'detectFunc',
@@ -103,7 +130,7 @@ export const asyncRouterMap = [{
             icon: 'label'
           },
           menu: 'detectLabel'
-        },{
+        }, {
           path: 'analyticsModule',
           name: 'analyticsModule',
           component: () => import('@/views/config/analyticsModule'),

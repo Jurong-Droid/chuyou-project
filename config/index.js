@@ -3,8 +3,11 @@ var path = require('path')
 module.exports = {
   build: {
     env: require('./prod.env'),
-    index: path.resolve(__dirname, '../dist/index.html'),
-    assetsRoot: path.resolve(__dirname, '../dist'),
+    //build打包时直接打包到spring-boot项目中，根据自己项目存储位置修改
+    // index: path.resolve(__dirname, '../dist/index.html'),
+    //assetsRoot: path.resolve(__dirname, '../dist'),
+    index: path.resolve(__dirname, '../../IMDP-springboot/src/main/resources/static/index.html'),
+    assetsRoot: path.resolve(__dirname, '../../IMDP-springboot/src/main/resources/static'),
     assetsSubDirectory: 'static',
     assetsPublicPath: './',
     productionSourceMap: true,

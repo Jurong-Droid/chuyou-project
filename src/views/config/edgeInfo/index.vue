@@ -2,15 +2,12 @@
 <div class="app-container">
     <div class="filter-container">
         <el-input size="mini" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="摄像头名称" clearable />
-        <el-select size="mini" v-model="listQuery.areaId" style="width:8%;" placeholder="区域名称" clearable>
-            <el-option v-for="item in areas" :key="item.id" :label="item.areaName" :value="item.id" />
-        </el-select>
-        <el-date-picker size="mini" v-model="updateValue" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
+        <el-date-picker size="mini" v-model="createTime" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
         </el-date-picker>
         <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
             搜索
         </el-button>
-        <el-button size="mini" type="primary" icon="plus" v-permission="'cameraInfo:add'" @click="showCreate">添加</el-button>
+        <el-button size="mini" type="primary" icon="plus" v-permission="'edgeInfo:add'" @click="showCreate">添加</el-button>
     </div>
     <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;">
         <el-table-column align="center" label="序号" min-width="5">
@@ -18,15 +15,13 @@
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="摄像头名称" min-width="15">
+        <el-table-column align="center" label="边缘端名称" min-width="15">
             <template slot-scope="scope">
-                <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.cameraName }}</span>
+                <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.edgeName }}</span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="区域名称" prop="areaName" min-width="10"></el-table-column>
-        <el-table-column align="center" label="ip" prop="ip" min-width="10"></el-table-column>
-        <el-table-column align="center" label="视频流地址" prop="rtsp" min-width="20"></el-table-column>
-        <el-table-column align="center" label="报警间隔（分钟）" prop="alertStep" min-width="6"></el-table-column>
+        <el-table-column align="center" label="边缘端地址" prop="edgeIp" min-width="15"></el-table-column>
+        <el-table-column align="center" label="边缘端信息" prop="edgeInfo" min-width="30"></el-table-column>
         <el-table-column align="center" label="角色" min-width="14">
             <template slot-scope="scope">
                 <div style="margin-right: 2%;display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
@@ -34,67 +29,69 @@
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="管理" min-width="15">
+        <el-table-column align="center" label="创建时间" prop="createTime" min-width="10"></el-table-column>
+        <el-table-column align="center" label="已绑定摄像头" min-width="8">
             <template slot-scope="scope">
-                <el-button size="mini" :plain='true' type="primary" icon="add" @click="showBindModule(scope.$index)" v-permission="'cameraInfo:add'">绑定模型</el-button>
-                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'cameraInfo:update'">修改</el-button>
-                <el-button size="mini" :plain='true' type="danger" icon="delete" @click="deleteCamera(scope.$index)" v-permission="'cameraInfo:delete'">删除</el-button>
+                <span>{{scope.row.cameraInfoList.length}}</span>
+            </template>
+        </el-table-column>
+        <el-table-column align="center" label="管理" min-width="20">
+            <template slot-scope="scope">
+                <el-button size="mini" :plain='true' type="primary" icon="add" @click="showBindCamera(scope.$index)" v-permission="'edgeInfo:add'">绑定摄像头</el-button>
+                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'edgeInfo:update'">修改</el-button>
+                <el-button size="mini" :plain='true' type="danger" icon="delete" @click="deleteEdgeInfo(scope.$index)" v-permission="'edgeInfo:delete'">删除</el-button>
             </template>
         </el-table-column>
     </el-table>
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form class="small-space" :model="tempCamera" label-position="left" label-width="15%">
-            <el-form-item label="摄像头名称" required>
-                <el-input type="text" v-model="tempCamera.cameraName" style="width: 40%" />
-            </el-form-item>
-            <el-form-item label="区域名称" required>
-                <el-select v-model="tempCamera.areaId" placeholder="请选择区域信息" style="width: 40%">
-                    <el-option v-for="item in areas" :key="item.id" :label="item.areaName" :value="item.id" />
-                </el-select>
+        <el-form class="small-space" :model="tempEdge" label-position="left" label-width="15%">
+            <el-form-item label="边缘端名称" required>
+                <el-input type="text" v-model="tempEdge.edgeName" style="width: 40%" />
             </el-form-item>
             <el-form-item label="角色" required>
-                <el-select v-model="tempCamera.roleIds" multiple placeholder="支持多角色" style="width: 40%">
+                <el-select v-model="tempEdge.roleIds" multiple placeholder="支持多角色" style="width: 40%">
                     <el-option v-for="item in roles" :key="item.roleId" :label="item.roleName" :value="item.roleId">
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="ip地址">
-                <el-input type="text" v-model="tempCamera.ip" style="width: 40%">
+            <el-form-item label="边缘端地址" required>
+                <el-input type="text" v-model="tempEdge.edgeIp" style="width: 40%">
                 </el-input>
             </el-form-item>
-            <el-form-item label="视频流地址" required>
-                <el-input type="textarea" autosize v-model="tempCamera.rtsp" placeholder="摄像头的直播流源 (支持RTSP和RTMP)" style="width: 40%">
+            <el-form-item label="边缘端信息">
+                <el-input type="textarea" autosize v-model="tempEdge.edgeInfo" style="width: 40%">
                 </el-input>
             </el-form-item>
-            <el-form-item label="设备访问密码">
-                <el-input type="password" v-model="tempCamera.password" style="width: 40%">
+            <el-form-item label="边缘端ssh的用户名">
+                <el-input type="text" autosize v-model="tempEdge.sshUsername" style="width: 40%">
                 </el-input>
             </el-form-item>
-            <el-form-item label="报警间隔（分钟）" required>
-                <el-input type="text" v-model="tempCamera.alertStep" style="width: 40%" onkeyup="this.value = this.value.replace(/[^\d.]/g,'');" maxlength="11">
+            <el-form-item label="边缘端ssh的密码">
+                <el-input type="password" v-model="tempEdge.sshPassword" style="width: 40%">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="ssh访问端口">
+                <el-input type="text" v-model="tempEdge.sshHost" style="width: 40%">
                 </el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button v-if="dialogStatus==='create'" type="success" @click="addCamera">创 建</el-button>
-            <el-button type="primary" v-else @click="updateCamera">修 改</el-button>
+            <el-button v-if="dialogStatus==='create'" type="success" @click="addEdgeInfo">创 建</el-button>
+            <el-button type="primary" v-else @click="updateEdgeInfo">修 改</el-button>
         </div>
     </el-dialog>
-    <el-dialog title="绑定检测算法模型" :visible.sync="dialogModuleVisible">
-        <el-form class="small-space" :model="tempModule" label-position="left" label-width="15%">
-            <el-form-item label="检测算法模型" required>
-                <el-select v-model="tempModule.moduleId" placeholder="请选择算法模型" style="width: 40%">
-                    <el-option v-for="item in modules" :key="item.id" :label="item.moduleName" :value="item.id" />
-                </el-select>
+    <el-dialog title="绑定摄像头" :visible.sync="dialogCameraVisible">
+        <el-form class="small-space" :model="tempCamera" label-position="left" label-width="15%">
+            <el-form-item label="摄像头名称" required>
+                <el-cascader v-model="tempCamera.cameraId" :options="options" :props="defaultProps" filterable clearable placeholder="请选择摄像头信息" style="width: 40%" />
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="success" @click="addModule">绑 定</el-button>
+            <el-button type="success" @click="addCamera">绑 定</el-button>
         </div>
     </el-dialog>
 </div>
@@ -120,35 +117,37 @@ export default {
                 updateTimeFrom: null,
                 updateTimeTo: null
             },
-            updateValue: [],
+            createTime: [],
+            options: [], //摄像头信息列表
+            defaultProps: {
+                children: "children",
+                label: "name",
+                value: "id",
+                level: "level",
+                emitPath: false //在选中节点改变时，是否返回由该节点所在的各级菜单的值所组成的数组，若设置 false，则只返回该节点的值
+            },
             roles: [], //角色列表
-            areas: [], //区域列表
             dialogStatus: 'create',
             dialogFormVisible: false,
+            dialogCameraVisible: false,
             textMap: {
                 update: '编辑',
                 create: '新建'
             },
-            tempCamera: {
+            tempEdge: {
                 id: null,
-                areaId: null,
-                areaName: null,
-                cameraName: null,
-                ip: null,
-                rtsp: null,
-                password: null,
-                alertStep: null,
-                edgeHost: null,
-                edgeUsername: null,
-                edgePassword: null,
+                edgeName: null,
+                edgeIp: null,
+                edgeInfo: null,
+                sshHost: null,
+                sshUsername: null,
+                sshPassword: null,
                 roleIds: []
             },
-            tempModule: {
-                cameraId: null,
-                moduleId: null
+            tempCamera: {
+                edgeId: null,
+                cameraId: null
             },
-            dialogModuleVisible: false,
-            modules: [], //检测算法模型列表
             pickerOptions: {
                 shortcuts: [{
                     text: '最近一周',
@@ -180,19 +179,18 @@ export default {
     },
     created() {
         this.getList();
-        if (this.hasPerm('cameraInfo:add') || this.hasPerm('cameraInfo:update')) {
+        if (this.hasPerm('edgeInfo:add') || this.hasPerm('edgeInfo:update')) {
             this.getAllRoles();
-            this.getAllAreas();
         }
     },
     watch: {
-        updateValue(value) {
+        createTime(value) {
             if (value) {
-                this.listQuery.updateTimeFrom = utils.parseTime(value[0]);
-                this.listQuery.updateTimeTo = utils.parseTime(value[1]);
+                this.listQuery.createTimeFrom = utils.parseTime(value[0]);
+                this.listQuery.createTimeTo = utils.parseTime(value[1]);
             } else {
-                this.listQuery.updateTimeFrom = null;
-                this.listQuery.updateTimeTo = null;
+                this.listQuery.createTimeFrom = null;
+                this.listQuery.createTimeTo = null;
             }
 
         }
@@ -206,34 +204,37 @@ export default {
                 this.roles = data;
             })
         },
-        getAllAreas() {
+        getCameraList() {
             this.api({
-                url: "/common/getAllAreas",
+                url: "/detectLabel/listCameraInfo",
                 method: "get"
             }).then(data => {
-                this.areas = data;
-            })
-        },
-        getAllModules() {
-            this.api({
-                url: "/common/getAllModules",
-                method: "get"
-            }).then(data => {
-                this.modules = data;
+                this.options = data;
             })
         },
         getList() {
             //查询列表
             this.listLoading = true;
             this.api({
-                url: "/cameraInfo/listCamera",
+                url: "/edgeInfo/listEdgeInfo",
                 method: "get",
                 params: this.listQuery
             }).then(data => {
                 this.listLoading = false;
                 this.list = data.list;
                 this.totalCount = data.totalCount;
+                //若是带有参数，则打开修改页面
+                let edgeId = this.$route.params.edgeId;
+                if (edgeId) {
+                    let i;
+                    for (i = 0; i < this.list.length; i++) {
+                        if (edgeId === this.list[i].id) {
+                            break;
+                        }
+                    }
+                    this.showUpdate(i);
 
+                }
             })
         },
         handleSizeChange(val) {
@@ -257,89 +258,78 @@ export default {
         },
         showCreate() {
             //显示新增对话框
-            this.tempCamera.areaId = "";
-            this.tempCamera.areaName = "";
-            this.tempCamera.cameraName = "";
-            this.tempCamera.ip = "";
-            this.tempCamera.rtsp = "";
-            this.tempCamera.password = "";
-            this.tempCamera.alertStep = "";
-            this.tempCamera.edgeHost = "";
-            this.tempCamera.edgeUsername = "";
-            this.tempCamera.edgePassword = "";
-            this.tempCamera.roleIds = [];
+            this.tempEdge.id = "";
+            this.tempEdge.edgeName = "";
+            this.tempEdge.edgeIp = "";
+            this.tempEdge.edgeInfo = "";
+            this.tempEdge.sshHost = "22";
+            this.tempEdge.sshUsername = "";
+            this.tempEdge.sshPassword = "";
+            this.tempEdge.roleIds = [];
             this.dialogStatus = "create"
             this.dialogFormVisible = true
         },
         showUpdate($index) {
-            let camera = this.list[$index];
-            this.tempCamera.id = camera.id;
-            this.tempCamera.areaId = camera.areaId;
-            this.tempCamera.areaName = camera.areaName;
-            this.tempCamera.cameraName = camera.cameraName;
-            this.tempCamera.ip = camera.ip;
-            this.tempCamera.rtsp = camera.rtsp;
-            this.tempCamera.password = camera.password;
-            this.tempCamera.alertStep = camera.alertStep;
-            this.tempCamera.edgeHost = camera.edgeHost;
-            this.tempCamera.edgeUsername = camera.edgeUsername;
-            this.tempCamera.edgePassword = camera.edgePassword;
-            this.tempCamera.roleIds = camera.roles.map(x => x.roleId);
+            let edgeInfo = this.list[$index];
+            this.tempEdge.id = edgeInfo.id;
+            this.tempEdge.edgeName = edgeInfo.edgeName;
+            this.tempEdge.edgeIp = edgeInfo.edgeIp;
+            this.tempEdge.edgeInfo = edgeInfo.edgeInfo;
+            this.tempEdge.sshHost = edgeInfo.sshHost;
+            this.tempEdge.sshUsername = edgeInfo.sshUsername;
+            this.tempEdge.sshPassword = edgeInfo.sshPassword;
+            this.tempEdge.roleIds = edgeInfo.roles.map(x => x.roleId);
             this.dialogStatus = "update"
             this.dialogFormVisible = true
         },
-        showBindModule($index) {
-            if (this.modules.length == 0) {
-                this.getAllModules();
+        showBindCamera($index) {
+            if (this.options.length == 0) {
+                this.getCameraList();
             }
-            let cameraInfo = this.list[$index];
-            this.tempModule.cameraId = cameraInfo.id;
-            this.tempModule.moduleId = "";
-            this.dialogModuleVisible = true;
+            let edgeInfo = this.list[$index];
+            this.tempCamera.edgeId = edgeInfo.id;
+            this.tempCamera.cameraId = "";
+            this.dialogCameraVisible = true;
 
         },
         validate() {
-            let u = this.tempCamera
-            if (u.areaId.length === 0) {
-                this.$message.warning('请选择区域信息')
+            let u = this.tempEdge
+            if (u.edgeName.trim().length === 0) {
+                this.$message.warning('请填写边缘端名称')
                 return false
             }
-            if (u.cameraName.trim().length === 0) {
-                this.$message.warning('请填写摄像头名称')
-                return false
-            }
-            if (u.rtsp.trim().length === 0) {
-                this.$message.warning('请填rtsp地址')
-                return false
-            }
-
             if (u.roleIds.length === 0) {
                 this.$message.warning('请选择角色')
                 return false
             }
+            const reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+            if (u.edgeIp.trim().length === 0 || !reg.test(u.edgeIp)) {
+                this.$message.warning('请输入正确的IP地址');
+                return false
+            }
             return true
         },
-        addCamera() {
+        addEdgeInfo() {
             if (!this.validate()) return
             //添加新用户
             this.api({
-                url: "/cameraInfo/addCamera",
+                url: "/edgeInfo/addEdgeInfo",
                 method: "post",
-                data: this.tempCamera
+                data: this.tempEdge
             }).then(() => {
                 this.getList();
                 this.dialogFormVisible = false
                 this.$message.success('新增成功！');
             })
         },
-        updateCamera() {
+        updateEdgeInfo() {
             if (!this.validate()) return
             //修改用户信息
             let _vue = this;
             this.api({
-                url: "/cameraInfo/updateCamera",
+                url: "/edgeInfo/updateEdgeInfo",
                 method: "post",
-                data: this.tempCamera
+                data: this.tempEdge
             }).then(() => {
                 this.$message.success('更新成功！');
                 this.dialogFormVisible = false;
@@ -347,16 +337,16 @@ export default {
                 location.reload();
             })
         },
-        deleteCamera($index) {
+        deleteEdgeInfo($index) {
             let _vue = this;
-            this.$confirm('确定删除此设备?', '提示', {
+            this.$confirm('确定删除此边缘端信息?', '提示', {
                 confirmButtonText: '确定',
                 showCancelButton: false,
                 type: 'warning'
             }).then(() => {
                 let camera = _vue.list[$index];
                 _vue.api({
-                    url: "/cameraInfo/deleteCamera",
+                    url: "/edgeInfo/deleteCamera",
                     method: "post",
                     data: {
                         id: camera.id
@@ -369,21 +359,21 @@ export default {
                 })
             })
         },
-        addModule() {
+        addCamera() {
             let _vue = this;
             this.api({
-                url: "/cameraInfo/bindModule",
+                url: "/edgeInfo/bindCamera",
                 method: "post",
-                data: this.tempModule
+                data: this.tempCamera
             }).then(() => {
                 _vue.$message.success('绑定成功！');
-                _vue.dialogModuleVisible = false;
+                _vue.dialogCameraVisible = false;
                 _vue.getList()
             })
         },
         handleDetail(row) {
             this.$router.push({
-                name: 'cameraDetail',
+                name: 'edgeDetail',
                 params: {
                     'data': row
                 }

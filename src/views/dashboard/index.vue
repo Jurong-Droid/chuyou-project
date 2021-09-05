@@ -91,11 +91,11 @@
             <div class="tag-group">
               <div
                 v-for="item in [
-                  { type: '#409EFF', label: '联合站',percent:'80',sum:'50' },
-                  { type: '#67C23A', label: '转油站',percent:'26',sum:'60' },
-                  { type: '#909399', label: '配水间',percent:'18',sum:'40' },
-                  { type: '#F56C6C', label: '集油间',percent:'63',sum:'20' },
-                  { type: '#E6A23C', label: '抽油机',percent:'37',sum:'30' },
+                  { type: '#409EFF', label: '联合站',percent:80,sum:'50' },
+                  { type: '#67C23A', label: '转油站',percent:26,sum:'60' },
+                  { type: '#909399', label: '配水间',percent:18,sum:'40' },
+                  { type: '#F56C6C', label: '集油间',percent:63,sum:'20' },
+                  { type: '#E6A23C', label: '抽油机',percent:37,sum:'30' },
                 ]"
                 :key="item.label"
               >
@@ -113,7 +113,7 @@
                       :text-inside="true"
                     ></el-progress>
                   </el-col>
-                  <el-col span="4">
+                  <el-col :span="4">
                     <el-tag color="rgb(3, 20, 52)" effect="dark">
                       {{ item.sum }}
                     </el-tag>
@@ -277,7 +277,6 @@ export default {
       new MTLLoader()
         .setPath("/static/model/modelFirst/")
         .load("modelFirst.mtl", (materials) => {
-          console.log("materials", materials);
           materials.preload();
           new OBJLoader()
             .setMaterials(materials)

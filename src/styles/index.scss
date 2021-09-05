@@ -5,6 +5,7 @@
 @import './sidebar.scss';
 
 body {
+  height: 100%;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -12,8 +13,14 @@ body {
 }
 
 html {
+  height: 100%;
   box-sizing: border-box;
 }
+
+#app {
+  height: 100%;
+}
+
 
 *,
 *:before,
@@ -56,6 +63,16 @@ a:hover {
 
 .app-container {
   padding: 20px;
+}
+
+.link-type,
+.link-type:focus {
+  color: #337ab7;
+  cursor: pointer;
+
+  &:hover {
+    color: rgb(32, 160, 255);
+  }
 }
 
 .filter-container {

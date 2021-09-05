@@ -1,14 +1,14 @@
 <template>
 <div class="app-container">
     <div class="filter-container">
-        <el-input size="mini" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="摄像头名称" clearable />
+        <el-input size="mini" v-model="listQuery.edgeName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="边缘端名称" clearable />
         <el-input size="mini" v-model="listQuery.moduleName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="模型名称" clearable />
         <el-date-picker size="mini" v-model="updateValue" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
         </el-date-picker>
         <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
             搜索
         </el-button>
-        <el-button size="mini" type="primary" icon="plus" v-permission="'cameraInfo:add'" @click="showCreate">添加</el-button>
+        <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
     </div>
     <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;">
         <el-table-column align="center" label="序号" min-width="5">
@@ -16,7 +16,7 @@
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="摄像头名称" prop="cameraName" min-width="15"></el-table-column>
+        <el-table-column align="center" label="边缘端名称" prop="edgeName" min-width="15"></el-table-column>
         <el-table-column align="center" label="模型名称" prop="moduleName" min-width="10"></el-table-column>
         <el-table-column align="center" label="模型类型" prop="moduleType" min-width="10"></el-table-column>
         <el-table-column align="center" label="模型说明" prop="description" min-width="20"></el-table-column>
@@ -29,18 +29,20 @@
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="15">
             <template slot-scope="scope">
-                <el-button size="mini" type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'analyticsModule:add'">修改</el-button>
-                <el-button size="mini" type="primary" icon="edit" @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
-                <el-button size="mini" type="danger" icon="delete" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
+                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
+                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
+                <el-button size="mini" :plain='true' type="danger" icon="delete" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
             </template>
         </el-table-column>
     </el-table>
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form class="small-space" :model="tempModule" label-position="left" label-width="auto">
+        <el-form class="small-space" :model="tempModule" label-position="left" label-width="15%">
             <el-form-item label="摄像头名称" required>
-                <el-cascader v-model="tempModule.cameraId" :options="options" :props="defaultProps" filterable clearable placeholder="请选择摄像头信息" style="width: 40%" />
+                <el-select v-model="tempModule.edgeId" placeholder="请选择边缘端" style="width: 40%">
+                    <el-option v-for="item in edgeEnds" :key="item.id" :label="item.edgeName" :value="item.id" />
+                </el-select>
             </el-form-item>
             <el-form-item label="模型名称" required>
                 <el-input type="text" v-model="tempModule.moduleName" style="width: 40%" />
@@ -97,13 +99,13 @@ export default {
                 pageNum: 1, //页码
                 pageRow: 50, //每页条数
                 areaId: null,
-                cameraName: null,
+                edgeName: null,
                 moduleName: null,
                 updateTimeFrom: null,
                 updateTimeTo: null
             },
             updateValue: [],
-            options: [], //摄像头信息列表
+            edgeEnds: [], //边缘端信息列表
             defaultProps: {
                 children: "children",
                 label: "name",
@@ -118,7 +120,7 @@ export default {
                 create: '新建'
             },
             statusMap: {
-                '1': '创建',
+                1: '创建',
                 2: '上传成功',
                 3: '同步成功',
                 4: '发布成功',
@@ -127,8 +129,8 @@ export default {
             },
             tempModule: {
                 id: null,
-                cameraId: null,
-                cameraName: null,
+                edegeId: null,
+                edgeName: null,
                 moduleName: null,
                 moduleType: null,
                 description: null,
@@ -173,9 +175,6 @@ export default {
     },
     created() {
         this.getList();
-        if (this.hasPerm('analyticsModule:add') || this.hasPerm('analyticsModule:update')) {
-            this.getCameraList();
-        }
     },
     watch: {
         updateValue(value) {
@@ -190,12 +189,12 @@ export default {
         }
     },
     methods: {
-        getCameraList() {
+        getAllEdgeEnds() {
             this.api({
-                url: "/detectLabel/listCameraInfo",
+                url: "/common/getAllEdgeEnds",
                 method: "get"
             }).then(data => {
-                this.options = data;
+                this.edgeEnds = data;
             })
         },
         getList() {
@@ -231,8 +230,11 @@ export default {
             return (this.listQuery.pageNum - 1) * this.listQuery.pageRow + $index + 1
         },
         showCreate() {
+            if (this.edgeEnds.length === 0) {
+                this.getAllEdgeEnds();
+            }
             //显示新增对话框
-            this.tempModule.cameraId = "";
+            this.tempModule.edgeId = "";
             this.tempModule.moduleName = "";
             this.tempModule.moduleType = "";
             this.tempModule.description = "";
@@ -249,7 +251,7 @@ export default {
             //     return false
             // }
             this.tempModule.id = module.id;
-            this.tempModule.cameraId = module.cameraId;
+            this.tempModule.edgeId = module.edgeId;
             this.tempModule.moduleName = module.moduleName;
             this.tempModule.moduleType = module.moduleType;
             this.tempModule.description = module.description;
@@ -270,7 +272,7 @@ export default {
         },
         validate() {
             let u = this.tempModule
-            if (u.cameraId.length === 0) {
+            if (u.edgeId.length === 0) {
                 this.$message.warning('请选择摄像头信息')
                 return false
             }
@@ -320,7 +322,7 @@ export default {
                     method: "post",
                     data: {
                         id: module.id,
-                        cameraId: module.cameraId
+                        edgeId: module.edgeId
                     }
                 }).then((data) => {
                     _vue.getList()
@@ -334,13 +336,13 @@ export default {
                         _vue.instance = _vue.$notify({
                             title: '系统提示',
                             dangerouslyUseHTMLString: true,
-                            message: `<p> ${error.msg} </p><p style='color:#43c39d'>点击进行修改</p>`,
+                            message: `<p> ${error.msg} </p><p style='color:#43c39d'>点击此处进行修改</p>`,
                             duration: 0,
                             onClick: () => {
                                 _vue.$router.replace({
-                                    name: 'cameraInfo',
+                                    name: 'edgeInfo',
                                     params: {
-                                        'cameraId': module.cameraId
+                                        'edgeId': module.edgeId
                                     }
                                 });
                                 _vue.instance.close();
