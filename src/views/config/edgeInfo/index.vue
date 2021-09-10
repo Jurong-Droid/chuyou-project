@@ -1,7 +1,7 @@
 <template>
 <div class="app-container">
     <div class="filter-container">
-        <el-input size="mini" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="摄像头名称" clearable />
+        <el-input size="mini" v-model="listQuery.edgeName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="边缘端名称" clearable />
         <el-date-picker size="mini" v-model="createTime" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
         </el-date-picker>
         <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
@@ -90,7 +90,7 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button @click="dialogCameraVisible = false">取 消</el-button>
             <el-button type="success" @click="addCamera">绑 定</el-button>
         </div>
     </el-dialog>
@@ -113,7 +113,7 @@ export default {
                 pageNum: 1, //页码
                 pageRow: 50, //每页条数
                 areaId: null,
-                cameraName: null,
+                edgeName: null,
                 updateTimeFrom: null,
                 updateTimeTo: null
             },
@@ -206,7 +206,7 @@ export default {
         },
         getCameraList() {
             this.api({
-                url: "/detectLabel/listCameraInfo",
+                url: "/common/getAllCameras",
                 method: "get"
             }).then(data => {
                 this.options = data;

@@ -86,7 +86,6 @@ export default {
     },
     created() {
         this.getList();
-        this.getDetectFuncList();
     },
     watch: {
         filterText(val) {
@@ -105,7 +104,7 @@ export default {
             }
             this.listLoading = true;
             this.api({
-                url: "/detectLabel/listCameraInfo",
+                url: "/common/getAllCameras",
                 method: "get",
             }).then((data) => {
                 this.listLoading = false;
@@ -113,6 +112,7 @@ export default {
             });
         },
         clickNode(data, node, obj) {
+            this.getDetectFuncList();
             if (data.level === '2' && data.id) {
                 this.cameraId = data.id;
                 this.showVideo = true;

@@ -123,9 +123,9 @@ export default {
             //表格序号
             return (this.listQuery.pageNum - 1) * this.listQuery.pageRow + $index + 1
         },
-        cellStyle(row, column, rowIndex, columnIndex) { //根据报警级别显示颜色
-            if (row.column.label === "标注框展示") {
-                return 'background:' + row.row.tagColor
+        cellStyle({row,column}) { //根据报警级别显示颜色
+            if (column.label === "标注框展示") {
+                return 'background:' + row.tagColor
             }
         },
         showCreate() {

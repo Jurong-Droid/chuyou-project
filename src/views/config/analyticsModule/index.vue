@@ -10,27 +10,30 @@
         </el-button>
         <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
     </div>
-    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;">
+    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row> style="width: 100%;">
         <el-table-column align="center" label="序号" min-width="5">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="边缘端名称" prop="edgeName" min-width="15"></el-table-column>
-        <el-table-column align="center" label="模型名称" prop="moduleName" min-width="10"></el-table-column>
-        <el-table-column align="center" label="模型类型" prop="moduleType" min-width="10"></el-table-column>
+        <el-table-column align="center" label="边缘端名称" prop="edgeName" min-width="12"></el-table-column>
+        <el-table-column align="center" label="模型名称" prop="moduleName" min-width="12"></el-table-column>
+        <el-table-column align="center" label="模型类型" prop="moduleType" min-width="8"></el-table-column>
         <el-table-column align="center" label="模型说明" prop="description" min-width="20"></el-table-column>
-        <el-table-column align="center" label="version" prop="version" min-width="10"></el-table-column>
+        <el-table-column align="center" label="version" prop="version" min-width="8"></el-table-column>
         <el-table-column align="center" label="状态" min-width="6">
             <template slot-scope="scope">
-                <span>{{statusMap[scope.row.status]}}</span>
+                <el-tag  v-if="['200','201'].includes(scope.row.status)"  type="success" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag  v-else-if="['5','6'].includes(scope.row.status)"  type="danger" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag  v-else type="info" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
             </template>
         </el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="管理" min-width="15">
+        <el-table-column align="center" label="管理" min-width="20">
             <template slot-scope="scope">
                 <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
                 <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
+                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="syncFile(scope.$index)" v-permission="'analyticsModule:release'">同步</el-button>
                 <el-button size="mini" :plain='true' type="danger" icon="delete" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
             </template>
         </el-table-column>
@@ -38,10 +41,11 @@
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount" :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-        <el-form class="small-space" :model="tempModule" label-position="left" label-width="15%">
-            <el-form-item label="摄像头名称" required>
+        <el-form class="small-space" :model="tempModule" label-position="left" label-width="18%">
+            <el-form-item label="边缘端名称" required>
                 <el-select v-model="tempModule.edgeId" placeholder="请选择边缘端" style="width: 40%">
-                    <el-option v-for="item in edgeEnds" :key="item.id" :label="item.edgeName" :value="item.id" />
+                    <el-option v-for="item in edgeEnds" :key="item.id" :label="item.edgeName" :value="item.id">
+                    </el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="模型名称" required>
@@ -58,8 +62,16 @@
                 <el-input type="text" v-model="tempModule.version" placeholder="模型的版本信息" style="width: 40%">
                 </el-input>
             </el-form-item>
+            <el-form-item label="同步路径">
+                <el-input type="text" v-model="tempModule.syncPath" placeholder="边缘端检测模块存储路径" style="width: 40%">
+                </el-input>
+            </el-form-item>
             <el-form-item label="发布命令">
                 <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以回车分隔" style="width: 40%">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="对应的RabbitMQ的队列">
+                <el-input type="textarea" v-model="tempModule.mqQueue" placeholder="此检测模块消息交换的队列名" style="width: 40%">
                 </el-input>
             </el-form-item>
         </el-form>
@@ -126,17 +138,21 @@ export default {
                 4: '发布成功',
                 5: '同步失败',
                 6: '发布失败',
+                200: '正在检测',
+                201: '未在检测'
             },
             tempModule: {
                 id: null,
-                edegeId: null,
+                edgeId: null,
                 edgeName: null,
                 moduleName: null,
                 moduleType: null,
                 description: null,
                 version: null,
                 storagePath: null,
-                commandScript: null
+                syncPath: null,
+                commandScript: null,
+                mqQueue: null
             },
             uploadUrl: process.env.NODE_ENV === 'production' ? '/analyticsModule/upload' : process.env.BASE_URL + '/analyticsModule/upload',
             fileList: [],
@@ -240,7 +256,9 @@ export default {
             this.tempModule.description = "";
             this.tempModule.version = "";
             this.tempModule.storagePath = "";
+            this.tempModule.syncPath = "";
             this.tempModule.commandScript = "";
+            this.tempModule.mqQueue = "";
             this.dialogStatus = "create"
             this.dialogFormVisible = true
         },
@@ -257,7 +275,9 @@ export default {
             this.tempModule.description = module.description;
             this.tempModule.version = module.version;
             this.tempModule.storagePath = module.storagePath;
+            this.tempModule.syncPath = module.syncPath;
             this.tempModule.commandScript = module.commandScript;
+            this.tempModule.mqQueue = module.mqQueue;
             this.dialogStatus = "update"
             this.dialogFormVisible = true
         },
@@ -308,6 +328,30 @@ export default {
                 this.getList();
             })
         },
+        syncFile($index) {
+            let _vue = this;
+            let module = _vue.list[$index];
+            _vue.$confirm('确定同步模型?', '提示', {
+                confirmButtonText: '确定',
+                showCancelButton: false,
+                type: 'warning'
+            }).then(() => {
+                _vue.listLoading = true;
+                _vue.api({
+                    url: "/analyticsModule/syncAnalyticsModule",
+                    method: "post",
+                    data: {
+                        id: module.id,
+                        edgeId: module.edgeId
+                    }
+                }).then((data) => {
+                    this.$message.success('同步成功！');
+                    _vue.getList()
+                }).catch(error => {
+                    _vue.listLoading = false;
+                })
+            })
+        },
         releaseModule($index) {
             let _vue = this;
             let module = _vue.list[$index];
@@ -326,7 +370,7 @@ export default {
                     }
                 }).then((data) => {
                     _vue.getList()
-                    this.$alert(`<el-row><el-col style="white-space: pre-wrap;">${data}</el-col></el-row> `, '执行结果', {
+                    this.$alert(`<el-row><el-col style="white-space: pre-wrap;">${data}</el-col></el-row>`, '执行结果', {
                         dangerouslyUseHTMLString: true,
                         confirmButtonText: '确定',
                     });
