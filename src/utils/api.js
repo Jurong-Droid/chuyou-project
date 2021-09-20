@@ -40,6 +40,7 @@ service.interceptors.response.use(
       return Promise.reject("未登录")
     } else if(res.code === '90003'){
       Message({
+        dangerouslyUseHTMLString : true,
         message: res.msg,
         type: 'error',
         duration: 5 * 1000
@@ -47,9 +48,10 @@ service.interceptors.response.use(
       return Promise.reject(res)
     } else {
       Message({
+        dangerouslyUseHTMLString : true,
         message: res.msg,
         type: 'error',
-        duration: 3 * 1000
+        duration: 5 * 1000
       })
       return Promise.reject(res)
     }

@@ -5,7 +5,7 @@
     <div style="margin:20px 0 5px 20px">
         <el-descriptions class="margin-top" :column="2" border>
             <el-descriptions-item>
-                <template>
+                <template slot="label">
                     <i class="el-icon-video-camera"></i>
                     摄像头名称
                 </template>

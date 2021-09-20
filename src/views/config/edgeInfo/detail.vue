@@ -76,7 +76,11 @@
         <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border style="width: 100%">
             <el-table-column align="center" label="序号" type="index" min-width="5">
             </el-table-column>
-            <el-table-column align="center" label="摄像头名称" prop="cameraName" min-width="15"></el-table-column>
+            <el-table-column align="center" label="摄像头名称" min-width="15">
+                <template slot-scope="scope">
+                    <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.cameraName }}</span>
+                </template>
+            </el-table-column>
             <el-table-column align="center" label="ip" prop="ip" min-width="10"></el-table-column>
             <el-table-column align="center" label="视频流地址" prop="rtsp" min-width="20"></el-table-column>
             <el-table-column align="center" label="管理" min-width="15">
@@ -150,6 +154,14 @@ export default {
         callback() {
             this.$router.push({
                 name: 'edgeInfo',
+            });
+        },
+        handleDetail(row) {
+            this.$router.push({
+                name: 'cameraDetail',
+                params: {
+                    'data': row
+                }
             });
         }
     }

@@ -156,7 +156,7 @@ export default {
                     url: "/detectFunc/removeDetectFunc",
                     method: "post",
                     data: {
-                        id: this.list[$index].id
+                        keyId: this.list[$index].id
                     },
                 }).then((data) => {
                     this.$message.success('删除成功！');

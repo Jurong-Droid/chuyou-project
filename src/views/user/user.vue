@@ -115,7 +115,7 @@ export default {
     methods: {
         getAllRoles() {
             this.api({
-                url: "/user/getAllRoles",
+                url: "/common/getUserRoles",
                 method: "get"
             }).then(data => {
                 this.roles = data;
@@ -238,7 +238,7 @@ export default {
                     url: "/user/deleteUser",
                     method: "post",
                     data: {
-                        userId: user.userId
+                        keyId: user.userId
                     }
                 }).then(() => {
                     _vue.getList()

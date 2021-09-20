@@ -9,6 +9,7 @@
             搜索
         </el-button>
         <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
+        <el-button size="mini" type="danger" icon="plus" v-permission="'analyticsModule:release'" @click="resetHeartbeat">重置链接</el-button>
     </div>
     <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row> style="width: 100%;">
         <el-table-column align="center" label="序号" min-width="5">
@@ -23,9 +24,10 @@
         <el-table-column align="center" label="version" prop="version" min-width="8"></el-table-column>
         <el-table-column align="center" label="状态" min-width="6">
             <template slot-scope="scope">
-                <el-tag  v-if="['200','201'].includes(scope.row.status)"  type="success" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
-                <el-tag  v-else-if="['5','6'].includes(scope.row.status)"  type="danger" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
-                <el-tag  v-else type="info" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag v-if="['200','201'].includes(scope.row.status)" type="success" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag v-else-if="['6','7'].includes(scope.row.status)" type="danger" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag v-else-if="scope.row.status === '4' && scope.row.heartbeatCount >5  " type="danger" disable-transitions>连接失败</el-tag>
+                <el-tag v-else type="info" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
             </template>
         </el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
@@ -63,7 +65,7 @@
                 </el-input>
             </el-form-item>
             <el-form-item label="同步路径">
-                <el-input type="text" v-model="tempModule.syncPath" placeholder="边缘端检测模块存储路径" style="width: 40%">
+                <el-input type="text" v-model="tempModule.syncPath" placeholder="边缘端上检测模块存储路径" style="width: 40%">
                 </el-input>
             </el-form-item>
             <el-form-item label="发布命令">
@@ -135,11 +137,12 @@ export default {
                 1: '创建',
                 2: '上传成功',
                 3: '同步成功',
-                4: '发布成功',
-                5: '同步失败',
-                6: '发布失败',
-                200: '正在检测',
-                201: '未在检测'
+                4: '发布中',
+                5: '发布成功',
+                6: '同步失败',
+                7: '发布失败',
+                200: '正常运行',
+                201: '无任务运行'
             },
             tempModule: {
                 id: null,
@@ -251,6 +254,7 @@ export default {
             }
             //显示新增对话框
             this.tempModule.edgeId = "";
+            this.tempModule.edgeName = "";
             this.tempModule.moduleName = "";
             this.tempModule.moduleType = "";
             this.tempModule.description = "";
@@ -264,12 +268,12 @@ export default {
         },
         showUpdate($index) {
             let module = this.list[$index];
-            // if (module.status != '1' && module.status != '2' && module.status != '6') {
-            //     this.$message.warning('目前状态不能进行修改')
-            //     return false
-            // }
+            if (this.edgeEnds.length === 0) {
+                this.getAllEdgeEnds();
+            }
             this.tempModule.id = module.id;
             this.tempModule.edgeId = module.edgeId;
+            this.tempModule.edgeName = module.edgeName;
             this.tempModule.moduleName = module.moduleName;
             this.tempModule.moduleType = module.moduleType;
             this.tempModule.description = module.description;
@@ -283,17 +287,29 @@ export default {
         },
         showUpload($index) {
             let module = this.list[$index];
-            // if (module.status != '1' && module.status != '2' && module.status != '6') {
-            //     this.$message.warning('目前状态不能进行上传')
-            //     return false
-            // }
             this.uploadData.moduleId = module.id;
             this.uploadVisible = true
+        },
+        resetHeartbeat(){
+            let _vue = this;
+            _vue.$confirm('确定重置心跳次数?', '提示', {
+                confirmButtonText: '确定',
+                showCancelButton: false,
+                type: 'warning'
+            }).then(() => {
+                _vue.api({
+                    url: "/analyticsModule/resetHeartbeat",
+                    method: "post",
+                }).then((data) => {
+                    this.$message.success('成功重置成功'+data+'条！');
+                    _vue.getList()
+                })
+            })
         },
         validate() {
             let u = this.tempModule
             if (u.edgeId.length === 0) {
-                this.$message.warning('请选择摄像头信息')
+                this.$message.warning('请选择边缘端信息')
                 return false
             }
             if (u.moduleName.trim().length === 0) {
@@ -415,7 +431,7 @@ export default {
         //上传前的校验 可限制文件的类型和大小
         handleBeforeUpload(file) {
             console.log(file.type);
-            const isZip = file.type === 'application/zip';
+            const isZip = ['application/zip', 'application/x-zip-compressed'].includes(file.type);
             const isLt2M = file.size / 1024 / 1024 < 500;
             if (!isZip) {
                 this.$message.error('上传文件只能是zip格式的压缩包!');

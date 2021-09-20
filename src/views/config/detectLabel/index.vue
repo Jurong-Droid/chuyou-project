@@ -112,6 +112,9 @@ export default {
             });
         },
         clickNode(data, node, obj) {
+            if (!this.hasPerm("detectLabel:start")) {
+                return;
+            }
             this.getDetectFuncList();
             if (data.level === '2' && data.id) {
                 this.cameraId = data.id;

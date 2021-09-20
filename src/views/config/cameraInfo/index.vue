@@ -62,7 +62,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="ip地址">
-                <el-input type="text" v-model="tempCamera.ip" style="width: 40%">
+                <el-input type="text" v-model="tempCamera.ip" autocomplete="off" style="width: 40%">
                 </el-input>
             </el-form-item>
             <el-form-item label="视频流地址" required>
@@ -70,7 +70,7 @@
                 </el-input>
             </el-form-item>
             <el-form-item label="设备访问密码">
-                <el-input type="password" v-model="tempCamera.password" style="width: 40%">
+                <el-input type="password" v-model="tempCamera.password" autocomplete="new-password" style="width: 40%">
                 </el-input>
             </el-form-item>
             <el-form-item label="报警间隔（分钟）" required>
@@ -87,7 +87,7 @@
     <el-dialog title="绑定检测算法模型" :visible.sync="dialogModuleVisible">
         <el-form class="small-space" :model="tempModule" label-position="left" label-width="15%">
             <el-form-item label="检测算法模型" required>
-                <el-select v-model="tempModule.moduleId" placeholder="请选择算法模型" style="width: 40%">
+                <el-select v-model="tempModule.moduleIds" multiple placeholder="请选择算法模型" style="width: 40%">
                     <el-option v-for="item in modules" :key="item.id" :label="item.moduleName" :value="item.id" />
                 </el-select>
             </el-form-item>
@@ -145,7 +145,7 @@ export default {
             },
             tempModule: {
                 cameraId: null,
-                moduleId: null
+                moduleIds: []
             },
             dialogModuleVisible: false,
             modules: [], //检测算法模型列表
@@ -200,7 +200,7 @@ export default {
     methods: {
         getAllRoles() {
             this.api({
-                url: "/user/getAllRoles",
+                url: "/common/getUserRoles",
                 method: "get"
             }).then(data => {
                 this.roles = data;
@@ -294,7 +294,7 @@ export default {
             }
             let cameraInfo = this.list[$index];
             this.tempModule.cameraId = cameraInfo.id;
-            this.tempModule.moduleId = "";
+            this.tempModule.moduleIds = [];
             this.dialogModuleVisible = true;
 
         },
@@ -359,7 +359,7 @@ export default {
                     url: "/cameraInfo/deleteCamera",
                     method: "post",
                     data: {
-                        id: camera.id
+                        keyId: camera.id
                     }
                 }).then(() => {
                     _vue.getList()

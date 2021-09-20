@@ -65,11 +65,11 @@
                 </el-input>
             </el-form-item>
             <el-form-item label="边缘端ssh的用户名">
-                <el-input type="text" autosize v-model="tempEdge.sshUsername" style="width: 40%">
+                <el-input type="text" autosize v-model="tempEdge.sshUsername" auto-complete="off" style="width: 40%">
                 </el-input>
             </el-form-item>
             <el-form-item label="边缘端ssh的密码">
-                <el-input type="password" v-model="tempEdge.sshPassword" style="width: 40%">
+                <el-input type="password" v-model="tempEdge.sshPassword" auto-complete="new-password" style="width: 40%">
                 </el-input>
             </el-form-item>
             <el-form-item label="ssh访问端口">
@@ -86,7 +86,7 @@
     <el-dialog title="绑定摄像头" :visible.sync="dialogCameraVisible">
         <el-form class="small-space" :model="tempCamera" label-position="left" label-width="15%">
             <el-form-item label="摄像头名称" required>
-                <el-cascader v-model="tempCamera.cameraId" :options="options" :props="defaultProps" filterable clearable placeholder="请选择摄像头信息" style="width: 40%" />
+                <el-cascader v-model="tempCamera.cameraIds" :options="options" :props="defaultProps" filterable clearable placeholder="请选择摄像头信息" style="width: 40%" />
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -124,6 +124,7 @@ export default {
                 label: "name",
                 value: "id",
                 level: "level",
+                multiple: true,
                 emitPath: false //在选中节点改变时，是否返回由该节点所在的各级菜单的值所组成的数组，若设置 false，则只返回该节点的值
             },
             roles: [], //角色列表
@@ -146,7 +147,7 @@ export default {
             },
             tempCamera: {
                 edgeId: null,
-                cameraId: null
+                cameraIds: []
             },
             pickerOptions: {
                 shortcuts: [{
@@ -198,7 +199,7 @@ export default {
     methods: {
         getAllRoles() {
             this.api({
-                url: "/user/getAllRoles",
+                url: "/common/getUserRoles",
                 method: "get"
             }).then(data => {
                 this.roles = data;
@@ -288,7 +289,7 @@ export default {
             }
             let edgeInfo = this.list[$index];
             this.tempCamera.edgeId = edgeInfo.id;
-            this.tempCamera.cameraId = "";
+            this.tempCamera.cameraIds = [];
             this.dialogCameraVisible = true;
 
         },
@@ -339,17 +340,28 @@ export default {
         },
         deleteEdgeInfo($index) {
             let _vue = this;
-            this.$confirm('确定删除此边缘端信息?', '提示', {
-                confirmButtonText: '确定',
-                showCancelButton: false,
-                type: 'warning'
-            }).then(() => {
+            //需要使用$createElement来创建 定义含义class的可以 h('i', { class: 'el-icon-question' })
+            const h = _vue.$createElement
+            _vue.$confirm(
+                '提示', {
+                    title: '提示',
+                    message: h('div', [
+                        h('p', '确定删除此边缘端信息？'),
+                        h('p', '边缘端与摄像头的关联关系会被删除！'),
+                        h('p', '边缘端上的检测算法模型信息会被删除！')
+                    ]),
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }
+            ).then(() => {
                 let camera = _vue.list[$index];
                 _vue.api({
                     url: "/edgeInfo/deleteCamera",
                     method: "post",
                     data: {
-                        id: camera.id
+                        keyId: camera.id
                     }
                 }).then(() => {
                     _vue.getList()
@@ -358,6 +370,7 @@ export default {
                     _vue.$message.error("删除失败")
                 })
             })
+
         },
         addCamera() {
             let _vue = this;
