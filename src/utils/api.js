@@ -1,6 +1,6 @@
 import axios from 'axios'
 import {Message} from 'element-ui'
-import {getToken} from '@/utils/auth'
+import {getToken,setToken} from '@/utils/auth'
 import store from '../store'
 // 创建axios实例
 const service = axios.create({
@@ -11,7 +11,7 @@ const service = axios.create({
 service.interceptors.request.use(config => {
   let token = getToken();
   if (token) {
-    config.headers.token = token;
+    config.headers.Authorization = token;
   }
   return config
 }, error => {
@@ -22,10 +22,14 @@ service.interceptors.request.use(config => {
 // respone拦截器
 service.interceptors.response.use(
   response => {
+    const token = response.headers.authorization;
+    if(token){
+      setToken(token);
+    }
     const res = response.data;
     if (res.code === '200') {
-      return res.info;
-    } else if (res.code === "20011") {
+      return res.data;
+    } else if (res.code === "401") {
       Message({
         showClose: true,
         message: res.msg,

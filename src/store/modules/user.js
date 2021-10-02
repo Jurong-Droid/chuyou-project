@@ -40,7 +40,7 @@ const user = {
           data: loginForm
         }).then(data => {
           //localstorage中保存token
-          setToken(data.token);
+          setToken(data);
           resolve(data);
         }).catch(err => {
           reject(err)

@@ -3,13 +3,12 @@
     <div class="filter-container">
         <el-input size="mini" v-model="listQuery.edgeName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="边缘端名称" clearable />
         <el-input size="mini" v-model="listQuery.moduleName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="模型名称" clearable />
-        <el-date-picker size="mini" v-model="updateValue" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
-        </el-date-picker>
+        <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>
         <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
             搜索
         </el-button>
         <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
-        <el-button size="mini" type="danger" icon="plus" v-permission="'analyticsModule:release'" @click="resetHeartbeat">重置链接</el-button>
+        <el-button size="mini" type="danger" icon="plus" v-permission="'analyticsModule:release'" @click="resetHeartbeat">重置状态检测</el-button>
     </div>
     <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row> style="width: 100%;">
         <el-table-column align="center" label="序号" min-width="5">
@@ -26,7 +25,7 @@
             <template slot-scope="scope">
                 <el-tag v-if="['200','201'].includes(scope.row.status)" type="success" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
                 <el-tag v-else-if="['6','7'].includes(scope.row.status)" type="danger" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
-                <el-tag v-else-if="scope.row.status === '4' && scope.row.heartbeatCount >5  " type="danger" disable-transitions>连接失败</el-tag>
+                <el-tag v-else-if="scope.row.status === '4' && scope.row.heartbeatCount >5  " type="danger" disable-transitions>检测失败</el-tag>
                 <el-tag v-else type="info" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
             </template>
         </el-table-column>
@@ -118,7 +117,6 @@ export default {
                 updateTimeFrom: null,
                 updateTimeTo: null
             },
-            updateValue: [],
             edgeEnds: [], //边缘端信息列表
             defaultProps: {
                 children: "children",
@@ -163,49 +161,10 @@ export default {
                 moduleId: null
             },
             uploadVisible: false,
-            pickerOptions: {
-                shortcuts: [{
-                    text: '最近一周',
-                    onClick(picker) {
-                        const end = new Date();
-                        const start = new Date();
-                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-                        picker.$emit('pick', [start, end]);
-                    }
-                }, {
-                    text: '最近一个月',
-                    onClick(picker) {
-                        const end = new Date();
-                        const start = new Date();
-                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-                        picker.$emit('pick', [start, end]);
-                    }
-                }, {
-                    text: '最近三个月',
-                    onClick(picker) {
-                        const end = new Date();
-                        const start = new Date();
-                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-                        picker.$emit('pick', [start, end]);
-                    }
-                }]
-            },
         }
     },
     created() {
         this.getList();
-    },
-    watch: {
-        updateValue(value) {
-            if (value) {
-                this.listQuery.updateTimeFrom = utils.parseTime(value[0]);
-                this.listQuery.updateTimeTo = utils.parseTime(value[1]);
-            } else {
-                this.listQuery.updateTimeFrom = null;
-                this.listQuery.updateTimeTo = null;
-            }
-
-        }
     },
     methods: {
         getAllEdgeEnds() {
@@ -228,6 +187,10 @@ export default {
                 this.list = data.list;
                 this.totalCount = data.totalCount;
             })
+        },
+        getTime(date) {
+            this.listQuery.updateTimeFrom = date.updateTimeFrom;
+            this.listQuery.updateTimeTo = date.updateTimeTo;
         },
         handleSizeChange(val) {
             //改变每页数量
@@ -290,7 +253,7 @@ export default {
             this.uploadData.moduleId = module.id;
             this.uploadVisible = true
         },
-        resetHeartbeat(){
+        resetHeartbeat() {
             let _vue = this;
             _vue.$confirm('确定重置心跳次数?', '提示', {
                 confirmButtonText: '确定',
@@ -301,7 +264,7 @@ export default {
                     url: "/analyticsModule/resetHeartbeat",
                     method: "post",
                 }).then((data) => {
-                    this.$message.success('成功重置成功'+data+'条！');
+                    this.$message.success('成功重置成功' + data + '条！');
                     _vue.getList()
                 })
             })

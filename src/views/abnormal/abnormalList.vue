@@ -1,5 +1,12 @@
 <template>
 <div class="app-container">
+    <div class="filter-container">
+        <el-input size="mini" v-model="listQuery.name" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="视频名" clearable />
+        <el-cascader size="mini" v-model="listQuery.cameraId" :options="options" :props="defaultProps" filterable clearable placeholder="请选择摄像头信息" />
+        <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>
+        <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">搜索</el-button>
+        <el-button size="mini" type="danger" icon="plus" v-permission="'abnormalInfo:start'" @click="allConfirmation">一键确认</el-button>
+    </div>
     <div>
         <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit :row-style="rowstyle">
             <el-table-column align="center" label="序号" min-width="5">
@@ -36,7 +43,15 @@
 </template>
 
 <script>
+import DatePicker from "@/components/DatePicker"
+import waves from '@/directives/waves/index.js' // 水波纹指令
 export default {
+    components: {
+        DatePicker,
+    },
+    directives: {
+        waves
+    },
     data() {
         return {
             totalCount: 0, //分页组件--数据总条数
@@ -45,7 +60,18 @@ export default {
             listQuery: {
                 pageNum: 1, //页码
                 pageRow: 50, //每页条数
-                name: "",
+                name: null, //视频名
+                cameraId: null, //视频名
+                updateTimeFrom: null,
+                updateTimeTo: null
+            },
+            options: [], //摄像头信息列表
+            defaultProps: {
+                children: "children",
+                label: "name",
+                value: "id",
+                level: "level",
+                emitPath: false //在选中节点改变时，是否返回由该节点所在的各级菜单的值所组成的数组，若设置 false，则只返回该节点的值
             },
             //视频名称
             title: "",
@@ -60,6 +86,7 @@ export default {
     },
     created() {
         this.getList();
+        this.getCameraList();
     },
     methods: {
         getList() {
@@ -83,6 +110,34 @@ export default {
                     this.playMv(abnormalId);
                 }
             });
+        },
+        getCameraList() {
+            this.api({
+                url: "/common/getAllCameras",
+                method: "get"
+            }).then(data => {
+                this.options = data;
+            })
+        },
+        allConfirmation() {
+            let _vue = this;
+            _vue.$confirm('确定确认所有异常信息?', '提示', {
+                confirmButtonText: '确定',
+                showCancelButton: false,
+                type: 'warning'
+            }).then(() => {
+                _vue.api({
+                    url: "/abnormalInfo/allConfirmation",
+                    method: "post",
+                }).then((data) => {
+                    this.$message.success('成功确认异常信息' + data + '条！');
+                    _vue.getList()
+                })
+            })
+        },
+        getTime(date) {
+            this.listQuery.updateTimeFrom = date.updateTimeFrom;
+            this.listQuery.updateTimeTo = date.updateTimeTo;
         },
         handleSizeChange(val) {
             //改变每页数量
@@ -119,7 +174,7 @@ export default {
             //router没有提供清空数据的方法 刷新可清楚数据 
             if (this.$route.params.id) {
                 location.reload();
-            }else{
+            } else {
                 this.getList();
             }
         },

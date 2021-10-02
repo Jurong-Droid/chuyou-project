@@ -50,7 +50,7 @@ import flvjs from "flv.js";
 //参考文档https://vmarker.sagocloud.com/doc/
 import {
     AIMarker
-} from "Vue-Picture-BD-Marker";
+} from "ui-picture-bd-marker";
 export default {
     components: {
         "ui-marker": AIMarker,
