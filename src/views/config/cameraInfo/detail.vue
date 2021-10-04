@@ -78,9 +78,9 @@
             </el-table-column>
             <el-table-column align="center" label="模型名称" prop="moduleName" min-width="10"></el-table-column>
             <el-table-column align="center" label="模型类型" prop="moduleType" min-width="10"></el-table-column>
-            <el-table-column align="center" label="状态" min-width="6">
+            <el-table-column align="center" label="同步状态" min-width="6">
                 <template slot-scope="scope">
-                    <span>{{statusMap[scope.row.status]}}</span>
+                    <span>{{statusMap[scope.row.syncStatus]}}</span>
                 </template>
             </el-table-column>
             <el-table-column align="center" label="管理" min-width="15">
@@ -111,12 +111,16 @@ export default {
             list: [], //表格的数据
             listLoading: false, //数据加载等待动画
             statusMap: {
-                1: '创建',
-                2: '上传成功',
-                3: '同步成功',
-                4: '发布成功',
-                5: '同步失败',
-                6: '发布失败',
+                100: '绑定同步中',
+                101: '绑定成功',
+                102: '绑定失败',
+                200: '更新同步中',
+                201: '更新成功',
+                102: '绑定失败',
+                300: '删除同步中',
+                301: '删除成功',
+                302: '删除失败'
+
             },
         }
 

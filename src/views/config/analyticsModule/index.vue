@@ -71,7 +71,7 @@
                 <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以回车分隔" style="width: 40%">
                 </el-input>
             </el-form-item>
-            <el-form-item label="对应的RabbitMQ的队列">
+            <el-form-item label="对应的RabbitMQ的队列" required>
                 <el-input type="textarea" v-model="tempModule.mqQueue" placeholder="此检测模块消息交换的队列名" style="width: 40%">
                 </el-input>
             </el-form-item>
@@ -277,6 +277,10 @@ export default {
             }
             if (u.moduleName.trim().length === 0) {
                 this.$message.warning('请填写模型名称')
+                return false
+            }
+            if (u.mqQueue.trim().length === 0) {
+                this.$message.warning('请填写RabbitMQ的队列名')
                 return false
             }
             return true
