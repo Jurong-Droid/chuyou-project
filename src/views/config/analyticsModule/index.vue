@@ -97,9 +97,12 @@
 </template>
 
 <script>
+import DatePicker from "@/components/DatePicker"
 import waves from '@/directives/waves/index.js' // 水波纹指令
-const utils = require('@/utils/index')
 export default {
+    components: {
+        DatePicker,
+    },
     directives: {
         waves
     },
@@ -188,6 +191,7 @@ export default {
                 this.totalCount = data.totalCount;
             })
         },
+        //时间查询组件设置时间方法
         getTime(date) {
             this.listQuery.updateTimeFrom = date.updateTimeFrom;
             this.listQuery.updateTimeTo = date.updateTimeTo;

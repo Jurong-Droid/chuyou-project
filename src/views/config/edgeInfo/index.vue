@@ -2,8 +2,7 @@
 <div class="app-container">
     <div class="filter-container">
         <el-input size="mini" v-model="listQuery.edgeName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="边缘端名称" clearable />
-        <el-date-picker size="mini" v-model="createTime" type="daterange" align="right" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :picker-options="pickerOptions">
-        </el-date-picker>
+        <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>
         <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
             搜索
         </el-button>
@@ -98,9 +97,12 @@
 </template>
 
 <script>
+import DatePicker from "@/components/DatePicker"
 import waves from '@/directives/waves/index.js' // 水波纹指令
-const utils = require('@/utils/index')
 export default {
+    components: {
+        DatePicker,
+    },
     directives: {
         waves
     },
@@ -149,51 +151,12 @@ export default {
                 edgeId: null,
                 cameraIds: []
             },
-            pickerOptions: {
-                shortcuts: [{
-                    text: '最近一周',
-                    onClick(picker) {
-                        const end = new Date();
-                        const start = new Date();
-                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-                        picker.$emit('pick', [start, end]);
-                    }
-                }, {
-                    text: '最近一个月',
-                    onClick(picker) {
-                        const end = new Date();
-                        const start = new Date();
-                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-                        picker.$emit('pick', [start, end]);
-                    }
-                }, {
-                    text: '最近三个月',
-                    onClick(picker) {
-                        const end = new Date();
-                        const start = new Date();
-                        start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-                        picker.$emit('pick', [start, end]);
-                    }
-                }]
-            },
         }
     },
     created() {
         this.getList();
         if (this.hasPerm('edgeInfo:add') || this.hasPerm('edgeInfo:update')) {
             this.getAllRoles();
-        }
-    },
-    watch: {
-        createTime(value) {
-            if (value) {
-                this.listQuery.createTimeFrom = utils.parseTime(value[0]);
-                this.listQuery.createTimeTo = utils.parseTime(value[1]);
-            } else {
-                this.listQuery.createTimeFrom = null;
-                this.listQuery.createTimeTo = null;
-            }
-
         }
     },
     methods: {
@@ -212,6 +175,11 @@ export default {
             }).then(data => {
                 this.options = data;
             })
+        },
+        //时间查询组件设置时间方法
+        getTime(date) {
+            this.listQuery.updateTimeFrom = date.updateTimeFrom;
+            this.listQuery.updateTimeTo = date.updateTimeTo;
         },
         getList() {
             //查询列表
