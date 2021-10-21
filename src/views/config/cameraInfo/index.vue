@@ -26,13 +26,6 @@
         <el-table-column align="center" label="ip" prop="ip" min-width="10"></el-table-column>
         <el-table-column align="center" label="视频流地址" prop="rtsp" min-width="20"></el-table-column>
         <el-table-column align="center" label="报警间隔（分钟）" prop="alertStep" min-width="6"></el-table-column>
-        <el-table-column align="center" label="角色" min-width="14">
-            <template slot-scope="scope">
-                <div style="margin-right: 2%;display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
-                    <el-tag type="primary" v-text="i.roleName"></el-tag>
-                </div>
-            </template>
-        </el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="15">
             <template slot-scope="scope">

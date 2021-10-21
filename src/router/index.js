@@ -139,6 +139,15 @@ export const asyncRouterMap = [{
             icon: 'module'
           },
           menu: 'analyticsModule'
+        },{
+          path: '/moduleDetail',
+          name: 'moduleDetail',
+          hidden: true,
+          meta: {
+            title: '检测模型详情',
+            icon: 'server'
+          },
+          component: () => import('@/views/config/analyticsModule/detail')
         }]
 
       }

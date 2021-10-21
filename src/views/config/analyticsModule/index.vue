@@ -16,6 +16,11 @@
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
+        <el-table-column align="center" label="边缘端名称" min-width="15">
+            <template slot-scope="scope">
+                <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.moduleName }}</span>
+            </template>
+        </el-table-column>
         <el-table-column align="center" label="边缘端名称" prop="edgeName" min-width="12"></el-table-column>
         <el-table-column align="center" label="模型名称" prop="moduleName" min-width="12"></el-table-column>
         <el-table-column align="center" label="模型类型" prop="moduleType" min-width="8"></el-table-column>
@@ -71,7 +76,7 @@
                 <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以回车分隔" style="width: 40%">
                 </el-input>
             </el-form-item>
-            <el-form-item label="对应的RabbitMQ的队列" required>
+            <el-form-item label="模型的RabbitMQ的队列" required>
                 <el-input type="textarea" v-model="tempModule.mqQueue" placeholder="此检测模块消息交换的队列名" style="width: 40%">
                 </el-input>
             </el-form-item>
@@ -379,6 +384,19 @@ export default {
                                 _vue.instance.close();
                             }
                         });
+                    }else if (error.code === '10015') {
+                        _vue.instance = _vue.$notify({
+                            title: '系统提示',
+                            dangerouslyUseHTMLString: true,
+                            message: `<p> ${error.msg} </p><p style='color:#43c39d'>点击此处进行修改</p>`,
+                            duration: 0,
+                            onClick: () => {
+                                _vue.$router.replace({
+                                    name: 'cameraInfo'
+                                });
+                                _vue.instance.close();
+                            }
+                        });
                     }
 
                 })
@@ -427,6 +445,14 @@ export default {
         handleUpload() {
             this.$refs.upload.submit();
         },
+        handleDetail(row) {
+            this.$router.push({
+                name: 'moduleDetail',
+                params: {
+                    'moduleId': row.id
+                }
+            });
+        }
 
     }
 }

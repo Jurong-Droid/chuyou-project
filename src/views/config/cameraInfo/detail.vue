@@ -76,7 +76,11 @@
         <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border style="width: 100%">
             <el-table-column align="center" label="序号" type="index" min-width="5">
             </el-table-column>
-            <el-table-column align="center" label="模型名称" prop="moduleName" min-width="10"></el-table-column>
+            <el-table-column align="center" label="模型名称" min-width="15">
+                <template slot-scope="scope">
+                    <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.moduleName }}</span>
+                </template>
+            </el-table-column>
             <el-table-column align="center" label="模型类型" prop="moduleType" min-width="10"></el-table-column>
             <el-table-column align="center" label="同步状态" min-width="6">
                 <template slot-scope="scope">
@@ -165,6 +169,14 @@ export default {
         callback() {
             this.$router.push({
                 name: 'cameraInfo',
+            });
+        },
+        handleDetail(row) {
+            this.$router.push({
+                name: 'moduleDetail',
+                params: {
+                    'moduleId': row.id
+                }
             });
         }
     }
