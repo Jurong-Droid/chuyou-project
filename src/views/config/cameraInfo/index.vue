@@ -11,7 +11,7 @@
         </el-button>
         <el-button size="mini" type="primary" icon="plus" v-permission="'cameraInfo:add'" @click="showCreate">添加</el-button>
     </div>
-    <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;">
+    <el-table :data="list"  v-loading="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
         <el-table-column align="center" label="序号" min-width="5">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>

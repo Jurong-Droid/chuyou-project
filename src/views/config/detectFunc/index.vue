@@ -8,7 +8,7 @@
             </el-form-item>
         </el-form>
     </div>
-    <el-table :data="list" v-loading="listLoading" border fit highlight-current-row :cell-style="cellStyle">
+    <el-table :data="list" v-loading="listLoading" border fit highlight-current-row :cell-style="cellStyle" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
         <el-table-column align="center" label="序号" min-width="5%">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>

@@ -8,7 +8,7 @@
         <el-button size="mini" type="danger" icon="plus" v-permission="'abnormalInfo:start'" @click="allConfirmation">一键确认</el-button>
     </div>
     <div>
-        <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit :row-style="rowstyle">
+        <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit :row-style="rowstyle" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
             <el-table-column align="center" label="序号" min-width="5">
                 <template slot-scope="scope">
                     <span v-text="getIndex(scope.$index)"> </span>

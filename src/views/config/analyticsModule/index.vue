@@ -10,7 +10,7 @@
         <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
         <el-button size="mini" type="danger" icon="plus" v-permission="'analyticsModule:release'" @click="resetHeartbeat">重置状态检测</el-button>
     </div>
-    <el-table :data="list" v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row> style="width: 100%;">
+    <el-table :data="list"  v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
         <el-table-column align="center" label="序号" min-width="5">
             <template slot-scope="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
@@ -37,10 +37,15 @@
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="20">
             <template slot-scope="scope">
-                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
-                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
-                <el-button size="mini" :plain='true' type="primary" icon="edit" @click="syncFile(scope.$index)" v-permission="'analyticsModule:release'">同步</el-button>
-                <el-button size="mini" :plain='true' type="danger" icon="delete" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
+                <template  v-if="['200','201'].includes(scope.row.status)" >
+                    <el-button size="mini" :plain='true' type="danger" @click="stopModule(scope.$index)" v-permission="'analyticsModule:release'">停止</el-button>
+                </template>
+                <template  v-else>
+                    <el-button size="mini" :plain='true' type="warning"  @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
+                    <el-button size="mini" :plain='true' type="primary"  @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
+                    <el-button size="mini" :plain='true' type="primary"  @click="syncFile(scope.$index)" v-permission="'analyticsModule:release'">同步</el-button>
+                    <el-button size="mini" :plain='true' type="success" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
+                </template>
             </template>
         </el-table-column>
     </el-table>
@@ -147,6 +152,8 @@ export default {
                 5: '发布成功',
                 6: '同步失败',
                 7: '发布失败',
+                8: '停止中',
+                9: '停止',
                 200: '正常运行',
                 201: '无任务运行'
             },
@@ -399,6 +406,29 @@ export default {
                         });
                     }
 
+                })
+            })
+        },
+        stopModule($index) {
+            let _vue = this;
+            let module = _vue.list[$index];
+            _vue.$confirm('确定停止模型?', '提示', {
+                confirmButtonText: '确定',
+                showCancelButton: false,
+                type: 'warning'
+            }).then(() => {
+                _vue.listLoading = true;
+                _vue.api({
+                    url: "/analyticsModule/stopAnalyticsModule",
+                    method: "post",
+                    data: {
+                        id: module.id,
+                        edgeId: module.edgeId
+                    }
+                }).then((data) => {
+                    _vue.getList()
+                }).catch(error => {
+                    _vue.listLoading = false;
                 })
             })
         },
