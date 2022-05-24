@@ -79,9 +79,7 @@
     <el-dialog title="绑定检测算法模型" :visible.sync="dialogModuleVisible">
         <el-form class="small-space" :model="tempModule" label-position="left" label-width="15%">
             <el-form-item label="检测算法模型" required>
-                <el-select v-model="tempModule.moduleIds" multiple placeholder="请选择算法模型" style="width: 40%">
-                    <el-option v-for="item in modules" :key="item.id" :label="item.moduleName" :value="item.id" />
-                </el-select>
+                <el-cascader v-model="tempModule.moduleIds" :options="options" :props="defaultProps" filterable clearable placeholder="请选择算法模型" style="width: 40%" />
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -116,6 +114,15 @@ export default {
                 updateTimeTo: null
             },
             updateValue: [],
+            options: [], //模型信息列表
+            defaultProps: {
+                children: "children",
+                label: "name",
+                value: "id",
+                level: "level",
+                multiple: true,
+                emitPath: false //在选中节点改变时，是否返回由该节点所在的各级菜单的值所组成的数组，若设置 false，则只返回该节点的值
+            },
             roles: [], //角色列表
             areas: [], //区域列表
             dialogStatus: 'create',
@@ -143,7 +150,6 @@ export default {
                 moduleIds: []
             },
             dialogModuleVisible: false,
-            modules: [], //检测算法模型列表
         }
     },
     created() {
@@ -170,12 +176,13 @@ export default {
                 this.areas = data;
             })
         },
-        getAllModules() {
+        getAllModules(cameraId) {
             this.api({
                 url: "/common/getAllModules",
-                method: "get"
+                method: "get",
+                params: {cameraId :cameraId }
             }).then(data => {
-                this.modules = data;
+                this.options = data;
             })
         },
         //时间查询组件设置时间方法
@@ -250,14 +257,11 @@ export default {
             this.dialogFormVisible = true
         },
         showBindModule($index) {
-            if (this.modules.length == 0) {
-                this.getAllModules();
-            }
             let cameraInfo = this.list[$index];
             this.tempModule.cameraId = cameraInfo.id;
             this.tempModule.moduleIds = [];
             this.dialogModuleVisible = true;
-
+            this.getAllModules(cameraInfo.id);
         },
         validate() {
             let u = this.tempCamera
