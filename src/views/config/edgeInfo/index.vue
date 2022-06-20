@@ -63,7 +63,11 @@
                 <el-input type="textarea" autosize v-model="tempEdge.edgeInfo" style="width: 40%">
                 </el-input>
             </el-form-item>
-            <el-form-item label="边缘端ssh的用户名">
+            <el-form-item label="RabbitMQ的队列" required>
+                <el-input type="textarea" v-model="tempEdge.mqQueue" placeholder="此边缘节点绑定的RabbitMQ的队列" style="width: 40%">
+                </el-input>
+            </el-form-item>            
+            <!-- <el-form-item label="边缘端ssh的用户名">
                 <el-input type="text" autosize v-model="tempEdge.sshUsername" auto-complete="off" style="width: 40%">
                 </el-input>
             </el-form-item>
@@ -74,7 +78,7 @@
             <el-form-item label="ssh访问端口">
                 <el-input type="text" v-model="tempEdge.sshHost" style="width: 40%">
                 </el-input>
-            </el-form-item>
+            </el-form-item> -->
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -145,6 +149,7 @@ export default {
                 sshHost: null,
                 sshUsername: null,
                 sshPassword: null,
+                mqQueue:null,
                 roleIds: []
             },
             tempCamera: {
@@ -234,6 +239,7 @@ export default {
             this.tempEdge.sshHost = "22";
             this.tempEdge.sshUsername = "";
             this.tempEdge.sshPassword = "";
+            this.tempEdge.mqQueue = "";
             this.tempEdge.roleIds = [];
             this.dialogStatus = "create"
             this.dialogFormVisible = true
@@ -247,6 +253,7 @@ export default {
             this.tempEdge.sshHost = edgeInfo.sshHost;
             this.tempEdge.sshUsername = edgeInfo.sshUsername;
             this.tempEdge.sshPassword = edgeInfo.sshPassword;
+            this.tempEdge.mqQueue = edgeInfo.mqQueue;
             this.tempEdge.roleIds = edgeInfo.roles.map(x => x.roleId);
             this.dialogStatus = "update"
             this.dialogFormVisible = true

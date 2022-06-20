@@ -8,7 +8,7 @@
             搜索
         </el-button>
         <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
-        <el-button size="mini" type="danger" icon="plus" v-permission="'analyticsModule:release'" @click="resetHeartbeat">重置状态检测</el-button>
+        <el-button size="mini" type="danger" icon="plus" v-permission="'analyticsModule:newRelease'" @click="resetHeartbeat">重置状态检测</el-button>
     </div>
     <el-table :data="list"  v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
         <el-table-column align="center" label="序号" min-width="5">
@@ -37,15 +37,22 @@
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="20">
             <template slot-scope="scope">
-                <template  v-if="['200','201'].includes(scope.row.status)" >
-                    <el-button size="mini" :plain='true' type="danger" @click="stopModule(scope.$index)" v-permission="'analyticsModule:release'">停止</el-button>
-                </template>
-                <template  v-else>
+               <template  v-if="['1','2','6','7','9'].includes(scope.row.status)" >
                     <el-button size="mini" :plain='true' type="warning"  @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
                     <el-button size="mini" :plain='true' type="primary"  @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
+                </template>                
+                <template  v-if="['2','6'].includes(scope.row.status)" >
+                    <el-button size="mini" :plain='true' type="primary"  @click="newSyncFile(scope.$index)" v-permission="'analyticsModule:newRelease'">同步</el-button>
                     <el-button size="mini" :plain='true' type="primary"  @click="syncFile(scope.$index)" v-permission="'analyticsModule:release'">同步</el-button>
+                </template>   
+                <template  v-else-if="['3','7','9'].includes(scope.row.status)" >
+                    <el-button size="mini" :plain='true' type="primary"  @click="commandModule(scope.$index,'start')" v-permission="'analyticsModule:newRelease'">发布</el-button>
                     <el-button size="mini" :plain='true' type="success" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
+                </template>                             
+                <template  v-else-if="['200','201'].includes(scope.row.status)" >
+                    <el-button size="mini" :plain='true' type="danger" @click="commandModule(scope.$index,'close')" v-permission="'analyticsModule:newRelease'">停止</el-button>
                 </template>
+
             </template>
         </el-table-column>
     </el-table>
@@ -73,14 +80,14 @@
                 <el-input type="text" v-model="tempModule.version" placeholder="模型的版本信息" style="width: 40%">
                 </el-input>
             </el-form-item>
-            <el-form-item label="同步路径">
+            <!-- <el-form-item label="同步路径">
                 <el-input type="text" v-model="tempModule.syncPath" placeholder="边缘端上检测模块存储路径" style="width: 40%">
                 </el-input>
             </el-form-item>
             <el-form-item label="发布命令">
                 <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以回车分隔" style="width: 40%">
                 </el-input>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="模型的RabbitMQ的队列" required>
                 <el-input type="textarea" v-model="tempModule.mqQueue" placeholder="此检测模块消息交换的队列名" style="width: 40%">
                 </el-input>
@@ -154,6 +161,7 @@ export default {
                 7: '发布失败',
                 8: '停止中',
                 9: '停止',
+                10: '同步中',                
                 200: '正常运行',
                 201: '无任务运行'
             },
@@ -409,21 +417,54 @@ export default {
                 })
             })
         },
-        stopModule($index) {
+        newSyncFile($index) {
             let _vue = this;
             let module = _vue.list[$index];
-            _vue.$confirm('确定停止模型?', '提示', {
+            _vue.$confirm('确定同步模型?', '提示', {
                 confirmButtonText: '确定',
                 showCancelButton: false,
                 type: 'warning'
             }).then(() => {
                 _vue.listLoading = true;
                 _vue.api({
-                    url: "/analyticsModule/stopAnalyticsModule",
+                    url: "/analyticsModule/newSyncAnalyticsModule",
                     method: "post",
                     data: {
                         id: module.id,
                         edgeId: module.edgeId
+                    }
+                }).then((data) => {
+                    this.$message.success('同步中！');
+                    _vue.getList()
+                }).catch(error => {
+                    _vue.listLoading = false;
+                })
+            })
+        },      
+        commandModule($index,command) {
+            let _vue = this;
+            let module = _vue.list[$index];
+            let tips;
+            if (command === 'start'){
+                tips = '确定发布模型?';
+            }else if(command === 'close'){
+                tips = '确定停止模型?';
+            }else{
+                return
+            }
+            _vue.$confirm('确定', '提示', {
+                confirmButtonText: '确定',
+                showCancelButton: false,
+                type: 'warning'
+            }).then(() => {
+                _vue.listLoading = true;
+                _vue.api({
+                    url: "/analyticsModule/commandAnalyticsModule",
+                    method: "post",
+                    data: {
+                        id: module.id,
+                        edgeId: module.edgeId,
+                        commandStatus:command
                     }
                 }).then((data) => {
                     _vue.getList()
