@@ -16,13 +16,12 @@
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="边缘端名称" min-width="15">
+        <el-table-column align="center" label="模型名称" min-width="15">
             <template slot-scope="scope">
                 <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.moduleName }}</span>
             </template>
         </el-table-column>
         <el-table-column align="center" label="边缘端名称" prop="edgeName" min-width="12"></el-table-column>
-        <el-table-column align="center" label="模型名称" prop="moduleName" min-width="12"></el-table-column>
         <el-table-column align="center" label="模型类型" prop="moduleType" min-width="8"></el-table-column>
         <el-table-column align="center" label="模型说明" prop="description" min-width="20"></el-table-column>
         <el-table-column align="center" label="version" prop="version" min-width="8"></el-table-column>

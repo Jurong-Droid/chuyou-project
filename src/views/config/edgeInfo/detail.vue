@@ -25,6 +25,13 @@
                 </template>
                 {{tempEdge.edgeInfo}}
             </el-descriptions-item>
+            <el-descriptions-item :span="2">
+                <template slot="label">
+                    <i class="el-icon-info"></i>
+                    边缘端交互MQ队列名
+                </template>
+                {{tempEdge.mqQueue}}
+            </el-descriptions-item>            
             <el-descriptions-item>
                 <template slot="label">
                     <i class="el-icon-position"></i>
