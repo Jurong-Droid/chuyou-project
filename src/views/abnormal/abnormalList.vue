@@ -10,7 +10,7 @@
     <div>
         <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit :row-style="rowstyle" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
             <el-table-column align="center" label="序号" min-width="5">
-                <template slot-scope="scope">
+                <template v-slot="scope">
                     <span v-text="getIndex(scope.$index)"> </span>
                 </template>
             </el-table-column>
@@ -18,14 +18,14 @@
             <el-table-column align="center" label="摄像头名称" prop="camName" min-width="15" />
             <el-table-column align="center" label="检测类型" prop="detectType" min-width="10" />
             <el-table-column align="center" label="异常信息" min-width="30">
-                <template slot-scope="scope">
+                <template v-slot="scope">
                     <span v-if="scope.row.closeBy !=null" style="color:red">{{ scope.row.expInfo }}</span>
                     <span v-else>{{ scope.row.expInfo }}</span>
                 </template>
             </el-table-column>
             <el-table-column align="center" label="创建时间" prop="createTime" min-width="10" />
-            <el-table-column align="center" label="管理" min-width="15" v-if="hasPerm('abnormalInfo:start')">
-                <template slot-scope="scope">
+            <el-table-column align="center" label="管理" min-width="15" v-permission="'abnormalInfo:start'">
+                <template v-slot="scope">
                     <el-button size="mini" @click="playMv(scope.row.id)">
                         <svg-icon icon-class="play" />
                     </el-button>
@@ -171,7 +171,7 @@ export default {
         closeMv() {
             this.showVideo = false;
             this.$refs.video.pause();
-            //router没有提供清空数据的方法 刷新可清楚数据 
+            //router没有提供清空数据的方法 刷新可清楚数据
             if (this.$route.params.id) {
                 location.reload();
             } else {
@@ -184,7 +184,7 @@ export default {
             let stylejson = {};
             if (row.closeBy == null) {
                 stylejson.background = "#e0838f"; // 背景颜色
-                // 也可以修改文字颜色 
+                // 也可以修改文字颜色
                 stylejson.color = 'green';
                 return stylejson;
             } else {

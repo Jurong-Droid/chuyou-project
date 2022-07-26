@@ -8,7 +8,6 @@
             搜索
         </el-button>
         <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
-        <el-button size="mini" type="danger" icon="plus" v-permission="'analyticsModule:newRelease'" @click="resetHeartbeat">重置状态检测</el-button>
     </div>
     <el-table :data="list"  v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
         <el-table-column align="center" label="序号" min-width="5">
@@ -155,7 +154,6 @@ export default {
                 2: '上传成功',
                 3: '同步成功',
                 4: '发布中',
-                5: '发布成功',
                 6: '同步失败',
                 7: '发布失败',
                 8: '停止中',
@@ -275,22 +273,6 @@ export default {
             let module = this.list[$index];
             this.uploadData.moduleId = module.id;
             this.uploadVisible = true
-        },
-        resetHeartbeat() {
-            let _vue = this;
-            _vue.$confirm('确定重置心跳次数?', '提示', {
-                confirmButtonText: '确定',
-                showCancelButton: false,
-                type: 'warning'
-            }).then(() => {
-                _vue.api({
-                    url: "/analyticsModule/resetHeartbeat",
-                    method: "post",
-                }).then((data) => {
-                    this.$message.success('成功重置成功' + data + '条！');
-                    _vue.getList()
-                })
-            })
         },
         validate() {
             let u = this.tempModule
