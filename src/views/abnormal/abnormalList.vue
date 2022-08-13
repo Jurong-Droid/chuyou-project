@@ -3,12 +3,12 @@
     <div class="filter-container">
         <el-input size="mini" v-model="listQuery.name" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="视频名" clearable />
         <el-cascader size="mini" v-model="listQuery.cameraId" :options="options" :props="defaultProps" filterable clearable placeholder="请选择摄像头信息" />
-        <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>
+        <DatePicker startVaule="异常开始日期" endValue="异常结束日期" @sendTimeData="getTime"></DatePicker>
         <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">搜索</el-button>
         <el-button size="mini" type="danger" icon="plus" v-permission="'abnormalInfo:start'" @click="allConfirmation">一键确认</el-button>
     </div>
     <div>
-        <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit :row-style="rowstyle" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
+        <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border fit :row-style="rowStyle" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
             <el-table-column align="center" label="序号" min-width="5">
                 <template v-slot="scope">
                     <span v-text="getIndex(scope.$index)"> </span>
@@ -23,7 +23,7 @@
                     <span v-else>{{ scope.row.expInfo }}</span>
                 </template>
             </el-table-column>
-            <el-table-column align="center" label="创建时间" prop="createTime" min-width="10" />
+            <el-table-column align="center" label="异常发生时间" prop="expTime" min-width="10" />
             <el-table-column align="center" label="管理" min-width="15" v-permission="'abnormalInfo:start'">
                 <template v-slot="scope">
                     <el-button size="mini" @click="playMv(scope.row.id)">
@@ -36,7 +36,7 @@
         </el-pagination>
     </div>
     <div class="video_con" v-show="showVideo">
-        <video ref="video" :src="video_url" controls="controls"></video>
+        <video  ref="video" :src="video_url" controls="controls"></video>
         <div class="mask" @click="closeMv"></div>
     </div>
 </div>
@@ -136,8 +136,8 @@ export default {
             })
         },
         getTime(date) {
-            this.listQuery.updateTimeFrom = date.updateTimeFrom;
-            this.listQuery.updateTimeTo = date.updateTimeTo;
+            this.listQuery.expTimeFrom = date.updateTimeFrom;
+            this.listQuery.expTimeTo = date.updateTimeTo;
         },
         handleSizeChange(val) {
             //改变每页数量
@@ -160,7 +160,6 @@ export default {
         },
         playMv(id) {
             this.showVideo = true;
-            console.log(window.location.origin);
             if (process.env.NODE_ENV !== 'production') {
                 this.video_url = process.env.BASE_URL + "/abnormalInfo/startAbnormalInfo?id=" + id;
             } else {
@@ -171,22 +170,22 @@ export default {
         closeMv() {
             this.showVideo = false;
             this.$refs.video.pause();
-            //router没有提供清空数据的方法 刷新可清楚数据
+            //router没有提供清空数据的方法 刷新可清除数据
             if (this.$route.params.id) {
                 location.reload();
             } else {
                 this.getList();
             }
         },
-        rowstyle({
+        rowStyle({
             row
         }) {
-            let stylejson = {};
+            let styleJson = {};
             if (row.closeBy == null) {
-                stylejson.background = "#e0838f"; // 背景颜色
+              styleJson.background = "#e0838f"; // 背景颜色
                 // 也可以修改文字颜色
-                stylejson.color = 'green';
-                return stylejson;
+              styleJson.color = 'green';
+                return styleJson;
             } else {
                 return "";
             }

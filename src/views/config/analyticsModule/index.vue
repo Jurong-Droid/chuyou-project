@@ -11,12 +11,12 @@
     </div>
     <el-table :data="list"  v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
         <el-table-column align="center" label="序号" min-width="5">
-            <template slot-scope="scope">
+            <template v-slot="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
         <el-table-column align="center" label="模型名称" min-width="15">
-            <template slot-scope="scope">
+            <template v-slot="scope">
                 <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.moduleName }}</span>
             </template>
         </el-table-column>
@@ -25,7 +25,7 @@
         <el-table-column align="center" label="模型说明" prop="description" min-width="20"></el-table-column>
         <el-table-column align="center" label="version" prop="version" min-width="8"></el-table-column>
         <el-table-column align="center" label="状态" min-width="6">
-            <template slot-scope="scope">
+            <template v-slot="scope">
                 <el-tag v-if="['200','201'].includes(scope.row.status)" type="success" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
                 <el-tag v-else-if="['6','7'].includes(scope.row.status)" type="danger" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
                 <el-tag v-else-if="scope.row.status === '4' && scope.row.heartbeatCount >5  " type="danger" disable-transitions>检测失败</el-tag>
@@ -34,19 +34,19 @@
         </el-table-column>
         <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
         <el-table-column align="center" label="管理" min-width="20">
-            <template slot-scope="scope">
+            <template v-slot="scope">
                <template  v-if="['1','2','6','7','9'].includes(scope.row.status)" >
                     <el-button size="mini" :plain='true' type="warning"  @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
                     <el-button size="mini" :plain='true' type="primary"  @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
-                </template>                
+                </template>
                 <template  v-if="['2','6'].includes(scope.row.status)" >
                     <el-button size="mini" :plain='true' type="primary"  @click="newSyncFile(scope.$index)" v-permission="'analyticsModule:newRelease'">同步</el-button>
                     <el-button size="mini" :plain='true' type="primary"  @click="syncFile(scope.$index)" v-permission="'analyticsModule:release'">同步</el-button>
-                </template>   
+                </template>
                 <template  v-else-if="['3','7','9'].includes(scope.row.status)" >
                     <el-button size="mini" :plain='true' type="primary"  @click="commandModule(scope.$index,'start')" v-permission="'analyticsModule:newRelease'">发布</el-button>
                     <el-button size="mini" :plain='true' type="success" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>
-                </template>                             
+                </template>
                 <template  v-else-if="['200','201'].includes(scope.row.status)" >
                     <el-button size="mini" :plain='true' type="danger" @click="commandModule(scope.$index,'close')" v-permission="'analyticsModule:newRelease'">停止</el-button>
                 </template>
@@ -85,11 +85,11 @@
             <el-form-item label="发布命令">
                 <el-input type="textarea" v-model="tempModule.commandScript" placeholder="多条命令以回车分隔" style="width: 40%">
                 </el-input>
-            </el-form-item> -->
+            </el-form-item>
             <el-form-item label="模型的RabbitMQ的队列" required>
                 <el-input type="textarea" v-model="tempModule.mqQueue" placeholder="此检测模块消息交换的队列名" style="width: 40%">
                 </el-input>
-            </el-form-item>
+            </el-form-item>  -->
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -158,7 +158,7 @@ export default {
                 7: '发布失败',
                 8: '停止中',
                 9: '停止',
-                10: '同步中',                
+                10: '同步中',
                 200: '正常运行',
                 201: '无任务运行'
             },
@@ -284,10 +284,10 @@ export default {
                 this.$message.warning('请填写模型名称')
                 return false
             }
-            if (u.mqQueue.trim().length === 0) {
+     /*       if (u.mqQueue.trim().length === 0) {
                 this.$message.warning('请填写RabbitMQ的队列名')
                 return false
-            }
+            }*/
             return true
         },
         createModule() {
@@ -332,10 +332,10 @@ export default {
                         id: module.id,
                         edgeId: module.edgeId
                     }
-                }).then((data) => {
+                }).then(() => {
                     this.$message.success('同步成功！');
                     _vue.getList()
-                }).catch(error => {
+                }).catch(() => {
                     _vue.listLoading = false;
                 })
             })
@@ -414,14 +414,14 @@ export default {
                         id: module.id,
                         edgeId: module.edgeId
                     }
-                }).then((data) => {
+                }).then(() => {
                     this.$message.success('同步中！');
                     _vue.getList()
-                }).catch(error => {
+                }).catch(() => {
                     _vue.listLoading = false;
                 })
             })
-        },      
+        },
         commandModule($index,command) {
             let _vue = this;
             let module = _vue.list[$index];
@@ -447,9 +447,9 @@ export default {
                         edgeId: module.edgeId,
                         commandStatus:command
                     }
-                }).then((data) => {
+                }).then(() => {
                     _vue.getList()
-                }).catch(error => {
+                }).catch(() => {
                     _vue.listLoading = false;
                 })
             })

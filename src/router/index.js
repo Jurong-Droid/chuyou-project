@@ -3,13 +3,15 @@ import Router from 'vue-router'
 // in development env not use Lazy Loading,because Lazy Loading too many pages will cause webpack hot update too slow.so only in production use Lazy Loading
 /* layout */
 import Layout from '../views/layout/Layout'
+import MultilevelMenu from '../components/MultilevelMenu'
+
 Vue.use(Router)
 
 export const constantRouterMap = [{
-    path: '/login',
-    component: () => import('@/views/login/index'),
-    hidden: true
-  },
+  path: '/login',
+  component: () => import('@/views/login/index'),
+  hidden: true
+},
   {
     path: '/404',
     component: () => import('@/views/404'),
@@ -35,29 +37,49 @@ export default new Router({
   routes: constantRouterMap
 })
 export const asyncRouterMap = [{
-    path: '/alarmPage',
-    name: 'alarmPage',
-    component: r => require.ensure([], () => r(require('../views/alarmPage/alarmPage')), 'alarmPage'),
-  },
+  path: '/alarmPage',
+  name: 'alarmPage',
+  component: r => require.ensure([], () => r(require('../views/alarmPage/alarmPage')), 'alarmPage'),
+},
   {
     path: '/system',
     component: Layout,
-    redirect: '/system/cameraLive',
+    redirect: 'cameraLive',
     name: 'system',
     meta: {
       title: '功能模块',
       icon: 'tree'
     },
     children: [{
+      path: '/system/live',
+      name: 'live',
+      component: MultilevelMenu,
+      // component: () => import('@/views/live/live'),
+      meta: {
+        title: '直播',
+        icon: 'live'
+      },
+      // menu: 'cameraLive',
+      children: [{
         path: 'cameraLive',
         name: 'cameraLive',
-        component: () => import('@/views/live/live'),
+        component: () => import('@/views/live/monitor'),
         meta: {
-          title: '直播',
+          title: '监控视频',
           icon: 'live'
         },
         menu: 'cameraLive'
-      },
+      },{
+        path: 'detectLive',
+        name: 'detectLive',
+        component: () => import('@/views/live/detectLive'),
+        meta: {
+          title: '智能检测',
+          icon: 'live'
+        },
+        menu: 'detectLive'
+      }]
+    },
       {
         path: 'abnormalInfo',
         name: 'abnormalInfo',
@@ -71,7 +93,7 @@ export const asyncRouterMap = [{
       {
         path: '/system/config',
         name: 'config',
-        component: () => import('@/views/config'),
+        component: MultilevelMenu,
         meta: {
           title: '配置管理',
           icon: 'config'
@@ -139,7 +161,7 @@ export const asyncRouterMap = [{
             icon: 'module'
           },
           menu: 'analyticsModule'
-        },{
+        }, {
           path: '/moduleDetail',
           name: 'moduleDetail',
           hidden: true,
@@ -163,15 +185,15 @@ export const asyncRouterMap = [{
       icon: 'table'
     },
     children: [{
-        path: 'user',
-        name: '用户列表',
-        component: () => import('@/views/user/user'),
-        meta: {
-          title: '用户列表',
-          icon: 'user'
-        },
-        menu: 'user'
+      path: 'user',
+      name: '用户列表',
+      component: () => import('@/views/user/user'),
+      meta: {
+        title: '用户列表',
+        icon: 'user'
       },
+      menu: 'user'
+    },
       {
         path: 'role',
         name: '权限管理',

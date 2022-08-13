@@ -1,5 +1,7 @@
 node_modules
 .vscode
+.idea
 .history
 dist
 config/index.js
+
