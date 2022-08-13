@@ -51,27 +51,6 @@
         </el-descriptions-item>
         <el-descriptions-item>
           <template slot="label">
-            <i class="el-icon-upload"></i>
-            同步路径
-          </template>
-          {{ tempModule.syncPath }}
-        </el-descriptions-item>
-        <el-descriptions-item>
-          <template slot="label">
-            <i class="el-icon-coin"></i>
-            模型的RabbitMQ的队列
-          </template>
-          {{ tempModule.mqQueue }}
-        </el-descriptions-item>
-        <el-descriptions-item>
-          <template slot="label">
-            <i class="el-icon-info"></i>
-            执行的脚本
-          </template>
-          {{ tempModule.commandScript }}
-        </el-descriptions-item>
-        <el-descriptions-item>
-          <template slot="label">
             <i class="el-icon-date"></i>
             创建时间
           </template>
