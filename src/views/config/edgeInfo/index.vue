@@ -2,8 +2,10 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input size="mini" v-model="listQuery.edgeName" style="width:8%;" @keyup.enter.native="handleFilter"
-                placeholder="边缘端名称" clearable/>
-      <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>
+                placeholder="边缘端名称" clearable/>&nbsp;&nbsp;
+      <el-input size="mini" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter"
+                placeholder="摄像头名称" clearable/>&nbsp;&nbsp;
+      <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>&nbsp;&nbsp;
       <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
       </el-button>
@@ -24,8 +26,8 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="边缘端地址" prop="edgeIp" min-width="15"></el-table-column>
-      <el-table-column align="center" label="边缘端信息" prop="edgeInfo" min-width="30"></el-table-column>
-      <el-table-column align="center" label="状态" min-width="6">
+      <el-table-column align="center" label="边缘端信息" prop="edgeInfo" min-width="20"></el-table-column>
+      <el-table-column align="center" label="状态" min-width="8">
         <template v-slot="props">
           <el-tag v-if="props.row.status === '200'" type="success" disable-transitions>
             {{ statusMap[props.row.status] }}
@@ -36,15 +38,15 @@
           <el-tag v-else type="info" disable-transitions>{{ statusMap[props.row.status] }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="角色" min-width="14">
+      <el-table-column align="center" label="权限角色" min-width="14">
         <template v-slot="scope">
           <div style="margin-right: 2%;display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
             <el-tag type="primary" v-text="i.roleName"></el-tag>
           </div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="创建时间" prop="createTime" min-width="10"></el-table-column>
-      <el-table-column align="center" label="已绑定摄像头" min-width="8">
+      <el-table-column align="center" label="创建时间" prop="createTime" min-width="12"></el-table-column>
+      <el-table-column align="center" label="摄像头数" min-width="6">
         <template v-slot="scope">
           <span>{{ scope.row.cameraInfoList.length }}</span>
         </template>

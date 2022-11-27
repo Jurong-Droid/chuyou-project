@@ -154,7 +154,7 @@ export default {
       },
       roles: [], //角色列表
       areas: [], //区域列表
-      cameraType: [{id: 1, name: '源摄像头流'}, {id: 2, name: '检测结果流'}],
+      cameraType: [{id: "1", name: '源摄像头流'}, {id: "2", name: '检测结果流'}],
       dialogStatus: 'create',
       dialogFormVisible: false,
       textMap: {
@@ -276,6 +276,7 @@ export default {
       this.tempCamera.areaId = camera.areaId;
       this.tempCamera.areaName = camera.areaName;
       this.tempCamera.cameraName = camera.cameraName;
+      this.tempCamera.cameraType = camera.cameraType;
       this.tempCamera.ip = camera.ip;
       this.tempCamera.rtsp = camera.rtsp;
       this.tempCamera.password = camera.password;
@@ -337,8 +338,8 @@ export default {
         method: "post",
         data: this.tempCamera
       }).then(() => {
-        this.$message.success('更新成功！');
-        this.dialogFormVisible = false;
+        _vue.$message.success('更新成功！');
+        _vue.dialogFormVisible = false;
         //router没有提供清空数据的方法 刷新可清楚数据
         location.reload();
       })

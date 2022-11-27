@@ -34,20 +34,6 @@
             </el-descriptions-item>            
             <el-descriptions-item>
                 <template slot="label">
-                    <i class="el-icon-position"></i>
-                    边缘端ssh的用户名
-                </template>
-                {{tempEdge.sshUsername}}
-            </el-descriptions-item>
-            <el-descriptions-item>
-                <template slot="label">
-                    <i class="el-icon-position"></i>
-                    ssh访问端口
-                </template>
-                {{tempEdge.sshHost}}
-            </el-descriptions-item>
-            <el-descriptions-item>
-                <template slot="label">
                     <i class="el-icon-date"></i>
                     创建时间
                 </template>
@@ -63,7 +49,7 @@
             <el-descriptions-item>
                 <template slot="label">
                     <i class="el-icon-user-solid"></i>
-                    角色
+                    拥有权限角色
                 </template>
                 <div style="margin-right: 2%;display: inline-block" v-for="i in tempEdge.roles" :key="i.roleId">
                     <el-tag type="primary" v-text="i.roleName"></el-tag>
@@ -76,10 +62,11 @@
         <el-row type="flex">
             <el-col :span="24">
                 <div class="grid-content bg-purple-light">
-                    <p>边缘端绑定的摄像头信息列表</p>
+                    <p>&nbsp;&nbsp;边缘端绑定的摄像头信息列表</p>
                 </div>
             </el-col>
         </el-row>
+        &nbsp;
         <el-table :data="list" v-loading="listLoading" element-loading-text="拼命加载中" border style="width: 100%">
             <el-table-column align="center" label="序号" type="index" min-width="5">
             </el-table-column>

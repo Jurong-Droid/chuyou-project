@@ -5,78 +5,36 @@
       <el-header>
         <span class="header-wrap">视频监控中心</span>
       </el-header>
-
       <el-container>
-        <!-- <el-aside width="200px">左标题 -->
         <el-aside>
           <el-card class="box-card">
-            <div  slot="header" class="clearfix">
+            <div slot="header" class="clearfix">
               <span class="title_style"> 违规分布</span>
             </div>
-            <!-- <div v-for="o in 4" :key="o" class="text item">
-            {{'列表内容 ' + o }}
-          </div> -->
-            
-            <el-row>
-              <el-col :span="8">
-                <span class="content_style">吸烟违规</span>
-              </el-col>
-              <el-col :span="16">
-                <el-progress :text-inside="true" :percentage="20" :stroke-width="14"  ></el-progress>
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="8">
-                <span class="content_style">未带安全帽</span>
-              </el-col>
-              <el-col :span="16">
-                <el-progress :text-inside="true" :percentage="40" :stroke-width="14" ></el-progress>
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="8">
-                <span class="content_style">打电话违规</span>
-              </el-col>
-              <el-col :span="16">
-                <el-progress :text-inside="true" :percentage="30" :stroke-width="14" ></el-progress>
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="8">
-                <span class="content_style">抽油机故障</span>
-              </el-col>
-              <el-col :span="16">
-                <el-progress :text-inside="true" :percentage="50" :stroke-width="14" ></el-progress>
-              </el-col>
-            </el-row>
-            <el-row>
-              <el-col :span="8">
-                <span class="content_style">漏油</span>
-              </el-col>
-              <el-col :span="16">
-                <el-progress :text-inside="true" :percentage="10" :stroke-width="14" ></el-progress>
-              </el-col>
-            </el-row>
+            <template v-for="item in detectTypeRatioList">
+              <el-row>
+                <el-col :span="14">
+                  <span class="content_style">{{ item.detectType }}</span>
+                </el-col>
+                <el-col :span="10">
+                  <el-progress :text-inside="true" :percentage=item.ratio :stroke-width="14"></el-progress>
+                </el-col>
+              </el-row>
+            </template>
           </el-card>
           <el-card class="box-card">
             <div slot="header" class="clearfix">
               <span class="title_style">违规情况统计</span>
             </div>
-            <!-- <div v-for="o in 4" :key="o" class="text item">
-            {{'列表内容 ' + o }}
-          </div> -->
-            <!-- <div id="lineCharts" > -->
             <div id="echarts_box" style="height: 150px"></div>
-            <!-- </div>  -->
           </el-card>
           <el-card class="box-card">
             <div slot="header" class="clearfix">
               <span class="title_style">违规详情</span>
             </div>
-            <el-alert title="转油5站检测到抽烟人员" type="success" class="background_color"></el-alert>
-            <el-alert title="转油3站检测漏油发生" type="info"  class="background_color"> </el-alert>
-            <el-alert title="集油间发现施工人员未带安全帽" type="warning"  class="background_color"> </el-alert>
-            <el-alert title="第5联合站发现人员入侵" type="error"  class="background_color"> </el-alert>
+            <template v-for="item in abnormalList">
+              <el-alert :title="item.expInfo" type="warning" class="background_color"></el-alert>
+            </template>
           </el-card>
         </el-aside>
         <el-main>
@@ -90,26 +48,18 @@
             </div>
             <div class="tag-group">
               <div
-                v-for="item in [
-                  { type: '#409EFF', label: '联合站',percent:80,sum:'50' },
-                  { type: '#67C23A', label: '转油站',percent:26,sum:'60' },
-                  { type: '#909399', label: '配水间',percent:18,sum:'40' },
-                  { type: '#F56C6C', label: '集油间',percent:63,sum:'20' },
-                  { type: '#E6A23C', label: '抽油机',percent:37,sum:'30' },
-                ]"
-                :key="item.label"
-              >
+                v-for="item in areaRatioList" :key="item.areaName">
                 <el-row>
                   <el-col :span="6">
-                    <el-tag :color="item.type" effect="dark">
-                      {{ item.label }}
+                    <el-tag :color="item.color" effect="dark">
+                      {{ item.areaName }}
                     </el-tag>
                   </el-col>
-                  <el-col :span="14" >
+                  <el-col :span="14">
                     <el-progress
-                      :percentage="item.percent"
+                      :percentage="item.ratio"
                       :stroke-width="30"
-                      :color="item.type"
+                      :color="item.color"
                       :text-inside="true"
                     ></el-progress>
                   </el-col>
@@ -122,33 +72,23 @@
               </div>
             </div>
 
-            
           </el-card>
           <el-card class="box-card">
             <div slot="header" class="clearfix">
               <span class="title_style">运行状态</span>
             </div>
-            <div class="pie-bar">
-              <div id="pieBar1" style="height: 150px"></div>
-              <span style="color:#00ffff">联合站</span>
-            </div>
-            <div class="pie-bar">
-              <div id="pieBar2" style="height: 150px"></div>
-              <span style="color:#00ffff">转油站</span>
-            </div>
-            <div class="pie-bar">
-              <div id="pieBar3" style="height: 150px"></div>
-              <span style="color:#00ffff">配水间</span>
-            </div>
+            <template v-for="(item,index) in moduleRunStatus">
+              <div class="pie-bar">
+                <div :id="'pieBar'+index" style="height: 150px"></div>
+                <span style="color:#00ffff">{{ item.areaName }}</span>
+              </div>
+            </template>
           </el-card>
           <el-card class="box-card">
             <div slot="header" class="clearfix">
               <span class="title_style">整体违规风险评估</span>
             </div>
-            <!-- <div v-for="o in 4" :key="o" class="text item">
-              {{ "列表内容 " + o }}
-            </div> -->
-            <div id="radarCharts" style="height: 200px"></div>
+            <div id="radarCharts" style="height: 150px"></div>
           </el-card>
         </el-aside>
       </el-container>
@@ -161,10 +101,10 @@
 import * as echarts from "echarts";
 
 import * as THREE from "three";
-import { OBJLoader, MTLLoader } from "three-obj-mtl-loader";
+import {MTLLoader, OBJLoader} from "three-obj-mtl-loader";
 // import MTLLoader from  'three-mtl-loader';
 // import OBJLoader from  'three-obj-loader';
-import { CSS2DRenderer, CSS2DObject } from "three-css2drender";
+import {CSS2DObject, CSS2DRenderer} from "three-css2drender";
 
 const OrbitControls = require("three-orbit-controls")(THREE);
 export default {
@@ -184,7 +124,17 @@ export default {
       biaozhudiv: "",
       img: "",
       biaozhuLabel: "",
-      
+      detectTypeRatioList: [],
+      preMonthAbnormalList: [],
+      preMonthAbnormalList: [],
+      lineData: [],
+      dateList: [],
+      dateList: [],
+      preMonthMax: 10,
+      abnormalList: [],
+      intervalId: null,
+      areaRatioList: [],
+      moduleRunStatus: [],
     };
   },
   mounted() {
@@ -195,12 +145,18 @@ export default {
     this.animate();
 
     this.createEchart();
-    this.createEchartPie();
     this.createEchartRadar();
+
+    this.getDetectTypeRatio();
+    this.getLastAbnormalList()
+    this.dataRefreh()
+    this.getCountAreaRatio()
+    this.getCountModuleRunStatus()
   },
-  // destroyed(){
-  //   console.log("实例已经被销毁");
-  // },
+  destroyed() {
+    // 在页面销毁后，清除计时器
+    this.clear();
+  },
   methods: {
     init() {
       this.scene = new THREE.Scene();
@@ -210,30 +166,27 @@ export default {
       this.light.position.multiplyScalar(0.3);
       this.scene.add(this.light);
       //初始化相机
-      // this.camera = new THREE.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, 1, 1000);
       this.camera = new THREE.PerspectiveCamera(
         this.fov,
         window.innerWidth / window.innerHeight,
         1,
         1000
       );
-      //this.camera.position.set(10, 90, 65);
       this.camera.position.set(10, 90, 65);
       this.camera.lookAt(this.scene.position);
 
-      var scale=0.45
-      var heigh_scale=0.7
+      var scale = 0.45
+      var heigh_scale = 0.7
       //渲染
       this.renderer = new THREE.WebGLRenderer({
         alpha: true,
       }); //会在body里面生成一个canvas标签,
       this.renderer.setPixelRatio(window.devicePixelRatio); //为了兼容高清屏幕
-      this.renderer.setSize(window.innerWidth *scale, window.innerHeight*heigh_scale);
+      this.renderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
 
       const container = document.getElementById("container");
       container.appendChild(this.renderer.domElement);
 
-      // console.log("子节点：", container.childNodes[0])
       //初始化控制器
       this.controls = new OrbitControls(this.camera, container);
       this.controls.target.set(0, 0, 0);
@@ -244,7 +197,7 @@ export default {
 
       //标注渲染
       this.labelRenderer = new CSS2DRenderer();
-      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight*heigh_scale);
+      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
       this.labelRenderer.domElement.style.position = "absolute";
       // this.labelRenderer.domElement.style.position = 'relative';
       this.labelRenderer.domElement.style.top = 0;
@@ -255,8 +208,8 @@ export default {
     onWindowResize() {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth * scale, window.innerHeight*heigh_scale);
-      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight*heigh_scale);
+      this.renderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
+      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
     },
     animate() {
       requestAnimationFrame(this.animate);
@@ -307,7 +260,8 @@ export default {
                 -70,
                 "1号联合站",
                 obj,
-                function () {}
+                function () {
+                }
               );
               this.addSprite(
                 -80,
@@ -317,7 +271,8 @@ export default {
                 -52,
                 "2号联合站",
                 obj,
-                function () {}
+                function () {
+                }
               );
               this.addSprite(
                 -100,
@@ -327,7 +282,8 @@ export default {
                 -63,
                 "1号转油站",
                 obj,
-                function () {}
+                function () {
+                }
               );
 
               this.scene.add(obj);
@@ -378,7 +334,8 @@ export default {
                 -64,
                 "",
                 obj,
-                function () {}
+                function () {
+                }
               );
               //this.addSprite(-170, -35, -120, '/static/image/jac.png', -100, '17号', obj, function () {
               this.addSprite(
@@ -389,7 +346,8 @@ export default {
                 -100,
                 "",
                 obj,
-                function () {}
+                function () {
+                }
               );
               //this.addSprite(-170, -40, -140, '/static/image/clo.png', -47, '18号', obj, function () {
               this.addSprite(
@@ -400,7 +358,8 @@ export default {
                 -47,
                 "",
                 obj,
-                function () {}
+                function () {
+                }
               );
               this.scene.add(obj);
             });
@@ -423,7 +382,8 @@ export default {
                 -50,
                 "1号配水间",
                 obj,
-                function () {}
+                function () {
+                }
               );
               this.scene.add(obj);
             });
@@ -446,7 +406,8 @@ export default {
                 -37,
                 "2号配水间",
                 obj,
-                function () {}
+                function () {
+                }
               );
               this.scene.add(obj);
             });
@@ -469,7 +430,8 @@ export default {
                 -70,
                 "1号集油间",
                 obj,
-                function () {}
+                function () {
+                }
               );
               this.scene.add(obj);
             });
@@ -518,7 +480,8 @@ export default {
                 -67,
                 "",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.addSprite(
                 -30,
@@ -528,7 +491,8 @@ export default {
                 -68,
                 "2号集油间",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.addSprite(
                 50,
@@ -538,7 +502,8 @@ export default {
                 -79,
                 "1号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.scene.add(obj);
             });
@@ -561,7 +526,8 @@ export default {
                 -71,
                 "2号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.addSprite(
                 -20,
@@ -571,7 +537,8 @@ export default {
                 -64,
                 "3号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               // this.addSprite(-20, -55, -70, '/static/image/dance.png', -69, '8号抽油机', obj, () => {
               // });
@@ -583,7 +550,8 @@ export default {
                 -69,
                 "4号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.addSprite(
                 30,
@@ -593,7 +561,8 @@ export default {
                 -80,
                 "5号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.scene.add(obj);
             });
@@ -616,7 +585,8 @@ export default {
                 -79,
                 "6号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
 
               this.scene.add(obj);
@@ -640,7 +610,8 @@ export default {
                 -126,
                 "7号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.addSprite(
                 70,
@@ -650,7 +621,8 @@ export default {
                 -66,
                 "8号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.scene.add(obj);
             });
@@ -673,7 +645,8 @@ export default {
                 -126,
                 "9号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.scene.add(obj);
             });
@@ -696,7 +669,8 @@ export default {
                 -73,
                 "10号抽油机",
                 obj,
-                () => {}
+                () => {
+                }
               );
               this.scene.add(obj);
             });
@@ -731,9 +705,9 @@ export default {
       // this.$router.push("alarmPage");
       // console.log("跳转到监控界面");
       let routeUrl = this.$router.resolve({
-                path: "/alarmPage",//路由的名称
-                
-            });
+        path: "/alarmPage",//路由的名称
+
+      });
       window.open(routeUrl.href, '_blank');
     },
     //点击模块查看信息的3D界面
@@ -755,295 +729,195 @@ export default {
     createEchart() {
       // 1. 基于准备好的dom，初始化echarts实例
       var myChart = echarts.init(document.getElementById("echarts_box"));
-      // 2. 发起请求，获取数据
-      // const { data: res } = await this.$http.get('reports/type/1')
-      // if (res.meta.status !== 200) {
-      //    return this.$message.error('获取折线图数据失败！')
-      // }
-      var lineData = [6, 15, 10, 17, 10, 16, 12];
-      var max = 0;
-
-      for (var i = 0; i < lineData.length; i++) {
-        if (max < lineData[i]) {
-          max = lineData[i];
+      this.api({
+        url: "/screenDisplay/countPreMonthNum",
+        method: "get",
+      }).then(data => {
+        this.preMonthAbnormalList = data;
+        let max = 0;
+        for (let i = 0; i < this.preMonthAbnormalList.length; i++) {
+          let preMonthData = this.preMonthAbnormalList[i]
+          this.lineData.push(preMonthData.num)
+          this.dateList.push(preMonthData.date)
+          if (max < preMonthData.num) {
+            max = preMonthData.num;
+          }
         }
-      }
-      if (max % 10 == 0) {
-        max += 10;
-      } else {
-        max = Math.ceil(max / 10) * 10;
-      }
+        let lineData = this.lineData;
+        if (max % 10 == 0) {
+          max += 10;
+        } else {
+          max = Math.ceil(max / 10) * 10;
+        }
+        this.preMonthMax = max;
+        let optionL = {
+          color: ["#2fffff"],
+          tooltip: {
+            formatter: function (params) {
+              return params.value;
+            },
+          },
+          grid: {
+            left: "3%",
+            right: "5%",
+            bottom: "3%",
+            top: "3%",
+            containLabel: true,
+          },
+          xAxis: [
+            {
+              type: "category",
+              data: this.dateList,
+              axisLine: {
+                lineStyle: {
+                  color: "#ffffff",
+                },
+              },
+              axisTick: {
+                show: false,
+              },
+              axisLabel: {
+                fontSize: 12,
+                textStyle: {
+                  color: '#ffffff'
+                },
+              },
+            },
+            {
+              type: "category",
+              axisLine: {
+                lineStyle: {
+                  color: "#ffffff",
+                },
+                onZero: false,
+              },
+              axisTick: {
+                show: false,
+              },
+              axisLabel: {
+                show: false,
+              },
+            },
+          ],
+          yAxis: [
+            {
+              type: "value",
+              max: this.preMonthMax,
+              axisLine: {
+                lineStyle: {
+                  color: "#ffffff",
+                },
+                show: true,
+              },
+              axisTick: {
+                show: false,
+              },
+              axisLabel: {
+                fontSize: 12,
+                textStyle: {
+                  color: '#ffffff'
+                },
+              },
+              splitLine: {
+                show: false,
+              },
+            },
+            {
+              type: "value",
+              axisLine: {
+                lineStyle: {
+                  color: "#ffffff",
+                },
+                onZero: false,
+                show: true,
+              },
+              axisTick: {
+                show: false,
+              },
+              axisLabel: {
+                show: false,
+              },
+              splitLine: {
+                show: false,
+              },
+            },
+          ],
+          series: [
+            {
+              data: this.lineData,
+              type: "line",
+              smooth: true,
+              itemStyle: {
+                emphasis: {
+                  borderColor: "#000000",
+                },
+              },
+            },
+          ],
+        };
 
-      var optionL = {
-        color: ["#2fffff"],
-        // color: ['#000000'],
-        tooltip: {
-          formatter: function (params) {
-            return params.value;
-          },
-        },
-        grid: {
-          left: "3%",
-          right: "5%",
-          bottom: "3%",
-          top: "3%",
-          containLabel: true,
-        },
-        xAxis: [
-          {
-            type: "category",
-            data: ["20/1", "20/2", "20/3", "20/4", "20/5", "20/6", "20/7"],
-            axisLine: {
-              lineStyle: {
-                // color: '#6b6e86'
-                //color: "#000000",
-                color: "#ffffff",
-              },
-            },
-            axisTick: {
-              show: false,
-            },
-            axisLabel: {
-              fontSize: 12,
-              textStyle: {
-                color: '#ffffff'
-                // color: "#000000",
-              },
-            },
-          },
-          {
-            type: "category",
-            axisLine: {
-              lineStyle: {
-                // color: '#6b6e86'
-                // color: "#000000",
-                color: "#ffffff",
-              },
-              onZero: false,
-            },
-            axisTick: {
-              show: false,
-            },
-            axisLabel: {
-              show: false,
-            },
-          },
-        ],
-        yAxis: [
-          {
-            type: "value",
-            max: max,
-            axisLine: {
-              lineStyle: {
-                // color: '#6b6e86'
-                // color: "#000000",
-                color: "#ffffff",
-              },
-              show: true,
-            },
-            axisTick: {
-              show: false,
-            },
-            axisLabel: {
-              fontSize: 12,
-              textStyle: {
-                color: '#ffffff'
-                // color: "#000000",
-              },
-            },
-            splitLine: {
-              show: false,
-            },
-          },
-          {
-            type: "value",
-            axisLine: {
-              lineStyle: {
-                // color: '#6b6e86'
-                // color: "#000000",
-                color: "#ffffff",
-              },
-              onZero: false,
-              show: true,
-            },
-            axisTick: {
-              show: false,
-            },
-            axisLabel: {
-              show: false,
-            },
-            splitLine: {
-              show: false,
-            },
-          },
-        ],
-        series: [
-          {
-            data: lineData,
-            type: "line",
-            smooth: true,
-            itemStyle: {
-              emphasis: {
-                // borderColor: '#e60012'
-                borderColor: "#000000",
-              },
-            },
-          },
-        ],
-      };
+        // 3. 使用刚指定的配置项和数据，显示图表
+        myChart.setOption(optionL);
+      });
 
-      // 3. 使用刚指定的配置项和数据，显示图表
-      myChart.setOption(optionL);
+
     },
-    createEchartPie() {
-      var pieList = [80, 70, 60];
-      var pieBar1 = echarts.init(document.getElementById("pieBar1"));
-      var optionp1 = {
-        grid: {
-          top: "3%",
-          bottom: "3%",
-        },
-        series: [
-          {
-            name: "valueOfMarket",
-            type: "pie",
-            center: ["50%", "40%"], // 饼图的圆心坐标
-            radius: ["50%", "60%"],
-            avoidLabelOverlap: false,
-            hoverAnimation: false,
-            label: {
-              //  饼图图形上的文本标签
-              normal: {
-                // normal 是图形在默认状态下的样式
-                show: true,
-                position: "center",
-                formatter: "{c}%",
-              },
-            },
-            data: [
-              {
-                value: pieList[0],
-                name: "name",
-                itemStyle: {
-                  color: "#FF6A6A",
-                },
-                label: {
-                  // color: "#000000",
-                  color: "#ffffff",
-                },
-              },
-              {
-                value: 100 - pieList[0],
-                name: "",
-                itemStyle: {
-                  color: "#4EEE94",
-                },
-              },
-            ],
+    createEchartPie(moduleRunStatus) {
+      for (let i = 0; i < moduleRunStatus.length; i++) {
+        let ratioVO = moduleRunStatus[i]
+        let percent = parseInt(ratioVO.runNum / ratioVO.sum * 100)
+        console.log(percent,"percent")
+        let pieBar = echarts.init(document.getElementById("pieBar" + i));
+        let option = {
+          grid: {
+            top: "3%",
+            bottom: "3%",
           },
-        ],
-      };
-
-      pieBar1.setOption(optionp1);
-
-      var pieBar2 = echarts.init(document.getElementById("pieBar2"));
-      var optionp2 = {
-        grid: {
-          top: "3%",
-          bottom: "3%",
-        },
-        series: [
-          {
-            name: "valueOfMarket",
-            type: "pie",
-            center: ["50%", "40%"], // 饼图的圆心坐标
-            radius: ["50%", "60%"],
-            avoidLabelOverlap: false,
-            hoverAnimation: false,
-            label: {
-              //  饼图图形上的文本标签
-              normal: {
-                // normal 是图形在默认状态下的样式
-                show: true,
-                position: "center",
-                formatter: "{c}%",
+          series: [
+            {
+              name: "valueOfMarket",
+              type: "pie",
+              center: ["50%", "40%"], // 饼图的圆心坐标
+              radius: ["50%", "60%"],
+              avoidLabelOverlap: false,
+              hoverAnimation: false,
+              label: {
+                //  饼图图形上的文本标签
+                normal: {
+                  // normal 是图形在默认状态下的样式
+                  show: true,
+                  position: "center",
+                  formatter: "{c}%",
+                },
               },
+              data: [
+                {
+                  value: percent,
+                  name: "name",
+                  itemStyle: {
+                    color: "#FF6A6A",
+                  },
+                  label: {
+                    color: "#ffffff",
+                  },
+                },
+                {
+                  value: 100 - percent,
+                  name: "",
+                  itemStyle: {
+                    color: "#4EEE94",
+                  },
+                },
+              ],
             },
+          ],
+        };
 
-            data: [
-              {
-                value: pieList[1],
-                name: "name",
-                itemStyle: {
-                  color: "#1E90FF",
-                },
-                label: {
-                  color: "#ffffff",
-                },
-              },
-              {
-                value: 100 - pieList[1],
-                name: "",
-                itemStyle: {
-                  color: "#9932CC",
-                },
-              },
-            ],
-          },
-        ],
-      };
+        pieBar.setOption(option);
+      }
 
-      pieBar2.setOption(optionp2);
-
-      var pieBar3 = echarts.init(document.getElementById("pieBar3"));
-      var optionp3 = {
-        grid: {
-          top: "3%",
-          bottom: "3%",
-        },
-        series: [
-          {
-            name: "valueOfMarket",
-            type: "pie",
-            center: ["50%", "40%"], // 饼图的圆心坐标
-            radius: ["50%", "60%"],
-            avoidLabelOverlap: false,
-            hoverAnimation: false,
-            label: {
-              //  饼图图形上的文本标签
-              normal: {
-                // normal 是图形在默认状态下的样式
-                show: true,
-                position: "center",
-                formatter: "{c}%",
-              },
-            },
-            data: [
-              {
-                value: pieList[2],
-                name: "name",
-                itemStyle: {
-                  color: "#2effff",
-                },
-                label: {
-                  color: "#ffffff",
-                },
-              },
-              {
-                value: 100 - pieList[2],
-                name: "",
-                itemStyle: {
-                  color: "#0f5058",
-                },
-              },
-            ],
-          },
-        ],
-      };
-
-      pieBar3.setOption(optionp3);
     },
-    createEchartRadar(){
+    createEchartRadar() {
       var radarCharts = echarts.init(document.getElementById('radarCharts'));
 
       var optionR = {
@@ -1051,11 +925,8 @@ export default {
         tooltip: {},
         radar: {
           name: {
-            textStyle: {
-              // color: '#000',
-              color: '#00ffff',
-              fontSize: 12
-            }
+            color: '#00ffff',
+            fontSize: 12
           },
           splitArea: {
             show: false
@@ -1067,9 +938,9 @@ export default {
           },
           radius: "48%",
           indicator: [{
-              name: '正常运行状态',
-              max: 24
-            },
+            name: '正常运行状态',
+            max: 24
+          },
             {
               name: '警戒状态',
               max: 16
@@ -1096,9 +967,9 @@ export default {
           name: '故障占比',
           type: 'radar',
           data: [{
-              value: [18, 15, 28, 35, 50, 24],
-              name: '类型一'
-            },
+            value: [18, 15, 28, 35, 50, 24],
+            name: '类型一'
+          },
             {
               value: [8, 8, 28, 31, 42, 21],
               name: '类型二'
@@ -1112,7 +983,61 @@ export default {
       };
 
       radarCharts.setOption(optionR)
-    }
+    },
+    getDetectTypeRatio() {
+      this.api({
+        url: "/screenDisplay/countDetectTypeRatio",
+        method: "get",
+      }).then(data => {
+        this.detectTypeRatioList = data;
+      })
+    },
+    getLastAbnormalList() {
+      this.api({
+        url: "/screenDisplay/getLastAbnormalList",
+        method: "get",
+        params: {pageNum: 1, pageRow: 5, uncheck: true},
+      }).then(data => {
+        this.abnormalList = data.list;
+      })
+    },
+    // 定时刷新数据函数
+    dataRefreh() {
+      // 计时器正在进行中，退出函数
+      if (this.intervalId != null) {
+        return;
+      }
+      // 计时器为空，操作
+      this.intervalId = setInterval(() => {
+        this.getLastAbnormalList(); //加载数据函数
+      }, 10000);
+    },
+    // 停止定时器
+    clear() {
+      clearInterval(this.intervalId); //清除计时器
+      this.intervalId = null; //设置为null
+    },
+    getCountAreaRatio() {
+      this.api({
+        url: "/screenDisplay/countAreaRatio",
+        method: "get",
+      }).then(data => {
+        this.areaRatioList = data;
+      })
+    },
+    getCountModuleRunStatus() {
+      this.api({
+        url: "/screenDisplay/countModuleRunStatus",
+        method: "get",
+      }).then(data => {
+        this.moduleRunStatus = data;
+
+        setTimeout(() => {
+          this.createEchartPie(this.moduleRunStatus);
+        }, 1);
+
+      })
+    },
   },
 };
 </script>
@@ -1121,7 +1046,7 @@ export default {
 .wrap {
   position: relative;
   height: 100%;
-/*  background: url('../images/bg.png') no-repeat;*/
+  /*  background: url('../images/bg.png') no-repeat;*/
   background-size: 100% 100%;
   background-color: rgb(3, 20, 52);
   /* background:-webkit-linear-gradient(); */
@@ -1142,58 +1067,69 @@ export default {
   font-size: 30px;
   /* color: #fff; */
   font-weight: bold;
-  background-image:-webkit-linear-gradient(left,rgb(0,121,255),rgb(0,255,255),rgb(0,121,255)); 
-  -webkit-background-clip:text; 
-  -webkit-text-fill-color:transparent; 
+  background-image: -webkit-linear-gradient(left, rgb(0, 121, 255), rgb(0, 255, 255), rgb(0, 121, 255));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 
 }
-.box-card{
+
+.box-card {
   background-color: rgb(3, 20, 52);
   /* border-color: rgb(2, 19, 49);  */
-  border: 1px solid rgb(56,98,145);
+  border: 1px solid rgb(56, 98, 145);
   color: #fff;
-  border-radius:10px;
+  border-radius: 10px;
+  overflow-y:auto;/* 开启滚动显示溢出内容 */
 }
-.title_style{
-  text-align: center; 
+
+.title_style {
+  text-align: center;
   display: block;
-  color:#00ffff;
+  color: #00ffff;
   font-size: 18px;
 }
-.content_style{
-  text-align: center; 
+
+.content_style {
+  text-align: center;
   display: block;
-  color:#00ffff;
+  color: #00ffff;
   font-size: 15px;
-  
+
 }
+
 /* .progressBar >>> .el-progress-bar__outer {
   background-color: #386291;
 }  */
 .el-progress--line >>> .el-progress-bar__outer {
-  background-color: rgb(56,98,145);
+  background-color: rgb(56, 98, 145);
 }
+
 .box-card /deep/ .el-card__header {
-    border-bottom: 1px solid rgb(56,98,145);
-  }
+  border-bottom: 1px solid rgb(56, 98, 145);
+}
+
 .el-progress-circle__track {
   stroke: #386291;
 }
+
 /* .el-progress-bar__outer {
   stroke: #386291;
 } */
 /* .el-card__header{
   border-bottom: 1px solid rgb(56,98,145);
 } */
-.el-font-color{
+.el-font-color {
   color: #fff;
 }
-.background_color{
-   background-color: rgb(3, 20, 52);
+
+.background_color {
+  background-color: rgb(3, 20, 52);
 }
+
 .el-header {
   height: 10%;
 }
+
 .el-container {
   /*设置内部填充为0，几个布局元素之间没有间距*/
   padding: 0px;
@@ -1203,18 +1139,21 @@ export default {
   height: 100%;
   width: 100%;
 }
+
 .el-aside {
   width: 10%;
   padding: 0px;
   /*外部间距也是如此设置*/
   margin: 0px;
 }
+
 .box-card {
   height: 32%;
 }
+
 /* .el-row{
     background-color: coral;
-    
+
   }
   .el-col{
     background-color: cornflowerblue;
@@ -1227,6 +1166,7 @@ export default {
   width: 33%;
   height: 100%;
 }
+
 .pie-bar span {
   position: absolute;
   left: 50%;
@@ -1236,17 +1176,20 @@ export default {
   font-size: 12px;
   transform: translateX(-50%);
 }
+
 .wrap-item-1 {
   position: relative;
   padding: 0 24px;
   height: 30%;
 }
+
 .item-title {
   height: 50px;
   line-height: 50px;
   color: #000000;
   font-size: 20px;
 }
+
 .item-box {
   position: absolute;
   top: 56px;
@@ -1254,9 +1197,11 @@ export default {
   right: 24px;
   bottom: 0;
 }
+
 .fault-box {
   height: 100%;
 }
+
 .fault-box li .fault-icon {
   float: left;
   width: 16px;
@@ -1266,6 +1211,7 @@ export default {
   color: #00ffff;
   background: #053336;
 }
+
 /* 左上角进度条样式 */
 .fault-name .block-bar {
   float: right;

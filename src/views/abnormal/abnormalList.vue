@@ -36,7 +36,7 @@
         </el-pagination>
     </div>
     <div class="video_con" v-show="showVideo">
-        <video  ref="video" :src="video_url" controls="controls"></video>
+        <video  ref="video" :src="video_url" controls="controls" controlsList="nodownload"></video>
         <div class="mask" @click="closeMv"></div>
     </div>
 </div>
