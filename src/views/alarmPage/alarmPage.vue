@@ -27,6 +27,7 @@ export default {
     };
   },
   mounted() {
+
     this.$nextTick(() => {
       var videoElement = document.getElementById("youchang");
       //console.log(this.$refs.videoPlayer);

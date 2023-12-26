@@ -41,139 +41,243 @@ export const asyncRouterMap = [{
   name: 'alarmPage',
   component: r => require.ensure([], () => r(require('../views/alarmPage/alarmPage')), 'alarmPage'),
 },
+
+  {
+    path: '/#',
+    component:Layout,
+    redirect: '/dashboard',
+    name: 'dash',
+    meta: {
+      title:'首页',
+      icon: 'tree'
+    },
+    children: [{
+      path: 'dashboard',
+      name: 'dashboard',
+      component:()=>import('@/views/dashboard/index'),
+      meta: {
+        title:'首页',
+        icon: 'tree'
+      },
+      //menu: 'dashboard'
+    }]
+  },
   {
     path: '/system',
     component: Layout,
     redirect: 'cameraLive',
     name: 'system',
     meta: {
-      title: '功能模块',
+      title: '报警管理',
       icon: 'tree'
     },
-    children: [{
-      path: '/system/live',
-      name: 'live',
-      component: MultilevelMenu,
-      // component: () => import('@/views/live/live'),
-      meta: {
-        title: '直播',
-        icon: 'live'
-      },
-      // menu: 'cameraLive',
-      children: [{
-        path: 'cameraLive',
-        name: 'cameraLive',
-        component: () => import('@/views/live/monitor'),
-        meta: {
-          title: '监控视频',
-          icon: 'live'
-        },
-        menu: 'cameraLive'
-      },{
-        path: 'detectLive',
-        name: 'detectLive',
-        component: () => import('@/views/live/detectLive'),
-        meta: {
-          title: '智能检测',
-          icon: 'live'
-        },
-        menu: 'detectLive'
-      }]
-    },
+    children:[
       {
         path: 'abnormalInfo',
         name: 'abnormalInfo',
         component: () => import('@/views/abnormal/abnormalList'),
         meta: {
-          title: '异常记录',
+          title: '报警信息',
           icon: 'warn'
         },
-        menu: 'abnormalInfo'
+      }]
+  },
+  {
+    path: '/system/live',
+    name: 'live',
+    component: Layout,
+    // component: () => import('@/views/live/live'),
+    meta: {
+      title: '实时监控',
+      icon: 'live'
+    },
+    // menu: 'cameraLive',
+    children: [{
+      path: 'cameraLive',
+      name: 'cameraLive',
+      component: () => import('@/views/live/monitor'),
+      meta: {
+        title: '监控视频',
+        icon: 'live'
       },
-      {
-        path: '/system/config',
-        name: 'config',
-        component: MultilevelMenu,
-        meta: {
-          title: '配置管理',
-          icon: 'config'
-        },
-        children: [{
-          path: 'edgeInfo',
-          name: 'edgeInfo',
-          component: () => import('@/views/config/edgeInfo'),
-          meta: {
-            title: '边缘端',
-            icon: 'server'
-          },
-          menu: 'edgeInfo'
-        }, {
-          path: '/edgeDetail',
-          name: 'edgeDetail',
-          hidden: true,
-          meta: {
-            title: '边缘端详情',
-            icon: 'server'
-          },
-          component: () => import('@/views/config/edgeInfo/detail')
-        }, {
-          path: 'cameraInfo',
-          name: 'cameraInfo',
-          component: () => import('@/views/config/cameraInfo'),
-          meta: {
-            title: '摄像头信息',
-            icon: 'monitor'
-          },
-          menu: 'cameraInfo'
-        }, {
-          path: '/cameraDetail',
-          name: 'cameraDetail',
-          hidden: true,
-          meta: {
-            title: '摄像头信息详情',
-            icon: 'monitor'
-          },
-          component: () => import('@/views/config/cameraInfo/detail')
-        }, {
-          path: 'detectFunc',
-          name: 'detectFunc',
-          component: () => import('@/views/config/detectFunc'),
-          meta: {
-            title: '检测方法',
-            icon: 'detect'
-          },
-          menu: 'detectFunc'
-        }, {
-          path: 'detectLabel',
-          name: 'detectLabel',
-          component: () => import('@/views/config/detectLabel'),
-          meta: {
-            title: '检测标注',
-            icon: 'label'
-          },
-          menu: 'detectLabel'
-        }, {
-          path: 'analyticsModule',
-          name: 'analyticsModule',
-          component: () => import('@/views/config/analyticsModule'),
-          meta: {
-            title: '模型管理',
-            icon: 'module'
-          },
-          menu: 'analyticsModule'
-        }, {
-          path: '/moduleDetail',
-          name: 'moduleDetail',
-          hidden: true,
-          meta: {
-            title: '检测模型详情',
-            icon: 'server'
-          },
-          component: () => import('@/views/config/analyticsModule/detail')
-        }]
+      menu: 'cameraLive'
+    },{
+      path: 'intelligentLive',
+      name: 'intelligentLive',
+      component:()=>import('@/views/live/IntelligentLive'),
+      meta: {
+        title: '智能监控',
+        icon: 'live'
+      }
+    }
+    ]
+  },
 
+  {
+    path: '/organ',
+    name: 'organ',
+    component: Layout,
+    // component: () => import('@/views/live/live'),
+    meta: {
+      title: '组织机构',
+      icon: 'live'
+    },
+    // menu: 'cameraLive',
+    children: [
+      {
+        path: 'oilfield',
+        name: 'oilfield',
+        component: () => import('@/views/organ/oilfield'),
+        meta: {
+          title: '油田',
+          icon: 'module'
+        },
+        // menu: 'organizationInfo'
+      }, {
+        path: 'oilplant',
+        name: 'oilplant',
+        component: () => import('@/views/organ/oilplant'),
+        meta: {
+          title: '采油厂',
+          icon: 'module'
+        },
+        // menu: 'organizationInfo'
+      },{
+        path: 'organizationInfo',
+        name: 'organizationInfo',
+        component: () => import('@/views/organ/oparea'),
+        meta: {
+          title: '单位',
+          icon: 'module'
+        },
+        // menu: 'organizationInfo'
+      },{
+        path:'location',
+        name:'location',
+        component:()=>import('@/views/organ/location'),
+        meta: {
+          title: '区域',
+          icon: 'module'
+        }
       }
     ]
+  },
+
+  {
+    path: '/system/module',
+    component:Layout,
+    name:'anlyticsModule',
+    meta: {
+      title: '模型管理',
+      icon: 'module'
+    },
+    children: [
+      {
+        path: 'anlyticsModule',
+        name:'anlyticsModule',
+        component:()=>import('@/views/moduleSlide'),
+        meta: {
+          title: '模型管理',
+          icon: 'module'
+        }
+      },
+      {
+        path: 'detectFunc',
+        name: 'detectFunc',
+        component: () => import('@/views/config/detectFunc'),
+        meta: {
+          title: '检测方法',
+          icon: 'detect'
+        },
+        menu: 'detectFunc'
+      }, {
+        path: 'detectLabel',
+        name: 'detectLabel',
+        component: () => import('@/views/config/detectLabel'),
+        meta: {
+          title: '检测标注',
+          icon: 'label'
+        },
+        menu: 'detectLabel'
+      },
+      ,
+      {
+        path: 'onlineTrain',
+        name: 'onlineTrain',
+        component: () => import('@/views/onlineTrain'),
+        meta: {
+          title: '在线训练',
+          icon: 'warn'
+        },
+      }
+    ]
+  },
+
+  {
+    path: '/system/config',
+    name: 'config',
+    component: Layout,
+    meta: {
+      title: '设备管理',
+      icon: 'config'
+    },
+    children: [{
+      path: 'edgeInfo',
+      name: 'edgeInfo',
+      component: () => import('@/views/config/edgeInfo'),
+      meta: {
+        title: '检测设备管理',
+        icon: 'server'
+      },
+      menu: 'edgeInfo'
+    }, {
+      path: '/edgeDetail',
+      name: 'edgeDetail',
+      hidden: true,
+      meta: {
+        title: '边缘端详情',
+        icon: 'server'
+      },
+      component: () => import('@/views/config/edgeInfo/detail')
+    }, {
+      path: 'cameraInfo',
+      name: 'cameraInfo',
+      component: () => import('@/views/config/cameraInfo'),
+      meta: {
+        title: '摄像头管理',
+        icon: 'monitor'
+      },
+      menu: 'cameraInfo'
+    }, {
+      path: '/cameraDetail',
+      name: 'cameraDetail',
+      hidden: true,
+      meta: {
+        title: '摄像头信息详情',
+        icon: 'monitor'
+      },
+      component: () => import('@/views/config/cameraInfo/detail')
+    },
+      // {
+      //   path: 'slideshow',
+      //   name: 'slideshow',
+      //   component: () => import('@/views/moduleSlide'),
+      //   meta: {
+      //     title: '轮询设置',
+      //     icon: 'module'
+      //   },
+      //   menu: 'analyticsModule'
+      // }
+      {
+        path: '/moduleDetail',
+        name: 'moduleDetail',
+        hidden: true,
+        meta: {
+          title: '检测模型详情',
+          icon: 'server'
+        },
+        component: () => import('@/views/config/analyticsModule/detail')
+      }]
   },
   {
     path: '/user',
@@ -203,7 +307,28 @@ export const asyncRouterMap = [{
           icon: 'password'
         },
         menu: 'role'
+      }
+    ]
+  },
+  {
+    path: '/organ',
+    component:Layout,
+    // redirect: '/organ/organ',
+    name:'组织机构',
+    meta: {
+      title: '组织机构',
+      icon: 'table'
+    },
+    children:[{
+      path: 'organizationInfo',
+      name: '用户列表',
+      component:()=>import('@/views/organ/oparea'),
+      meta: {
+        title: '组织机构信息',
+        icon: 'server'
       },
+      menu: 'organizationInfo'
+    }
     ]
   },
   {

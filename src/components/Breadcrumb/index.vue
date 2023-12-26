@@ -29,7 +29,7 @@ export default {
       let matched = this.$route.matched.filter(item => item.name)
       const first = matched[0]
       if (first && first.name !== 'dashboard') {
-        matched = [{ path: '/dashboard', meta: { title: 'Dashboard' }}].concat(matched)
+        matched = [{ path: '/dashboard', meta: { title: '智能监控平台' }}].concat(matched)
       }
       this.levelList = matched
     }
@@ -47,5 +47,9 @@ export default {
       color: #97a8be;
       cursor: text;
     }
+
+
+
+
   }
 </style>

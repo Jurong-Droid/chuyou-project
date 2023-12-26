@@ -11,7 +11,7 @@
             </div>
         </el-col>
         <el-col :span="21" v-loading="imgLoading" element-loading-text="正在截取直播画面...">
-            <el-row type="flex" :gutter="10" justify="center" style="height: 5%" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
+            <el-row type="flex" :gutter="10" justify="center" v-show="showPic" v-if="hasPerm('detectLabel:operate')">
                 <el-col :span="5"></el-col>
                 <el-col :span="8">
                     <div class="grid-content bg-purple">
@@ -85,6 +85,11 @@ export default {
         };
     },
     created() {
+      document.body.style.zoom = "80%";
+      if (location.href.indexOf("#reloaded") == -1) {
+        location.href = location.href + "#reloaded";
+        location.reload();
+      }
         this.getList();
     },
     watch: {
@@ -132,12 +137,6 @@ export default {
                         const videoElement = this.$refs.videoElement;
                         this.flvPlayer = flvjs.createPlayer({
                             type: "flv",
-                            // enableWorker: true, //浏览器端开启flv.js的worker,多进程运行flv.js
-                            // isLive: true, //直播模式
-                            // hasAudio: true, //开启音频
-                            // hasVideo: true,
-                            // stashInitialSize: 128,
-                            // enableStashBuffer: false, //播放flv时，设置是否启用播放缓存，只在直播起作用。
                             url: data.httpUrl,
                         });
                         this.flvPlayer.attachMediaElement(videoElement);
@@ -148,30 +147,39 @@ export default {
                             console.error(error);
                         }
                         videoElement.currentTime = 5; //必须设置视频当前时长，要不然会黑屏
-                        const output = document.getElementById("output");
-                        // 创建画布准备截图
+
+
+                     videoElement.onloadeddata = () => {
                         const canvas = document.createElement("canvas");
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+                        canvas.getContext("2d").drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                        const dataURL = canvas.toDataURL("image/jpeg", 0.9); // 调整压缩质量为0.9
+                        this.imgUrl = dataURL;
 
-                        videoElement.setAttribute("crossOrigin", "anonymous");
-                        // 设置画布的宽高
-                        canvas.width = videoElement.clientWidth;
-                        canvas.height = videoElement.clientHeight;
-                        // 图片绘制
-                        videoElement.onloadeddata = () => {
-                            canvas.getContext("2d").drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                            const dataURL = canvas.toDataURL("image/jpeg");
-                            this.imgUrl = dataURL;
+                        this.showVideo = false;
+                        this.imgLoading = false;
 
-                            this.showVideo = false;
-                            this.imgLoading = false;
+                        this.destoryVideo(this.flvPlayer);
+                        //查询该摄像头是否原来有标注矩形框
+                        this.listRectangle();
+                      };
 
-                            this.destoryVideo(this.flvPlayer);
-                            //查询该摄像头是否原来有标注矩形框
-                            this.listRectangle();
-                        };
                     }
                 });
             }
+          // // 创建画布准备截图
+          // const canvas = document.createElement("canvas");
+          //
+          // videoElement.setAttribute("crossOrigin", "anonymous");
+          // // 设置画布的宽高
+          // canvas.width = videoElement.clientWidth;
+          // canvas.height = videoElement.clientHeight;
+
+// 1. 增加画布的分辨率：通过增加画布的宽度和高度，可以提高绘制图像的清晰度。将canvas的宽度和高度设置为videoElement的实际宽度和高度，以确保画布与视频元素的尺寸匹配。
+// 2. 调整绘制图像的大小：在drawImage方法中，可以通过指定目标图像的宽度和高度来调整绘制的图像大小。将目标图像的宽度和高度设置为与画布相同的尺寸，以确保绘制的图像不会被拉伸或压缩。
+// 3. 使用更高的图像压缩质量：在将画布转换为数据URL时，可以通过调整toDataURL方法的第一个参数来指定图像的压缩质量。默认情况下，该参数为image/png，可以尝试将其更改为image/jpeg，并调整第二个参数来指定更高的压缩质量，以获得更清晰的图像。
+
         },
         destoryVideo(flvPlayer) {
             if (flvPlayer) {

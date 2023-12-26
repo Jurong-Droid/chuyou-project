@@ -1,7 +1,7 @@
 <template>
-<el-badge :value="options.length" :hidden="hidden" class="item">
+<el-badge :value="options.length" :hidden="hidden" class="item" style="margin-top: 10px">
     <el-dropdown trigger="click" @command="handle">
-        <div>
+        <div style="font-size: 38px;top: 5px;color: #1f2d3d">
             <svg-icon icon-class="notice" />
         </div>
         <el-dropdown-menu slot="dropdown">
@@ -9,6 +9,7 @@
                 <a style='color:rgb(186 63 103);'>{{item.promptInfo }}>>>> </a>
             </el-dropdown-item>
         </el-dropdown-menu>
+
     </el-dropdown>
 </el-badge>
 </template>

@@ -1,10 +1,12 @@
 <template>
   <scroll-bar>
-    <el-menu mode="vertical" unique-opened :default-active="$route.path" :collapse="isCollapse"
-             background-color="#304156" text-color="#fff" active-text-color="#409EFF">
+
+    <el-menu v-if="this.$route.path!=='/dashboard'" class="el-menu-demo" mode="horizontal" unique-opened :default-active="$route.path" :collapse="isCollapse"
+              text-color="#fff" active-text-color="#00ffff" style="width: 100%;left: 300px;text-align: center;">
       <sidebar-item :routes="permission_routers"></sidebar-item>
     </el-menu>
   </scroll-bar>
+
 </template>
 <script>
   import {mapGetters} from 'vuex'

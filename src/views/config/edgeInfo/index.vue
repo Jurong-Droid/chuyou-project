@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input size="mini" v-model="listQuery.edgeName" style="width:8%;" @keyup.enter.native="handleFilter"
-                placeholder="边缘端名称" clearable/>&nbsp;&nbsp;
-      <el-input size="mini" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter"
+      <el-input  size="medium" v-model="listQuery.edgeName" style="width:8%;height:36px;" @keyup.enter.native="handleFilter"
+                placeholder="设备名称" clearable/>&nbsp;&nbsp;
+      <el-input  size="medium" v-model="listQuery.cameraName" style="width:8%;" @keyup.enter.native="handleFilter"
                 placeholder="摄像头名称" clearable/>&nbsp;&nbsp;
-      <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>&nbsp;&nbsp;
+      <DatePicker style="height:36px" startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>&nbsp;&nbsp;
       <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
         搜索
       </el-button>
@@ -20,28 +20,38 @@
           <span v-text="getIndex(props.$index)"> </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="边缘端名称" min-width="15">
+      <el-table-column align="center" label="设备类别"  min-width="8">
+        <template v-slot="scope">
+          <span v-text="showDeviceType(scope.row.devicetype)"></span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="设备名称" min-width="12">
         <template v-slot="scope">
           <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.edgeName }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="边缘端地址" prop="edgeIp" min-width="15"></el-table-column>
-      <el-table-column align="center" label="边缘端信息" prop="edgeInfo" min-width="20"></el-table-column>
-      <el-table-column align="center" label="状态" min-width="8">
-        <template v-slot="props">
-          <el-tag v-if="props.row.status === '200'" type="success" disable-transitions>
-            {{ statusMap[props.row.status] }}
-          </el-tag>
-          <el-tag v-else-if="props.row.status === '400' && props.row.heartbeatCount >5  " type="danger"
-                  disable-transitions>检测失败
-          </el-tag>
-          <el-tag v-else type="info" disable-transitions>{{ statusMap[props.row.status] }}</el-tag>
+      <el-table-column align="center" label="设备位置"  min-width="12">
+        <template v-slot="scope">
+          <span v-text="showlocation(scope.row.locationid)"></span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="权限角色" min-width="14">
+      <el-table-column align="center" label="设备信息" prop="edgeInfo" min-width="10"></el-table-column>
+      <el-table-column align="center" label="设备地址" prop="edgeIp" min-width="13"></el-table-column>
+      <el-table-column align="center" label="状态" min-width="8">
+        <template v-slot="props">
+          <el-tag  effect="plain" style="width: 80px;" v-if="props.row.status === '200'" type="success" disable-transitions>
+            {{ statusMap[props.row.status] }}
+          </el-tag>
+          <el-tag effect="plain" style="width: 80px" v-else-if="props.row.status === '500' && props.row.heartbeatCount >5  " type="danger"
+                  disable-transitions>
+          </el-tag>
+          <el-tag effect="plain" style="width: 80px" v-else type="info" disable-transitions>{{ statusMap[props.row.status] }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="权限角色" min-width="12">
         <template v-slot="scope">
           <div style="margin-right: 2%;display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
-            <el-tag type="primary" v-text="i.roleName"></el-tag>
+            <el-tag effect="plain" style="width: 60px" type="primary" v-text="i.roleName"></el-tag>
           </div>
         </template>
       </el-table-column>
@@ -51,15 +61,15 @@
           <span>{{ scope.row.cameraInfoList.length }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="管理" min-width="20">
+      <el-table-column  align="center" label="操作" min-width="25">
         <template v-slot="scope">
           <el-button size="mini" :plain='true' type="primary" icon="add" @click="showBindCamera(scope.$index)"
                      v-permission="'edgeInfo:add'">绑定摄像头
           </el-button>
-          <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)"
+          <el-button  size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)"
                      v-permission="'edgeInfo:update'">修改
           </el-button>
-          <el-button size="mini" :plain='true' type="danger" icon="delete" @click="deleteEdgeInfo(scope.$index)"
+          <el-button  size="mini" :plain='true' type="danger" icon="delete" @click="deleteEdgeInfo(scope.$index)"
                      v-permission="'edgeInfo:delete'">删除
           </el-button>
         </template>
@@ -69,22 +79,60 @@
                    :current-page="listQuery.pageNum" :page-size="listQuery.pageRow" :total="totalCount"
                    :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
+
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form class="small-space" :model="tempEdge" label-position="left" label-width="15%">
-        <el-form-item label="边缘端名称" required>
+        <el-form-item label="设备名称" required>
           <el-input type="text" v-model="tempEdge.edgeName" style="width: 40%"/>
         </el-form-item>
+        <el-form-item label="设备类型" required>
+          <el-select v-model="tempEdge.devicetype" placeholder="请选择设备类型" style="width: 40%">
+            <el-option v-for="item in device" :key="item.id" :label="item.name" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="角色" required>
-          <el-select v-model="tempEdge.roleIds" multiple placeholder="支持多角色" style="width: 40%">
+          <el-select v-model="tempEdge.roleIds"  multiple placeholder="支持多角色" style="width: 40%">
             <el-option v-for="item in roles" :key="item.roleId" :label="item.roleName" :value="item.roleId">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="边缘端地址">
+
+        <el-form-item label="油田名称" required>
+          <el-select @change="oilfieldSelectChange()" v-model="oilfieldid" placeholder="请选择油田" style="width: 40%">
+            <el-option v-for="item in oilfieldlist" :key="item.id" :label="item.oilfield" :value="item.id" >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="采油厂名称" required>
+          <el-select @change="oilplantSelectChange()" v-model="oilplantid" placeholder="请选择采油厂" style="width: 40%">
+            <el-option v-for="item in tempoilplantlist" :key="item.id" :label="item.oilplant" :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="单位名称" required>
+          <el-select @change="opareaSelectChange()" v-model="opareaid" placeholder="请选择单位" style="width: 40%">
+            <el-option v-for="item in tempoparealist" :key="item.id" :label="item.oparea" :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="区域名称" required>
+          <el-select v-model="tempEdge.locationid" placeholder="请选择区域" style="width: 40%">
+            <el-option v-for="item in templocationlist" :key="item.id" :label="item.location" :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+
+        <el-form-item label="设备地址">
           <el-input type="text" v-model="tempEdge.edgeIp" style="width: 40%">
           </el-input>
         </el-form-item>
-        <el-form-item label="边缘端信息">
+        <el-form-item label="设备信息">
           <el-input type="textarea" autosize v-model="tempEdge.edgeInfo" style="width: 40%">
           </el-input>
         </el-form-item>
@@ -138,6 +186,36 @@ export default {
   },
   data() {
     return {
+      device:[
+        {
+          id:1,
+          name:"边缘端",
+        },
+        {
+          id:0,
+          name:"服务端",
+        }
+      ],
+      tempoparealist:[],
+      tempoilplantlist:[],
+      oparea:[],
+      oparealist:[],
+      oilplantlist:[],
+      oilplant:[],
+      oilfieldlist:[],
+      oilfield:[],
+      opareaid:null,
+      oilplantid:null,
+      oilfieldid:null,
+      templocationlist:[],
+      location:[],
+      locationlist:[],
+      tempinfo: {
+        oname:4,
+        fid:null,
+        name:null
+      },
+
       totalCount: 0, //分页组件--数据总条数
       list: [], //表格的数据
       listLoading: false, //数据加载等待动画
@@ -178,26 +256,146 @@ export default {
         mqQueue: null,
         status: null,
         heartbeatCount: null,
-        roleIds: []
+        roleIds: [],
+        locationid: null,
+        devicetype:null
       },
       tempCamera: {
         edgeId: null,
         cameraIds: []
       },
       statusMap: {
-        200: '开机',
-        400: '关机',
-        500: '边缘端异常'
+        200: '在线',
+        400: '离线',
+        500: '设备异常'
       }
     }
   },
   created() {
+    if (location.href.indexOf("#reloaded") == -1) {
+      location.href = location.href + "#reloaded";
+      location.reload();
+    }
+    document.body.style.zoom = "80%";
+    this.getoparea();
+    this.getoilplant();
+    this.getoilfield();
+    this.getlocation();
     this.getList();
     if (this.hasPerm('edgeInfo:add') || this.hasPerm('edgeInfo:update')) {
       this.getAllRoles();
     }
   },
   methods: {
+
+    oilfieldSelectChange(){
+      this.oilplantid=null,
+        this.tempoilplantlist=[],
+        this.oilplantlist.forEach(temp=>{
+          if(temp.fid===this.oilfieldid){
+            this.tempoilplantlist.push(temp);
+          }
+        })
+    },
+    oilplantSelectChange(){
+      this.opareaid=null,
+        this.tempoparealist=[],
+        this.oparealist.forEach(temp=>{
+          if(temp.fid===this.oilplantid){
+            this.tempoparealist.push(temp);
+          }
+        })
+    },
+    opareaSelectChange(){
+      this.tempEdge.locationid=null,
+        this.templocationlist=[],
+        this.locationlist.forEach(temp=>{
+          if(temp.fid===this.opareaid){
+            this.templocationlist.push(temp);
+          }
+        })
+    },
+    getoilfield(){
+      this.api({
+        url:"/organizationInfo/getoilfield",
+        method:"get",
+      }).then(data=>{
+        data.forEach(temp=>{
+          this.oilfieldlist.push({
+            id:temp.oilfieldId,
+            oilfield: temp.oilfieldName,
+          })
+        })
+      })
+    },
+    getoilplant(){
+      this.api({
+        url:"/organizationInfo/getoilplant",
+        method:"get",
+      }).then(data=>{
+        data.forEach(temp=>{
+          this.oilplantlist.push({
+            id:temp.oilplantId,
+            fid:temp.oilfieldId,
+            oilfield: temp.oilfieldName,
+            oilplant:temp.oilplantName,
+          })
+        })
+      })
+    },
+    getoparea(){
+      this.api({
+        url:"/organizationInfo/getoparea",
+        method:"get",
+      }).then(data=>{
+        data.forEach(temp=>{
+          this.oparealist.push({
+            id:temp.opareaId,
+            fid:temp.oilplantId,
+            oilfield: temp.oilfieldName,
+            oilplant:temp.oilplantName,
+            oparea: temp.opareaName
+          })
+        })
+        console.log(this.oparealist);
+      })
+    },
+    getlocation(){
+      this.api({
+        url:"/organizationInfo/getlocation",
+        method:"get",
+      }).then(data=>{
+        data.forEach(temp=>{
+          this.locationlist.push({
+            id:temp.locationId,
+            oilfieldid:temp.oilfieldId,
+            oilplantid:temp.oilplantId,
+            fid:temp.opareaId,
+            oilfield: temp.oilfieldName,
+            oilplant:temp.oilplantName,
+            oparea: temp.opareaName,
+            location:temp.locationName
+          })
+        })
+      })
+    },
+    showOparea(n){
+      for (const otemp of this.oparealist) {
+        if (n == otemp.id) {
+          //console.log(otemp.oparea);
+          return otemp.oparea;
+        }
+      }
+    },
+    showlocation(n){
+      for(const otemp of this.locationlist){
+        if(n==otemp.id){
+          return otemp.location;
+        }
+      }
+    },
+
+
     getAllRoles() {
       this.api({
         url: "/common/getUserRoles",
@@ -211,6 +409,7 @@ export default {
         url: "/common/getAllCameras",
         method: "get"
       }).then(data => {
+        console.log(data);
         this.options = data;
       })
     },
@@ -227,6 +426,7 @@ export default {
         method: "get",
         params: this.listQuery
       }).then(data => {
+        console.log(data);
         this.listLoading = false;
         this.list = data.list;
         this.totalCount = data.totalCount;
@@ -242,6 +442,7 @@ export default {
           this.showUpdate(i);
 
         }
+
       })
     },
     handleSizeChange(val) {
@@ -263,6 +464,13 @@ export default {
       //表格序号
       return (this.listQuery.pageNum - 1) * this.listQuery.pageRow + $index + 1
     },
+    showDeviceType(n){
+      if(n==1){
+        return "边缘端"
+      }else {
+        return "服务端"
+      }
+    },
     showCreate() {
       //显示新增对话框
       this.tempEdge.id = "";
@@ -274,6 +482,8 @@ export default {
       this.tempEdge.sshPassword = "";
       this.tempEdge.mqQueue = "";
       this.tempEdge.roleIds = [];
+      this.tempEdge.locationid="",
+      this.tempEdge.devicetype="",
       this.dialogStatus = "create"
       this.dialogFormVisible = true
     },
@@ -288,8 +498,27 @@ export default {
       this.tempEdge.sshPassword = edgeInfo.sshPassword;
       this.tempEdge.mqQueue = edgeInfo.mqQueue;
       this.tempEdge.roleIds = edgeInfo.roles.map(x => x.roleId);
+      this.tempEdge.locationid=edgeInfo.locationid;
+     // this.tempEdge.devicetype=edgeInfo.devicetype;
       this.dialogStatus = "update"
       this.dialogFormVisible = true
+
+      console.log(this.list);
+
+      this.locationlist.forEach(temp=>{
+        if(this.tempEdge.locationid==temp.id){
+          this.oilfieldid=temp.oilfieldid;
+          this.oilplantid=temp.oilplantid;
+        }
+      })
+      this.tempoilplantlist=[],
+        this.oilplantlist.forEach(temp=>{
+          if(temp.fid===this.oilfieldid){
+            this.tempoilplantlist.push(temp);
+          }
+        })
+      this.oilplantSelectChange();
+      this.opareaSelectChange();
     },
     showBindCamera($index) {
       if (this.options.length === 0) {
@@ -319,8 +548,12 @@ export default {
     },
     validate() {
       let u = this.tempEdge
+      if (u.devicetype.length===0){
+        this.$message.warning('请选择设备类型')
+        return false
+      }
       if (u.edgeName.trim().length === 0) {
-        this.$message.warning('请填写边缘端名称')
+        this.$message.warning('请填写设备名称')
         return false
       }
       if (u.roleIds.length === 0) {
@@ -370,9 +603,9 @@ export default {
         '提示', {
           title: '提示',
           message: h('div', [
-            h('p', '确定删除此边缘端信息？'),
-            h('p', '边缘端与摄像头的关联关系会被删除！'),
-            h('p', '边缘端上的检测算法模型信息会被删除！')
+            h('p', '确定删除此设备信息？'),
+            h('p', '设备与摄像头的关联关系会被删除！'),
+            h('p', '设备上的检测算法模型信息会被删除！')
           ]),
           showCancelButton: true,
           confirmButtonText: '确定',

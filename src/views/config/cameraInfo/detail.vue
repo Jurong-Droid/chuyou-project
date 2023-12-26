@@ -35,7 +35,7 @@
             <el-descriptions-item>
                 <template slot="label">
                     <i class="el-icon-warning"></i>
-                    报警间隔（分钟）
+                    报警间隔（秒）
                 </template>
                 {{tempCamera.alertStep}}
             </el-descriptions-item>

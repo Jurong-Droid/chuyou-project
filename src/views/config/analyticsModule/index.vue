@@ -1,15 +1,18 @@
 <template>
 <div class="app-container">
-    <div class="filter-container">
-        <el-input size="mini" v-model="listQuery.edgeName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="边缘端名称" clearable />
-        <el-input size="mini" v-model="listQuery.moduleName" style="width:8%;" @keyup.enter.native="handleFilter" placeholder="模型名称" clearable />
-        <DatePicker startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>
+    <div class="filter-container"  >
+        <el-input size="medium" v-model="listQuery.edgeName" style="height:36px;width:8%" @keyup.enter.native="handleFilter" placeholder="边缘端名称" clearable />
+        <el-input size="medium" v-model="listQuery.moduleName" style="height:36px;width:8%" @keyup.enter.native="handleFilter" placeholder="模型名称" clearable />
+        <DatePicker style="height:36px;" startVaule="开始日期" endValue="结束日期" @sendTimeData="getTime"></DatePicker>
+<!--      <el-date-picker type="daterange" start-placeholder="开始日期" prefix-icon=0
+                      end-placeholder="结束日期" range-separator="|" style="font-size: 20px;height:37px" @sendTimeData="getTime"></el-date-picker>-->
         <el-button size="mini" v-waves type="primary" icon="el-icon-search" @click="handleFilter">
             搜索
         </el-button>
-        <el-button size="mini" type="primary" icon="plus" v-permission="'analyticsModule:add'" @click="showCreate">添加</el-button>
+        <el-button size="mini" type="primary" style="width: 5%"  v-permission="'analyticsModule:add'" @click="showCreate"> 添加 </el-button>
     </div>
-    <el-table :data="list"  v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
+
+    <el-table :data="list"  v-loading.body="listLoading" element-loading-text="拼命加载中" border fit highlight-current-row style="width: 100%;font-size: 18px" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}">
         <el-table-column align="center" label="序号" min-width="5">
             <template v-slot="scope">
                 <span v-text="getIndex(scope.$index)"> </span>
@@ -20,22 +23,28 @@
                 <span class="link-type" @click="handleDetail(scope.row)">{{ scope.row.moduleName }}</span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="边缘端名称" prop="edgeName" min-width="12"></el-table-column>
-        <el-table-column align="center" label="模型类型" prop="moduleType" min-width="8"></el-table-column>
-        <el-table-column align="center" label="模型说明" prop="description" min-width="20"></el-table-column>
-        <el-table-column align="center" label="version" prop="version" min-width="8"></el-table-column>
-        <el-table-column align="center" label="状态" min-width="6">
+        <el-table-column align="center" label="检测设备名称" prop="edgeName" min-width="12"></el-table-column>
+        <el-table-column align="center" label="模型类型" prop="moduleType" min-width="12"></el-table-column>
+        <el-table-column align="center" label="模型说明" prop="description" min-width="18"></el-table-column>
+        <el-table-column align="center" label="版本" prop="version" min-width="6"></el-table-column>
+      <el-table-column align="center" label="预处理状态" prop="opencv" min-width="6">
+        <template slot-scope="scope">
+          {{ scope.row.opencv === 0 ? '关闭' : '开启' }}
+        </template>
+      </el-table-column>
+        <el-table-column align="center" label="状态" min-width="7">
             <template v-slot="scope">
-                <el-tag v-if="['200','201'].includes(scope.row.status)" type="success" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
-                <el-tag v-else-if="['6','7'].includes(scope.row.status)" type="danger" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
-                <el-tag v-else-if="scope.row.status === '4' && scope.row.heartbeatCount >5  " type="danger" disable-transitions>检测失败</el-tag>
-                <el-tag v-else type="info" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag v-if="['200','201'].includes(scope.row.status)" type="success" style="width: 100%" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag v-else-if="['6','7'].includes(scope.row.status)" type="danger" style="width: 100%" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
+                <el-tag v-else-if="scope.row.status === '4' && scope.row.heartbeatCount >5  " style="width: 100%" type="danger" disable-transitions>检测失败</el-tag>
+                <el-tag v-else type="info" style="width: 100%" disable-transitions>{{statusMap[scope.row.status]}}</el-tag>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="管理" min-width="20">
-            <template v-slot="scope">
-               <template  v-if="['1','2','6','7','9'].includes(scope.row.status)" >
+        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="13"></el-table-column>
+        <el-table-column  align="center" label="管理" min-width="18">
+            <template  v-slot="scope">
+
+<!--               <template  v-if="['1','2','6','7','9'].includes(scope.row.status)" >
                     <el-button size="mini" :plain='true' type="warning"  @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
                     <el-button size="mini" :plain='true' type="primary"  @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
                 </template>
@@ -49,7 +58,23 @@
                 </template>
                 <template  v-else-if="['200','201'].includes(scope.row.status)" >
                     <el-button size="mini" :plain='true' type="danger" @click="commandModule(scope.$index,'close')" v-permission="'analyticsModule:newRelease'">停止</el-button>
-                </template>
+                </template>-->
+
+              <template  v-if="['1','2','6','7','9'].includes(scope.row.status)" >
+                <el-button size="mini" :plain='true' type="primary" style="font-size: 18px"  @click="showUpdate(scope.$index)" v-permission="'analyticsModule:update'">修改</el-button>
+                <el-button size="mini" :plain='true' type="primary" style="font-size: 18px" @click="showUpload(scope.$index)" v-permission="'analyticsModule:update'">上传</el-button>
+              </template>
+              <template  v-if="['2','6'].includes(scope.row.status)" >
+                <el-button size="mini" :plain='true' type="primary" style="font-size: 18px"  @click="newSyncFile(scope.$index)" v-permission="'analyticsModule:newRelease'">同步</el-button>
+<!--                <el-button size="mini" :plain='true' type="text" style="font-size: 15px" @click="syncFile(scope.$index)" v-permission="'analyticsModule:release'">同步</el-button>-->
+              </template>
+              <template  v-else-if="['3','7','9'].includes(scope.row.status)" >
+                <el-button size="mini" :plain='true' type="primary" style="font-size: 18px" @click="commandModule(scope.$index,'start')" v-permission="'analyticsModule:newRelease'">发布</el-button>
+<!--                <el-button size="mini" :plain='true' type="text" style="font-size: 15px" @click="releaseModule(scope.$index)" v-permission="'analyticsModule:release'">发布</el-button>-->
+              </template>
+              <template  v-else-if="['200','201'].includes(scope.row.status)" >
+                <el-button size="mini" :plain='true' type="primary" style="font-size: 18px" @click="commandModule(scope.$index,'close')" v-permission="'analyticsModule:newRelease'">停止</el-button>
+              </template>
 
             </template>
         </el-table-column>
@@ -58,8 +83,8 @@
     </el-pagination>
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
         <el-form class="small-space" :model="tempModule" label-position="left" label-width="18%">
-            <el-form-item label="边缘端名称" required>
-                <el-select v-model="tempModule.edgeId" placeholder="请选择边缘端" style="width: 40%">
+            <el-form-item label="设备名称" required>
+                <el-select v-model="tempModule.edgeId" placeholder="请选择设备" style="width: 40%">
                     <el-option v-for="item in edgeEnds" :key="item.id" :label="item.edgeName" :value="item.id">
                     </el-option>
                 </el-select>
@@ -78,6 +103,10 @@
                 <el-input type="text" v-model="tempModule.version" placeholder="模型的版本信息" style="width: 40%">
                 </el-input>
             </el-form-item>
+          <el-form-item label="预处理状态">
+            <el-input type="text" autosize v-model="tempModule.opencv" style="width: 40%">
+            </el-input>
+          </el-form-item>
             <!-- <el-form-item label="同步路径">
                 <el-input type="text" v-model="tempModule.syncPath" placeholder="边缘端上检测模块存储路径" style="width: 40%">
                 </el-input>
@@ -173,7 +202,8 @@ export default {
                 storagePath: null,
                 syncPath: null,
                 commandScript: null,
-                mqQueue: null
+                mqQueue: null,
+                opencv:null
             },
             uploadUrl: process.env.NODE_ENV === 'production' ? '/analyticsModule/upload' : process.env.BASE_URL + '/analyticsModule/upload',
             fileList: [],
@@ -184,6 +214,7 @@ export default {
         }
     },
     created() {
+      document.body.style.zoom = "80%";
         this.getList();
     },
     methods: {
@@ -193,6 +224,7 @@ export default {
                 method: "get"
             }).then(data => {
                 this.edgeEnds = data;
+              console.log(data)
             })
         },
         getList() {
@@ -247,6 +279,7 @@ export default {
             this.tempModule.syncPath = "";
             this.tempModule.commandScript = "";
             this.tempModule.mqQueue = "";
+            this.tempModule.opencv="";
             this.dialogStatus = "create"
             this.dialogFormVisible = true
         },
@@ -266,6 +299,7 @@ export default {
             this.tempModule.syncPath = module.syncPath;
             this.tempModule.commandScript = module.commandScript;
             this.tempModule.mqQueue = module.mqQueue;
+            this.tempModule.opencv=module.opencv;
             this.dialogStatus = "update"
             this.dialogFormVisible = true
         },
@@ -273,6 +307,8 @@ export default {
             let module = this.list[$index];
             this.uploadData.moduleId = module.id;
             this.uploadVisible = true
+
+
         },
         validate() {
             let u = this.tempModule

@@ -1,13 +1,17 @@
 <template>
   <div class="app-container">
-    <el-row type="flex" style="margin-bottom: -20px">
+    <el-row style="margin-bottom: -20px;">
       <el-col :span="3" v-loading="listLoading" element-loading-text="数据加载中...">
-        <div>
-          <el-input size="mini" placeholder="输入关键字进行过滤" v-model="filterText"/>
-          <el-tree class="filter-tree" ref="tree" :data="data" node-key="name" :expand-on-click-node="false"
-                   :props="defaultProps" :filter-node-method="filterNode" @node-click="clickNode" highlight-current
-                   default-expand-all>
-          </el-tree>
+      <div  style="display: flex;flex: 0;">
+          <div style="width: 100%;height: 100%">
+            <el-input size="mini" placeholder="输入关键字进行过滤" v-model="filterText"/>
+          </div>
+          <div style="width: 100%;height: 100%">
+            <el-tree  class="filter-tree"  ref="tree" :data="data" node-key="name" :expand-on-click-node="false"
+                      :props="defaultProps" :filter-node-method="filterNode" @node-click="clickNode" highlight-current
+                      default-expand-all>
+            </el-tree>
+          </div>
         </div>
       </el-col>
       <el-col :span="21">
@@ -30,6 +34,7 @@ export default {
     return {
       filterText: "",
       listLoading: false, //数据加载等待动画
+      fontsize:18,
       listQuery: {
         id: null,
         level: "",
@@ -48,6 +53,7 @@ export default {
     };
   },
   created() {
+    document.body.style.zoom = "80%";
     this.getList();
   },
   watch: {
@@ -105,12 +111,16 @@ export default {
   height: 80%;
   float: left;
   position: absolute;
-
 }
 
 .el-tree--highlight-current /deep/ .el-tree-node.is-current > .el-tree-node__content {
   background-color: rgb(255, 255, 255);
   color: rgb(64, 158, 255);
   position: relative;
+
 }
+/deep/.el-tree-node__label{
+  font-size: larger !important;
+}
+
 </style>

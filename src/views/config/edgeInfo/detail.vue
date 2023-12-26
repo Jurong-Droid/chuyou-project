@@ -31,7 +31,7 @@
                     边缘端交互MQ队列名
                 </template>
                 {{tempEdge.mqQueue}}
-            </el-descriptions-item>            
+            </el-descriptions-item>
             <el-descriptions-item>
                 <template slot="label">
                     <i class="el-icon-date"></i>

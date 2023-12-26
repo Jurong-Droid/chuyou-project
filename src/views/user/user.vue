@@ -3,7 +3,7 @@
     <div class="filter-container">
         <el-form>
             <el-form-item>
-                <el-button size="mini" :plain='true' type="primary" icon="plus" v-permission="'user:add'" @click="showCreate">添加用户</el-button>
+                <el-button :plain='true' type="primary" icon="plus" v-permission="'user:add'" @click="showCreate">添加用户</el-button>
             </el-form-item>
         </el-form>
     </div>
@@ -16,20 +16,25 @@
         <el-table-column align="center" label="用户名" prop="username" min-width="10"></el-table-column>
         <el-table-column align="center" label="手机号码" prop="phone" min-width="10"></el-table-column>
         <el-table-column align="center" label="电子邮箱" prop="email" min-width="15"></el-table-column>
-        <el-table-column align="center" label="角色" min-width="20">
+        <el-table-column  label="角色" min-width="15">
             <template slot-scope="scope">
-                <div style="margin-right:2%; display: inline-block" v-for="i in scope.row.roles" :key="i.roleId">
-                    <el-tag type="success" v-text="i.roleName" v-if="i.roleId===1"></el-tag>
-                    <el-tag type="primary" v-text="i.roleName" v-else></el-tag>
+                <div style="margin-right:2%; display: inline-block;" v-for="i in scope.row.roles" :key="i.roleId">
+                    <el-tag effect="plain" type="primary" style="width: 65px" v-text="i.roleName" v-if="i.roleId===1" ></el-tag>
+                    <el-tag effect="plain" type="primary" style="width: 65px" v-text="i.roleName" v-else></el-tag>
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="创建时间" prop="createTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="管理" min-width="20">
+        <el-table-column align="center" label="所在单位" min-width="20">
+        <template v-slot="scope">
+          <span v-text="showOparea(scope.row.oparea)"></span>
+        </template>
+        </el-table-column>
+        <el-table-column align="center" label="创建时间" prop="createTime" min-width="12"></el-table-column>
+        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="12"></el-table-column>
+        <el-table-column align="center" label="管理" min-width="16">
             <template slot-scope="scope">
                 <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'user:update'">修改</el-button>
-                <el-button size="mini" :plain='true' type="danger" icon="delete" v-if="scope.row.userId!=userId " @click="removeUser(scope.$index)" v-permission="'user:delete'">删除</el-button>
+                <el-button size="mini" :plain='true' type="danger" icon="delete" @click="removeUser(scope.$index)" v-permission="'user:delete'">删除</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -52,6 +57,29 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+
+          <el-form-item label="所属采油厂">
+            <el-select v-model="oilplant" placeholder="选择采油厂" @change="selectoparea()">
+              <el-option
+                v-for="item in oilplantlist"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+
+          <el-form-item label="所属单位">
+            <el-select v-model="oparea" placeholder="选择单位" @change="updateoparea()">
+              <el-option
+                v-for="item in oparealist"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+
             <el-form-item label="手机号码" required>
                 <el-input type="text" v-model="tempUser.phone" style="width:40%;" />
             </el-form-item>
@@ -76,6 +104,11 @@ import {
 export default {
     data() {
         return {
+            oilplant:"",
+            oparea:"",
+            oparealist:[],
+            foparealist:[],
+            oilplantlist:[],
             totalCount: 0, //分页组件--数据总条数
             list: [], //表格的数据
             listLoading: false, //数据加载等待动画
@@ -95,6 +128,7 @@ export default {
                 password: null,
                 phone: null,
                 email: null,
+                oparea: null,
                 avatar: null,
                 roleIds: [],
                 userId: null
@@ -102,7 +136,14 @@ export default {
         }
     },
     created() {
-        this.getList();
+      document.body.style.zoom = "80%";
+      if (location.href.indexOf("#reloaded") == -1) {
+        location.href = location.href + "#reloaded";
+        location.reload();
+      }
+        this.getoilplant();
+        this.getoparea();
+      this.getList();
         if (this.hasPerm('user:add') || this.hasPerm('user:update')) {
             this.getAllRoles();
         }
@@ -113,6 +154,54 @@ export default {
         ])
     },
     methods: {
+      updateoparea(){
+        this.tempUser.oparea=this.oparea;
+      },
+      showOparea(n){
+        if (n==0) return '全部'
+        for (const otemp of this.foparealist){
+          if (n==otemp.value){
+            return otemp.label
+          }
+        }
+      },
+      selectoparea(){
+        this.oparealist=this.foparealist.filter(temp=>temp.fid==this.oilplant);
+        this.oparealist.push({
+          value:0,
+          label:"全部"
+        })
+        this.oparea="";
+      },
+      getoilplant(){
+        this.api({
+          url:"/organizationInfo/getoilplant",
+          method:"get",
+        }).then(data=>{
+          data.forEach(temp=>{
+            this.oilplantlist.push({
+              value:temp.oilplantId,
+              label:temp.oilplantName,
+            })
+          })
+        })
+      },
+      getoparea(){
+        this.api({
+          url:"/organizationInfo/getoparea",
+          method:"get",
+        }).then(data=>{
+          data.forEach(temp=>{
+            this.foparealist.push({
+              value:temp.opareaId,
+              fid:temp.oilplantId,
+              fname: temp.oilplantName,
+              label: temp.opareaName
+            })
+          })
+          this.oparealist=this.foparealist;
+        })
+      },
         getAllRoles() {
             this.api({
                 url: "/common/getUserRoles",
@@ -161,8 +250,11 @@ export default {
             this.tempUser.email = null;
             this.tempUser.roleIds = [];
             this.tempUser.userId = null;
+            this.tempUser.oparea=null;
             this.dialogStatus = "create"
-            this.dialogFormVisible = true
+            this.dialogFormVisible = true;
+            this.oparea=null;
+            this.oilplant=null;
         },
         showUpdate($index) {
             let user = this.list[$index];
@@ -171,9 +263,27 @@ export default {
             this.tempUser.email = user.email;
             this.tempUser.roleIds = user.roles.map(x => x.roleId);
             this.tempUser.userId = user.userId;
+            this.tempUser.oparea=user.oparea;
             this.tempUser.password = null;
             this.dialogStatus = "update"
             this.dialogFormVisible = true
+
+            this.foparealist.forEach(temp=>{
+              if (temp.value==user.oparea){
+                this.oparea=temp.label
+                this.oilplantlist.forEach(otemp=>{
+                  if (otemp.value==temp.fid) {
+                    this.oilplant=otemp.label
+                  }
+                })
+              }
+            })
+          if (!this.oparealist.find(temp=>temp.value==0)){
+            this.oparealist.push({
+              value:0,
+              label:"全部"
+            })
+          }
         },
         validate(isCreate) {
             let u = this.tempUser

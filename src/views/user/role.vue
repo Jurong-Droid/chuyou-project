@@ -3,7 +3,7 @@
     <div class="filter-container">
         <el-form>
             <el-form-item>
-                <el-button size="mini" :plain='true' type="success" icon="plus" v-permission="'role:add'" @click="showCreate">添加角色
+                <el-button  :plain='true' type="success" icon="plus" v-permission="'role:add'" @click="showCreate">添加角色
                 </el-button>
             </el-form-item>
         </el-form>
@@ -14,28 +14,29 @@
                 <span v-text="getIndex(scope.$index)"> </span>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="角色" prop="roleName" min-width="10"></el-table-column>
-        <el-table-column align="center" label="用户" min-width="15">
+        <el-table-column align="center" label="角色" prop="roleName" min-width="8"></el-table-column>
+        <el-table-column align="center" label="用户" min-width="10">
             <template slot-scope="scope">
                 <div v-for="user in scope.row.users" :key="user.userId">
                     <div v-text="user.username" style="display: inline-block;vertical-align: middle;margin-top: 4%;"></div>
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="菜单&权限" min-width="35">
+        <el-table-column align="center" label="菜单&权限" min-width="46">
             <template slot-scope="scope">
-                <el-tag v-if="scope.row.roleName===adminName" type="success">全部</el-tag>
+
+                <el-tag style="width: 100px;margin-left:-34%;text-align:center;"  v-if="scope.row.roleName===adminName" type="success" effect="plain">全部</el-tag>
                 <div v-else>
                     <div v-for="menu in scope.row.menus" :key="menu.menuCode" style="text-align: left; margin-top: 1%;">
                         <span style="width: 25%;display: inline-block;text-align: right ">{{menu.menuName}}</span>
-                        <el-tag v-for="perm in menu.permissions" :key="perm.permissionName" v-text="perm.permissionName" style="margin-right:2%;" type="primary"></el-tag>
+                        <el-tag  v-for="perm in menu.permissions" :key="perm.permissionName" v-text="perm.permissionName" style="text-align: center;margin-right:2%;width: 97px" type="primary" effect="plain"></el-tag>
                     </div>
                 </div>
             </template>
         </el-table-column>
-        <el-table-column align="center" label="创建时间" prop="createTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="10"></el-table-column>
-        <el-table-column align="center" label="管理" min-width="15">
+        <el-table-column align="center" label="创建时间" prop="createTime" min-width="12"></el-table-column>
+        <el-table-column align="center" label="最近修改时间" prop="updateTime" min-width="12"></el-table-column>
+        <el-table-column align="center" label="管理" min-width="14">
             <template slot-scope="scope">
                 <div v-if="scope.row.roleName!=='管理员'">
                     <el-button size="mini" :plain='true' type="primary" icon="edit" @click="showUpdate(scope.$index)" v-permission="'role:update'">修改
@@ -52,10 +53,10 @@
                 <el-input type="text" v-model="tempRole.roleName" style="width: 40%;">
                 </el-input>
             </el-form-item>
-            <el-form-item label="菜单&权限" required>
+            <el-form-item label="菜单&权限"  required>
                 <div v-for=" (menu,_index) in allPermission" :key="menu.menuName">
                     <span style="width:10%; display:inline-block;">
-                        <el-button size="mini" :type="isMenuNone(_index)?'':(isMenuAll(_index)?'success':'primary')" @click="checkAll(_index)">{{menu.menuName}}</el-button>
+                        <el-button  :type="isMenuNone(_index)?'':(isMenuAll(_index)?'success':'primary')" @click="checkAll(_index)">{{menu.menuName}}</el-button>
                     </span>
                     <div style="display: inline-block;margin-left:2%;">
                         <el-checkbox-group v-model="tempRole.permissionIds">
@@ -99,6 +100,11 @@ export default {
         }
     },
     created() {
+      document.body.style.zoom = "80%";
+      if (location.href.indexOf("#reloaded") == -1) {
+        location.href = location.href + "#reloaded";
+        location.reload();
+      }
         this.getList();
         this.getAllPermisson();
     },

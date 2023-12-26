@@ -90,7 +90,7 @@
           </template>
         </el-table-column>
         <el-table-column align="center" label="ip" prop="ip" min-width="10"></el-table-column>
-        <el-table-column align="center" label="视频流地址" prop="rtsp" min-width="20"></el-table-column>
+        <el-table-column align="center" label="视频流地址" prop="rtsp" min-width="15"></el-table-column>
       </el-table>
     </div>
   </div>

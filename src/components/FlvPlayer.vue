@@ -1,12 +1,11 @@
 <template>
   <div class="videoPlayer">
     <video
-      width="320" 
+      width="320"
       height="240"
       ref="videoPlayer"
       id="videoElement"
-      class="video-js vjs-big-play-centered"
-    ></video>
+      class="video-js vjs-big-play-centered"></video>
   </div>
 </template>
 
@@ -30,6 +29,15 @@ export default {
   mounted() {
     if (flvjs.isSupported()) {
       var videoElement = document.getElementById("videoElement");
+      // var browerWidth=window.innerWidth;
+      // var  baseWidth=1920;
+      // var zoomValue=browerWidth/baseWidth;
+      // document.getElementById("app").style.transform="scale("+zoomValue+","+zoomValue+")";
+      // window.onresize=function (){
+      //   browerWidth=window.innerWidth;
+      //   zoomValue=browerWidth/baseWidth;
+      //   document.getElementById("app").style.transform="scale("+zoomValue+","+zoomValue+")";
+      }
 
       // console.log(videoElement.loadstart); //客户端开始请求数据
       // console.log(videoElement.progress); //客户端正在请求数据
@@ -78,17 +86,16 @@ export default {
       this.flvPlayer.load();
       this.flvPlayer.play();
     }
-  },
+  };
   methods: {
     play() {
       this.flvPlayer.play();
     }
-  }
 };
 </script>
 <style scoped>
 .videoPlayer {
-  width: 200px;
-  height: 200px;
+  /*width: 200px;*/
+  /*height: 200px;*/
 }
 </style>

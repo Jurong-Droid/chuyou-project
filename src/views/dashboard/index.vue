@@ -1,116 +1,347 @@
 <!--suppress ALL -->
 <template>
-  <div class="wrap">
-    <el-container>
-      <el-header>
-        <span class="header-wrap">视频监控中心</span>
-      </el-header>
-      <el-container>
-        <el-aside>
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="title_style"> 违规分布</span>
-            </div>
-            <template v-for="item in detectTypeRatioList">
-              <el-row>
-                <el-col :span="14">
-                  <span class="content_style">{{ item.detectType }}</span>
-                </el-col>
-                <el-col :span="10">
-                  <el-progress :text-inside="true" :percentage=item.ratio :stroke-width="14"></el-progress>
-                </el-col>
-              </el-row>
-            </template>
-          </el-card>
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="title_style">违规情况统计</span>
-            </div>
-            <div id="echarts_box" style="height: 150px"></div>
-          </el-card>
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="title_style">违规详情</span>
-            </div>
-            <template v-for="item in abnormalList">
-              <el-alert :title="item.expInfo" type="warning" class="background_color"></el-alert>
-            </template>
-          </el-card>
-        </el-aside>
-        <el-main>
-          <div id="container"></div>
-        </el-main>
-        <el-aside>
-          <!-- 右标题 -->
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="title_style">各场所违规分布</span>
-            </div>
-            <div class="tag-group">
-              <div
-                v-for="item in areaRatioList" :key="item.areaName">
-                <el-row>
-                  <el-col :span="6">
-                    <el-tag :color="item.color" effect="dark">
-                      {{ item.areaName }}
-                    </el-tag>
-                  </el-col>
-                  <el-col :span="14">
-                    <el-progress
-                      :percentage="item.ratio"
-                      :stroke-width="30"
-                      :color="item.color"
-                      :text-inside="true"
-                    ></el-progress>
-                  </el-col>
-                  <el-col :span="4">
-                    <el-tag color="rgb(3, 20, 52)" effect="dark">
-                      {{ item.sum }}
-                    </el-tag>
-                  </el-col>
-                </el-row>
+  <div
+    v-if="this.$route.path == '/dashboard'"
+    style="
+      background-color: transparent;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 1;
+      overflow: hidden;
+    "
+  >
+    <div class="wrap">
+      <el-container style="margin-top: 3%">
+        <el-header style="height: 10px">
+          <span class="header-wrap"></span>
+        </el-header>
+        <el-container>
+          <el-aside style="width: 25%">
+            <el-card
+              :body-style="{ padding: '5px', height: '100%', width: '100%' }"
+              class="box-card slidleft_01"
+              id="demo"
+            >
+              <i class="top"></i>
+              <i class="bottom"></i>
+              <div slot="header" class="clearfix">
+                <span class="title_style"> 报警分类统计 </span
+                ><!--违规分布-->
               </div>
-            </div>
+              <div id="echart2" style="height: 80%; width: 100%"></div>
+            </el-card>
+            <el-card
+              :body-style="{ padding: '5px' }"
+              class="box-card slidleft_02"
+            >
+              <i class="top"></i>
+              <i class="bottom"></i>
+              <div slot="header" class="clearfix">
+                <span class="title_style">设备在线情况</span>
+              </div>
+              <!--<div id="echart3" style="height:200px"></div>-->
+              <div v-for="(item, index) in moduleRunStatus" :key="index">
+                <div class="pie-bar">
+                  <div
+                    :id="'pieBar' + index"
+                    style="height: 200px; margin-left: 3%; padding-top: 5%"
+                    class="echartpie"
+                    @click="gocamera"
+                  ></div>
+                  <span
+                    style="
+                      color: #00dcfd;
+                      font-family: HuXiaoBoNanShenTi-2-Regular;
+                      font-size: 20px;
+                      width: 100%;
+                      text-align: center;
+                      position: absolute;
+                    "
+                    >{{ item.areaName }}<br />{{ item.runNum }}/{{
+                      item.sum
+                    }}</span
+                  >
+                </div>
+              </div>
+            </el-card>
 
-          </el-card>
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="title_style">运行状态</span>
-            </div>
-            <template v-for="(item,index) in moduleRunStatus">
-              <div class="pie-bar">
-                <div :id="'pieBar'+index" style="height: 150px"></div>
-                <span style="color:#00ffff">{{ item.areaName }}</span>
+            <el-card
+              :body-style="{ padding: '5px', height: '600px' }"
+              class="box-card slidleft_03"
+              style="width: 100%; text-align: left; overflow: hidden"
+              id="card"
+            >
+              <i class="top"></i>
+              <i class="bottom"></i>
+              <div slot="header" class="clearfix">
+                <span class="title_style">实时报警信息</span>
               </div>
-            </template>
-          </el-card>
-          <el-card class="box-card">
-            <div slot="header" class="clearfix">
-              <span class="title_style">整体违规风险评估</span>
+              <template>
+                <!--{{item.areaName+'————'+item.expInfo}}-->
+                <!--<el-alert :title="item.areaName+'————'+item.expInfo" type="info" class="background_color"  style=" color: #ffffff;"></el-alert>-->
+                <!--<div @click="goabormalList" style="cursor: pointer;color:#ff7542;font-size: 18px;padding-top: 10px;">{{item.camName+"- "+item.expInfo}}-<span style="color:#c6e2ff ">{{item.areaName}}  </span><span style="padding-left: 20px">{{item.expTime}}</span></div>-->
+                <ul class="th">
+                  <li style="margin-left: -4%">报警区域</li>
+                  <li style="margin-left: -3%">报警点</li>
+                  <li style="margin-left: -6%">报警信息</li>
+                  <li style="margin-left: -6%">报警时间</li>
+                </ul>
+                <vue-j-scroll
+                  :data="abnormalList"
+                  class="seamless-wrap"
+                  :steep="0.3"
+                  scroll-direction="top"
+                  :is-roller="true"
+                  :roller-scroll-distance="50"
+                >
+                  <ul
+                    class="item"
+                    style="
+                      list-style: none;
+                      margin-top: -2%;
+                      margin-bottom: 6px;
+                      margin-left: -13%;
+                      display: inline-block;
+                      width: 100%;
+                    "
+                  >
+                    <li
+                      v-for="(item, index) in abnormalList"
+                      :key="index"
+                      @click="goabormalList"
+                      style="
+                        cursor: pointer;
+                        color: #ffffff;
+                        font-size: 18px;
+                        padding-top: 10px;
+                        width: 100%;
+                      "
+                    >
+                      <!--<span v-text="item.camName"></span> - <span v-text="item.expInfo"></span> - <span v-text="item.areaName"></span> - <span v-text="item.expTime"></span>-->
+                      <ul
+                        class="content"
+                        style="display: flex; align-items: flex-start"
+                      >
+                        <li style="flex: 1">{{ item.areaName }}</li>
+                        <li
+                          style="flex: 1; margin-left: -58%; text-align: center"
+                        >
+                          {{ item.detectType }}
+                        </li>
+                        <li style="flex: 1; margin-left: -60%">
+                          {{ item.camName }}
+                        </li>
+                        <li
+                          style="flex: 1; text-align: center; margin-left: -59%"
+                        >
+                          {{ item.expTime }}
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </vue-j-scroll>
+              </template>
+            </el-card>
+          </el-aside>
+          <el-aside style="width: 50%; overflow: hidden">
+            <div
+              style="height: 60%; margin: 8px 2px 0px 2px; overflow: visible"
+            >
+              <object
+                id="my-object"
+                type="text/html"
+                data="http://10.64.192.5:8090/Emap/jk_map.htm"
+                width="100%"
+                height="100%"
+                style="position: relative; height: 100%"
+              ></object>
             </div>
-            <div id="radarCharts" style="height: 150px"></div>
-          </el-card>
-        </el-aside>
+            <el-card
+              :body-style="{ padding: '5px', height: '100%', width: '100%' }"
+              class="box-card slidup"
+              style="width: 100%; text-align: center; margin-top: 8px"
+            >
+              <i class="top"></i>
+              <i class="bottom"></i>
+              <div slot="header" class="clearfix">
+                <span class="title_style">报警趋势分析</span>
+              </div>
+              <div id="echarts_box" style="height: 85%; width: 100%"></div>
+            </el-card>
+          </el-aside>
+          <el-aside style="width: 25%">
+            <el-card
+              :body-style="{ padding: '0px' }"
+              class="box-card slidright_01"
+            >
+              <div slot="header" class="clearfix">
+                <span
+                  class="title_style"
+                  v-text="listObj[this.listN[0]].cameraName"
+                ></span>
+              </div>
+              <el-main
+                :el-main="{ padding: '0px 0px' }"
+                v-loading.body="listLoading"
+                element-loading-text="拼命加载中"
+                style="width: 100%; height: 100%; padding: 5px"
+              >
+                <div style="width: 100%; height: 100%">
+                  <div
+                    class="player-wrapper"
+                    element-loading-text="加载中..."
+                    element-loading-background="#000"
+                    style="width: 100%; height: 100%"
+                  >
+                    <div class="video-wrapper" :style="videoclass">
+                      <video
+                        :id="`video1`"
+                        ref="videoElement1"
+                        muted
+                        controls
+                        width="100%"
+                        height="100%"
+                        autoplay="autoplay"
+                        style="
+                          border-radius: 10px;
+                          width: 100%;
+                          height: 100%;
+                          margin: 0px;
+                        "
+                      >
+                        1
+                      </video>
+                    </div>
+                  </div>
+                </div>
+              </el-main>
+            </el-card>
+            <el-card
+              :body-style="{ padding: '0px' }"
+              class="box-card slidright_02"
+            >
+              <div slot="header" class="clearfix">
+                <span
+                  class="title_style"
+                  v-text="listObj[this.listN[1]].cameraName"
+                ></span>
+              </div>
+              <el-main
+                :el-main="{ padding: '0px 0px' }"
+                v-loading.body="listLoading"
+                element-loading-text="拼命加载中"
+                style="width: 100%; height: 100%; padding: 5px"
+              >
+                <div style="width: 100%; height: 100%">
+                  <div
+                    class="player-wrapper"
+                    element-loading-text="加载中..."
+                    element-loading-background="#000"
+                    style="width: 100%; height: 100%"
+                  >
+                    <div class="video-wrapper" :style="videoclass">
+                      <video
+                        :id="`video2`"
+                        ref="videoElement2"
+                        muted
+                        controls
+                        width="100%"
+                        height="100%"
+                        autoplay="autoplay"
+                        style="border-radius: 10px; width: 100%; height: 100%"
+                      ></video>
+                      <!--<video :id="`video2`" src="src/assets/video/v2.mp4" muted autoplay loop controls width="100%" height="100%" autoplay="autoplay"  style="border-radius: 10px; width: 100%; height: 100%"></video>-->
+                    </div>
+                  </div>
+                </div>
+              </el-main>
+            </el-card>
+            <el-card
+              :body-style="{ padding: '0px' }"
+              class="box-card slidright_03"
+            >
+              <div slot="header" class="clearfix">
+                <span
+                  class="title_style"
+                  v-text="listObj[this.listN[2]].cameraName"
+                ></span>
+              </div>
+              <el-main
+                :el-main="{ padding: '0px 0px' }"
+                v-loading.body="listLoading"
+                element-loading-text="拼命加载中"
+                style="width: 100%; height: 100%; padding: 5px"
+              >
+                <div style="width: 100%; height: 100%">
+                  <div
+                    class="player-wrapper"
+                    element-loading-text="加载中..."
+                    element-loading-background="#000"
+                    style="width: 100%; height: 100%"
+                  >
+                    <div class="video-wrapper" :style="videoclass">
+                      <video
+                        :id="`video3`"
+                        ref="videoElement3"
+                        muted
+                        controls
+                        width="100%"
+                        height="100%"
+                        autoplay="autoplay"
+                        style="border-radius: 10px; width: 100%; height: 100%"
+                      ></video>
+                    </div>
+                  </div>
+                </div>
+              </el-main>
+            </el-card>
+          </el-aside>
+        </el-container>
       </el-container>
-    </el-container>
-
-
+    </div>
   </div>
 </template>
 <script>
-import * as echarts from "echarts";
-
-import * as THREE from "three";
-import {MTLLoader, OBJLoader} from "three-obj-mtl-loader";
+import * as echarts from "echarts/core";
+import { BarChart, PieChart, LineChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DatasetComponent,
+} from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  BarChart,
+  PieChart,
+  LineChart,
+  CanvasRenderer,
+  LegendComponent,
+  DatasetComponent,
+]);
+// import * as THREE from "three";
+// import {MTLLoader, OBJLoader} from "three-obj-mtl-loader";
 // import MTLLoader from  'three-mtl-loader';
 // import OBJLoader from  'three-obj-loader';
-import {CSS2DObject, CSS2DRenderer} from "three-css2drender";
+// import {CSS2DObject, CSS2DRenderer} from "three-css2drender";
+import flvjs from "flv.js";
+import FlvExtend from "@/utils/flvExtend.js";
 
-const OrbitControls = require("three-orbit-controls")(THREE);
+// const OrbitControls = require("three-orbit-controls")(THREE);
 export default {
   name: "threeMap",
   data() {
     return {
+      randomTop: 0,
+      randomLeft: 0,
+      showVideo: false,
+      videoUrl: "",
+      radio1: "默认",
       scene: "",
       labelRenderer: "",
       light: "",
@@ -127,6 +358,9 @@ export default {
       detectTypeRatioList: [],
       preMonthAbnormalList: [],
       preMonthAbnormalList: [],
+      lineData2: [],
+      numData: [],
+      dateList2: [],
       lineData: [],
       dateList: [],
       dateList: [],
@@ -135,610 +369,250 @@ export default {
       intervalId: null,
       areaRatioList: [],
       moduleRunStatus: [],
+      listLoading: true, //数据加载等待动画
+      data: [],
+      defaultProps: {
+        children: "children",
+        label: "name",
+        level: "level",
+      },
+      title: "",
+      fullscreen: false,
+      fornum: 4,
+      clonum: 12,
+      dialogFormVisible: false,
+      videoclass:
+        " position: relative; margin: 0px auto; overflow: hidden;width: 100%; height: 100%",
+      listN: [0, 1, 2, 3], //监控
+      videoStatus: true, //开启轮播状态
+      videoTimer: null,
+      videoTime: 30000, //监控轮播间隔
+
+      listvideo: [],
+      listObj: [],
+      flvPlayerList: [],
+      listQuery: {
+        id: null,
+        level: "",
+        url: "",
+      },
+      data: [],
+      url: "",
+      listObjTest: [],
     };
   },
-  mounted() {
-    this.init();
+  created() {
+    if (location.href.indexOf("#reloaded") == -1) {
+      location.href = location.href + "#reloaded";
+      location.reload();
+    }
+  },
+  async mounted() {
+    document.body.style.zoom = 0.8;
+    this.listLoading = false;
 
-    this.addObj();
-    //this.initGrid();
-    this.animate();
-
+    await this.api({
+      url: "/cameraLive/alistCameraLive",
+      method: "post",
+      data: {
+        pageNum: 1, //页码
+        pageRow: 4, //每页条数
+        id: [],
+        level: "1",
+      },
+    }).then((data) => {
+      this.listObjTest = data;
+      this.listObjTest.forEach((item) => {
+        this.listObj.push({
+          id: 11,
+          cameraName: item.cameraName,
+          ip: "",
+          httpUrl: item.httpUrl,
+        });
+      });
+    });
+    this.createEcharts2();
     this.createEchart();
-    this.createEchartRadar();
-
+    // this.createEchartRadar();
     this.getDetectTypeRatio();
-    this.getLastAbnormalList()
-    this.dataRefreh()
-    this.getCountAreaRatio()
-    this.getCountModuleRunStatus()
+    this.getLastAbnormalList();
+    //this.dataRefreh();
+    this.getCountAreaRatio();
+    this.getCountModuleRunStatus();
+
+    this.initPlayer1();
+    this.initPlayer2();
+    this.initPlayer3();
+    //this.switchTime();
   },
   destroyed() {
     // 在页面销毁后，清除计时器
     this.clear();
   },
+
   methods: {
-    init() {
-      this.scene = new THREE.Scene();
-      this.scene.add(new THREE.AmbientLight(0x999999)); //环境光
-      this.light = new THREE.DirectionalLight(0xdfebff, 0.45); //从正上方（不是位置）照射过来的平行光，0.45的强度
-      this.light.position.set(50, 200, 100);
-      this.light.position.multiplyScalar(0.3);
-      this.scene.add(this.light);
-      //初始化相机
-      this.camera = new THREE.PerspectiveCamera(
-        this.fov,
-        window.innerWidth / window.innerHeight,
-        1,
-        1000
-      );
-      this.camera.position.set(10, 90, 65);
-      this.camera.lookAt(this.scene.position);
-
-      var scale = 0.45
-      var heigh_scale = 0.7
-      //渲染
-      this.renderer = new THREE.WebGLRenderer({
-        alpha: true,
-      }); //会在body里面生成一个canvas标签,
-      this.renderer.setPixelRatio(window.devicePixelRatio); //为了兼容高清屏幕
-      this.renderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
-
-      const container = document.getElementById("container");
-      container.appendChild(this.renderer.domElement);
-
-      //初始化控制器
-      this.controls = new OrbitControls(this.camera, container);
-      this.controls.target.set(0, 0, 0);
-      this.controls.minDistance = 80;
-      this.controls.maxDistance = 400;
-      this.controls.maxPolarAngle = Math.PI / 3;
-      this.controls.update();
-
-      //标注渲染
-      this.labelRenderer = new CSS2DRenderer();
-      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
-      this.labelRenderer.domElement.style.position = "absolute";
-      // this.labelRenderer.domElement.style.position = 'relative';
-      this.labelRenderer.domElement.style.top = 0;
-      container.appendChild(this.labelRenderer.domElement);
-      // window.addEventListener('resize', this.onWindowResize, false);//添加窗口监听事件（resize-onresize即窗口或框架被重新调整大小）
+    rightfill(num, targetnum) {
+      return num.toString().padEnd(targetnum, "s");
+    },
+    closeVideo() {
+      this.showVideo = false;
+      this.videoUrl = "";
     },
 
-    onWindowResize() {
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
-      this.labelRenderer.setSize(window.innerWidth * scale, window.innerHeight * heigh_scale);
-    },
-    animate() {
-      requestAnimationFrame(this.animate);
-      this.render();
-    },
-    render() {
-      this.renderer.render(this.scene, this.camera);
-      this.labelRenderer.render(this.scene, this.camera);
-    },
-    initGrid() {
-      // 网格的边长是1000，100小格子
-      var helper = new THREE.GridHelper(200, 20, 0x0000ff, 0x808080);
-      //helper.setColors( 0x0000ff, 0x808080 );
-      this.scene.add(helper);
-    },
-    addObj() {
-      //包含材质
-      new MTLLoader()
-        .setPath("/static/model/modelFirst/")
-        .load("modelFirst.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/modelFirst/")
-            .load("modelFirst.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              // obj.position.set(-40, -50, 10);
-              obj.position.set(-40, -50, 10);
-              // this.addSprite(-95, -55, -110, '/static/image/shoop.png', -70, '12号', obj, function () {
-              // });src\views\dashboard\static
-              // this.addSprite(-80, -65, -90, '/static/image/cloth.png', -52, '13号', obj, function () {
-              // });
-              // this.addSprite(-100, -45, -80, '/static/image/apple.png', -63, '14号', obj, function () {
-              // });
+    createEcharts2() {
+      var myChart = echarts.init(document.getElementById("echart2"));
+      this.api({
+        url: "/screenDisplay/countDetectTypeRatio",
+        method: "get",
+      }).then((data) => {
+        this.detectTypeRatioList = data; //取到的数据
+        let max = 0;
+        for (let i = 0; i < this.detectTypeRatioList.length; i++) {
+          let preDetectTypeRatio = this.detectTypeRatioList[i];
+          this.lineData2.push(preDetectTypeRatio.detectType);
+          this.dateList2.push(preDetectTypeRatio.ratio);
+          this.numData.push(preDetectTypeRatio.runNum);
+          if (max < preDetectTypeRatio.ratio) {
+            max = preDetectTypeRatio.ratio;
+          }
+        }
+        let lineData2 = this.lineData2;
+        this.preRadioMax = max;
+        let option = {
+          tooltip: {
+            trigger: "axis",
+            axisPointer: { type: "shadow" },
+          },
+          grid: {
+            //height:'200px',
+            left: "0%",
+            top: "8%",
+            right: "0%",
+            bottom: "2%",
+            containLabel: true, //
+          },
+          xAxis: [
+            {
+              type: "category",
+              data: this.lineData2,
+              axisLine: {
+                show: true,
+                lineStyle: {
+                  color: "rgba(255,255,255,.1)",
+                  width: 10,
+                  type: "solid",
+                },
+              },
 
-              // this.addSprite(-95, -55, -110, '/static/image/shoop.png', -70, '12号', obj, function () {
-              // });
-              // this.addSprite(-80, -65, -90, '/static/image/cloth.png', -52, '13号', obj, function () {
-              // });
-              // this.addSprite(-100, -45, -80, '/static/image/apple.png', -63, '14号', obj, function () {
-              // });
-
-              this.addSprite(
-                -95,
-                -55,
-                -110,
-                "/static/image/shoop.png",
-                -70,
-                "1号联合站",
-                obj,
-                function () {
-                }
-              );
-              this.addSprite(
-                -80,
-                -65,
-                -90,
-                "/static/image/cloth.png",
-                -52,
-                "2号联合站",
-                obj,
-                function () {
-                }
-              );
-              this.addSprite(
-                -100,
-                -45,
-                -80,
-                "/static/image/apple.png",
-                -63,
-                "1号转油站",
-                obj,
-                function () {
-                }
-              );
-
-              this.scene.add(obj);
-            });
+              axisTick: {
+                show: false,
+              },
+              axisLabel: {
+                interval: 0,
+                // formatter: function (value) {
+                //   return value.split('').join('\n')
+                // },
+                show: true,
+                splitNumber: 15,
+                textStyle: {
+                  color: "rgba(255,255,255,.6)",
+                  fontSize: "18",
+                  width: "20",
+                },
+                nameTextStyle: {
+                  width: "20",
+                },
+              },
+            },
+          ],
+          yAxis: [
+            {
+              type: "value",
+              axisLabel: {
+                formatter: "{value}",
+                show: true,
+                textStyle: {
+                  color: "rgba(255,255,255,.6)",
+                  fontSize: "10",
+                },
+              },
+              axisTick: {
+                show: false,
+              },
+              axisLine: {
+                show: true,
+                lineStyle: {
+                  color: "rgba(255,255,255,.1 )",
+                  width: 1,
+                  type: "solid",
+                },
+              },
+              splitLine: {
+                lineStyle: {
+                  color: "rgba(255,255,255,.1)",
+                },
+              },
+            },
+          ],
+          series: [
+            {
+              type: "bar",
+              data: this.numData,
+              barWidth: "50px",
+              barGap: 0,
+              center: ["70%", "30%"],
+              itemStyle: {
+                normal: {
+                  //'#27d08a'
+                  color: function (params) {
+                    var colorlist = [
+                      "#3479D3",
+                      "#29C7C8",
+                      "#FCA253",
+                      "#F24D84",
+                      "#91c7ae",
+                      "#749f83",
+                      "#61a0a8",
+                      "#d48265",
+                    ];
+                    return colorlist[params.dataIndex];
+                  },
+                  opacity: 1,
+                  label: {
+                    show: true,
+                    // data:this.numData,
+                    position: "top",
+                    formatter: "{c}",
+                    textStyle: {
+                      //数值样式
+                      color: "#fff",
+                      fontSize: 18,
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        };
+        myChart.setOption(option);
+        window.addEventListener("resize", function () {
+          myChart.resize();
         });
-      new MTLLoader()
-        .setPath("/static/model/VANS/")
-        .load("VANS.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/VANS/")
-            .load("VANS.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              //this.addSprite(-165, -55, -170, '/static/image/vans.png', -58, '15号', obj, () => {
-              this.addSprite(
-                -165,
-                -55,
-                -170,
-                "/static/image/vans.png",
-                -58,
-                "",
-                obj,
-                () => {
-                  this.viewDetailModel();
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/LEVIS/")
-        .load("LEVIS.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/LEVIS/")
-            .load("LEVIS.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              //this.addSprite(-170, -40, -100, '/static/image/television.png', -64, '16号', obj, function () {
-              this.addSprite(
-                -170,
-                -40,
-                -100,
-                "/static/image/television.png",
-                -64,
-                "",
-                obj,
-                function () {
-                }
-              );
-              //this.addSprite(-170, -35, -120, '/static/image/jac.png', -100, '17号', obj, function () {
-              this.addSprite(
-                -170,
-                -35,
-                -120,
-                "/static/image/jac.png",
-                -100,
-                "",
-                obj,
-                function () {
-                }
-              );
-              //this.addSprite(-170, -40, -140, '/static/image/clo.png', -47, '18号', obj, function () {
-              this.addSprite(
-                -170,
-                -40,
-                -140,
-                "/static/image/clo.png",
-                -47,
-                "",
-                obj,
-                function () {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/sanxing/")
-        .load("sanxing.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/sanxing/")
-            .load("sanxing.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                -125,
-                -40,
-                -98,
-                "/static/image/phone.png",
-                -50,
-                "1号配水间",
-                obj,
-                function () {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/CA/")
-        .load("CA.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/CA/")
-            .load("CA.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                -130,
-                -35,
-                -60,
-                "/static/image/car.png",
-                -37,
-                "2号配水间",
-                obj,
-                function () {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/SHOES/")
-        .load("SHOES.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/SHOES/")
-            .load("SHOES.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                -90,
-                -50,
-                -155,
-                "/static/image/shoes.png",
-                -70,
-                "1号集油间",
-                obj,
-                function () {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/square/")
-        .load("zhengfangxing.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/square/")
-            .load("zhengfangxing.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                -90,
-                -50,
-                -55,
-                "/static/image/sensor.png",
-                -95,
-                "1号监控",
-                obj,
-                () => {
-                  this.alarmDetail();
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/LOHO/")
-        .load("LOHO.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/LOHO/")
-            .load("LOHO.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              //this.addSprite(-30, -55, -180, '/static/image/lv.png', -67, '11号抽油机', obj, () => {
-              this.addSprite(
-                -30,
-                -55,
-                -180,
-                "/static/image/lv.png",
-                -67,
-                "",
-                obj,
-                () => {
-                }
-              );
-              this.addSprite(
-                -30,
-                -55,
-                -160,
-                "/static/image/card.png",
-                -68,
-                "2号集油间",
-                obj,
-                () => {
-                }
-              );
-              this.addSprite(
-                50,
-                -55,
-                -160,
-                "/static/image/liangshi.png",
-                -79,
-                "1号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/TWICE/")
-        .load("TWICE.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/TWICE/")
-            .load("TWICE.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                -20,
-                -55,
-                -110,
-                "/static/image/demand.png",
-                -71,
-                "2号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.addSprite(
-                -20,
-                -55,
-                -90,
-                "/static/image/lifang.png",
-                -64,
-                "3号抽油机",
-                obj,
-                () => {
-                }
-              );
-              // this.addSprite(-20, -55, -70, '/static/image/dance.png', -69, '8号抽油机', obj, () => {
-              // });
-              this.addSprite(
-                -20,
-                -55,
-                -70,
-                "/static/image/dance.png",
-                -69,
-                "4号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.addSprite(
-                30,
-                -55,
-                -120,
-                "/static/image/sleep.png",
-                -80,
-                "5号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/manji/")
-        .load("manji.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/manji/")
-            .load("manji.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                30,
-                -55,
-                -70,
-                "/static/image/candy.png",
-                -79,
-                "6号抽油机",
-                obj,
-                () => {
-                }
-              );
-
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/REPUBLIC/")
-        .load("REPUBLIC.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/REPUBLIC/")
-            .load("REPUBLIC.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                90,
-                -45,
-                -70,
-                "/static/image/puhblic.png",
-                -126,
-                "7号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.addSprite(
-                70,
-                -70,
-                -70,
-                "/static/image/humbar.png",
-                -66,
-                "8号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/JUSTCAVALLI/")
-        .load("JUSTCAVALLI.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/JUSTCAVALLI/")
-            .load("JUSTCAVALLI.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                140,
-                -45,
-                -80,
-                "/static/image/juice.png",
-                -126,
-                "9号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-      new MTLLoader()
-        .setPath("/static/model/taizhuolong/")
-        .load("taizhuolong.mtl", (materials) => {
-          materials.preload();
-          new OBJLoader()
-            .setMaterials(materials)
-            .setPath("/static/model/taizhuolong/")
-            .load("taizhuolong.obj", (obj) => {
-              obj.scale.set(0.8, 0.8, 0.8);
-              obj.position.set(-40, -50, 10);
-              this.addSprite(
-                120,
-                -45,
-                -120,
-                "/static/image/long.png",
-                -73,
-                "10号抽油机",
-                obj,
-                () => {
-                }
-              );
-              this.scene.add(obj);
-            });
-        });
-    },
-    addSprite(x, y, z, image, loc, text, Mash, callback) {
-      //添加div标签
-      this.biaozhudiv = document.createElement("div");
-      //添加图标标签
-      // this.img = document.createElement('img');
-      // this.img.src = image;
-      // this.img.style.marginLeft = loc + 'px';
-      this.biaozhudiv.className = "lable";
-      //两者的执行顺序
-      this.biaozhudiv.textContent = text;
-      //this.biaozhudiv.appendChild(this.img);
-      //标注的样式
-      this.biaozhudiv.id = "biaozhu";
-      this.biaozhudiv.style.color = "rgb(" + 0 + "," + 0 + "," + 0 + ")";
-      this.biaozhudiv.style.fontSize = 15 + "px";
-      this.biaozhudiv.style.fontFamily = "Georgia,serif";
-      this.biaozhudiv.style.cursor = "pointer";
-      this.biaozhudiv.onclick = function () {
-        callback(Mash);
-      };
-      this.biaozhuLabel = new CSS2DObject(this.biaozhudiv);
-      this.biaozhuLabel.position.set(x, y, z);
-      Mash.add(this.biaozhuLabel);
-    },
-    //传感器详情界面
-    alarmDetail() {
-      // this.$router.push("alarmPage");
-      // console.log("跳转到监控界面");
-      let routeUrl = this.$router.resolve({
-        path: "/alarmPage",//路由的名称
-
       });
-      window.open(routeUrl.href, '_blank');
     },
-    //点击模块查看信息的3D界面
-    viewDetailModel() {
-      // this.fov = 80;
-      // //改变相机
-      // this.camera = new THREE.PerspectiveCamera(this.fov, window.innerWidth / window.innerHeight, 1, 1000);
-      // this.camera.position.set(-20, 20, 35);
-      // this.camera.lookAt(this.scene.position);
-      // //控制器
-      // this.controls = new OrbitControls(this.camera);
-      // this.controls.target.set(0, 0, 0);
-      // this.controls.minDistance = 80;
-      // this.controls.maxDistance = 400;
-      // this.controls.maxPolarAngle = Math.PI / 3;
-      // this.controls.update();
-      console.log("清除场景");
-    },
+
     createEchart() {
-      // 1. 基于准备好的dom，初始化echarts实例
       var myChart = echarts.init(document.getElementById("echarts_box"));
       this.api({
         url: "/screenDisplay/countPreMonthNum",
         method: "get",
-      }).then(data => {
+      }).then((data) => {
         this.preMonthAbnormalList = data;
         let max = 0;
         for (let i = 0; i < this.preMonthAbnormalList.length; i++) {
-          let preMonthData = this.preMonthAbnormalList[i]
-          this.lineData.push(preMonthData.num)
-          this.dateList.push(preMonthData.date)
+          let preMonthData = this.preMonthAbnormalList[i];
+          this.lineData.push(preMonthData.num);
+          this.dateList.push(preMonthData.date);
           if (max < preMonthData.num) {
             max = preMonthData.num;
           }
@@ -751,11 +625,10 @@ export default {
         }
         this.preMonthMax = max;
         let optionL = {
-          color: ["#2fffff"],
+          color: ["#2f90ff"],
           tooltip: {
-            formatter: function (params) {
-              return params.value;
-            },
+            trigger: "axis",
+            axisPointer: { type: "shadow" },
           },
           grid: {
             left: "3%",
@@ -770,7 +643,7 @@ export default {
               data: this.dateList,
               axisLine: {
                 lineStyle: {
-                  color: "#ffffff",
+                  color: "rgba(255,255,255,.1)",
                 },
               },
               axisTick: {
@@ -779,7 +652,7 @@ export default {
               axisLabel: {
                 fontSize: 12,
                 textStyle: {
-                  color: '#ffffff'
+                  color: "rgba(255,255,255,.6)",
                 },
               },
             },
@@ -787,7 +660,7 @@ export default {
               type: "category",
               axisLine: {
                 lineStyle: {
-                  color: "#ffffff",
+                  color: "rgba(255,255,255,.1)",
                 },
                 onZero: false,
               },
@@ -805,7 +678,7 @@ export default {
               max: this.preMonthMax,
               axisLine: {
                 lineStyle: {
-                  color: "#ffffff",
+                  color: "rgba(255,255,255,.1)",
                 },
                 show: true,
               },
@@ -815,18 +688,22 @@ export default {
               axisLabel: {
                 fontSize: 12,
                 textStyle: {
-                  color: '#ffffff'
+                  color: "rgba(255,255,255,.6)",
                 },
               },
               splitLine: {
-                show: false,
+                show: true,
+                lineStyle: {
+                  color: "rgba(255,255,255,.1)",
+                },
               },
+              interval: 400,
             },
             {
               type: "value",
               axisLine: {
                 lineStyle: {
-                  color: "#ffffff",
+                  color: "rgba(255,255,255,.1)",
                 },
                 onZero: false,
                 show: true,
@@ -847,65 +724,94 @@ export default {
               data: this.lineData,
               type: "line",
               smooth: true,
+              symbol: "circle",
+              symbolSize: 10,
+              showSymbol: false,
               itemStyle: {
                 emphasis: {
-                  borderColor: "#000000",
+                  borderColor: "#ffffff",
                 },
               },
             },
           ],
         };
-
-        // 3. 使用刚指定的配置项和数据，显示图表
         myChart.setOption(optionL);
+        window.addEventListener("resize", function () {
+          myChart.resize();
+        });
       });
-
-
     },
+
     createEchartPie(moduleRunStatus) {
       for (let i = 0; i < moduleRunStatus.length; i++) {
-        let ratioVO = moduleRunStatus[i]
-        let percent = parseInt(ratioVO.runNum / ratioVO.sum * 100)
-        console.log(percent,"percent")
+        let ratioVO = moduleRunStatus[i];
+        let percent = parseInt((ratioVO.runNum / ratioVO.sum) * 100);
         let pieBar = echarts.init(document.getElementById("pieBar" + i));
         let option = {
           grid: {
             top: "3%",
             bottom: "3%",
           },
+          tooltip: {
+            trigger: "item",
+            formatter: function (params) {
+              return "在线:" + ratioVO.runNum + "<br>" + "总数:" + ratioVO.sum;
+            },
+          },
           series: [
             {
-              name: "valueOfMarket",
+              name: percent,
               type: "pie",
-              center: ["50%", "40%"], // 饼图的圆心坐标
-              radius: ["50%", "60%"],
+              center: ["50%", "50%"],
+              radius: ["35%", "90%"],
+              startAngle: 0,
               avoidLabelOverlap: false,
               hoverAnimation: false,
+
               label: {
-                //  饼图图形上的文本标签
                 normal: {
-                  // normal 是图形在默认状态下的样式
                   show: true,
                   position: "center",
-                  formatter: "{c}%",
+                  // formatter: "{c}
+                  formatter: "{a}%",
+                  fontSize: 20, // Increase font size to 20px
+                  color: "#ffffff",
                 },
+                emphasis: {
+                  itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: "rgba(0,0,0,0.5)",
+                  },
+                },
+                color: "rgba(255,255,255,.6)",
               },
               data: [
                 {
-                  value: percent,
-                  name: "name",
+                  value: 100,
                   itemStyle: {
-                    color: "#FF6A6A",
-                  },
-                  label: {
-                    color: "#ffffff",
+                    normal: {
+                      color: "rgba(80,150,224,0)",
+                    },
                   },
                 },
                 {
-                  value: 100 - percent,
-                  name: "",
+                  value: percent, // 渐变色部分
                   itemStyle: {
-                    color: "#4EEE94",
+                    // color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    //   { offset: 0, color: "#3db6fc" },
+                    //   { offset: 0.5, color: "#fdb146" },
+                    //   { offset: 1, color: "#00ECD9" },
+                    // ]),
+                    color: "#3db6fc",
+                  },
+                },
+                {
+                  value: 100 - percent, // 右侧部分
+                  itemStyle: {
+                    normal: {
+                      color: "#0C5071",
+                    },
                   },
                 },
               ],
@@ -915,91 +821,28 @@ export default {
 
         pieBar.setOption(option);
       }
-
     },
-    createEchartRadar() {
-      var radarCharts = echarts.init(document.getElementById('radarCharts'));
 
-      var optionR = {
-        color: ['#58ffff', '#fff100', '#007aff'],
-        tooltip: {},
-        radar: {
-          name: {
-            color: '#00ffff',
-            fontSize: 12
-          },
-          splitArea: {
-            show: false
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#212527'
-            }
-          },
-          radius: "48%",
-          indicator: [{
-            name: '正常运行状态',
-            max: 24
-          },
-            {
-              name: '警戒状态',
-              max: 16
-            },
-            {
-              name: '紧急状态',
-              max: 30
-            },
-            {
-              name: '异常状态',
-              max: 38
-            },
-            {
-              name: '恢复状态',
-              max: 52
-            },
-            {
-              name: '系统状态',
-              max: 25
-            }
-          ]
-        },
-        series: [{
-          name: '故障占比',
-          type: 'radar',
-          data: [{
-            value: [18, 15, 28, 35, 50, 24],
-            name: '类型一'
-          },
-            {
-              value: [8, 8, 28, 31, 42, 21],
-              name: '类型二'
-            },
-            {
-              value: [4, 3, 10, 11, 12, 23],
-              name: '类型三'
-            }
-          ]
-        }]
-      };
-
-      radarCharts.setOption(optionR)
-    },
     getDetectTypeRatio() {
       this.api({
         url: "/screenDisplay/countDetectTypeRatio",
         method: "get",
-      }).then(data => {
+      }).then((data) => {
         this.detectTypeRatioList = data;
-      })
+      });
     },
     getLastAbnormalList() {
       this.api({
         url: "/screenDisplay/getLastAbnormalList",
         method: "get",
-        params: {pageNum: 1, pageRow: 5, uncheck: true},
-      }).then(data => {
+        params: { pageNum: 1, pageRow: 15, uncheck: true },
+      }).then((data) => {
         this.abnormalList = data.list;
-      })
+        this.abnormalList.forEach((temp) => {
+          let str = temp.expTime.split("-");
+          temp.expTime = str[1] + "-" + str[2];
+        });
+      });
     },
     // 定时刷新数据函数
     dataRefreh() {
@@ -1021,39 +864,220 @@ export default {
       this.api({
         url: "/screenDisplay/countAreaRatio",
         method: "get",
-      }).then(data => {
+      }).then((data) => {
         this.areaRatioList = data;
-      })
+      });
     },
     getCountModuleRunStatus() {
       this.api({
         url: "/screenDisplay/countModuleRunStatus",
         method: "get",
-      }).then(data => {
+      }).then((data) => {
         this.moduleRunStatus = data;
 
         setTimeout(() => {
           this.createEchartPie(this.moduleRunStatus);
         }, 1);
+      });
+    },
 
-      })
+    // 判断轮播
+    judgeStaus() {
+      if (this.videoStatus != true) {
+        clearInterval(this.videoTimer);
+      }
+    },
+    // 轮播
+    forVideo() {
+      for (let i in this.listN) {
+        this.listN[i] =
+          (this.listN[i] + this.listN.length) % this.listObj.length;
+      }
+      this.initPlayer1();
+      this.initPlayer2();
+      this.initPlayer3();
+      this.initPlayer4();
+    },
+    //初始化
+    initPlayer1() {
+      this.closePlayer();
+      if (flvjs.isSupported()) {
+        const videoElement1 = this.$refs.videoElement1;
+        this.createVideo(videoElement1, this.listN[0]);
+        this.flvPlayerList.push(this.flvPlayer);
+      }
+    },
+    initPlayer2() {
+      if (flvjs.isSupported()) {
+        const videoElement2 = this.$refs.videoElement2;
+        this.createVideo(videoElement2, this.listN[1]);
+        this.flvPlayerList.push(this.flvPlayer);
+      }
+    },
+    initPlayer3() {
+      if (flvjs.isSupported()) {
+        const videoElement3 = this.$refs.videoElement3;
+        this.createVideo(videoElement3, this.listN[2]);
+        this.flvPlayerList.push(this.flvPlayer);
+      }
+    },
+
+    createVideo(videoElement, n) {
+
+      console.log(videoElement, n)
+      this.listLoading = false;
+
+      // 配置需要的功能
+      const flv = new FlvExtend({
+        element: videoElement, // *必传
+        frameTracking: true, // 开启追帧设置
+        updateOnStart: true, // 点击播放后更新视频
+        updateOnFocus: false, // 获得焦点后更新视频
+        reconnect: true, // 开启断流重连
+        reconnectInterval: 2000, // 断流重连间隔
+      });
+
+      this.flvPlayer = flv.init(
+        {
+          type: "flv",
+          url: this.listObj[n].httpUrl,
+          isLive: true, // 直播模式
+        },
+        {
+          enableWorker: false, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
+          enableStashBuffer: true, //播放flv时，设置是否启用播放缓存，只在直播起作用。
+          stashInitialSize: "300KB", // 指示IO暂存缓冲区的初始大小。默认值为384KB。指出合适的尺寸可以改善视频负载/搜索时间。
+          lazyLoad: true, // 懒加载 数据足够播放 终止http请求
+          lazyLoadMaxDuration: 3, // 懒加载保留3秒
+          accurateSeek: false, // 精确查找任何帧，加载会变慢
+          autoCleanupSourceBuffer: true, // 自动清理缓存
+          rangeLoadZeroStart: true, // Range: bytes=0-如果使用范围查找，则发送首次负载
+        }
+      );
+
+      flv.onError = (errorObj, player) => {
+        // const id = this.getUrlParams(player._statisticsInfo.url)["stream"];
+        console.log("播放失败...", player);
+
+        this.api({
+          url: "/cameraLive/alistCameraLive",
+          method: "post",
+          data: {
+            pageNum: 1, //页码
+            pageRow: 4, //每页条数
+            id: [],
+            level: "1",
+          },
+        }).then((data) => {
+          this.listObjTest = data;
+          this.listObjTest.forEach((item) => {
+            this.listObj.push({
+              id: 11,
+              cameraName: item.cameraName,
+              ip: "",
+              httpUrl: item.httpUrl,
+            });
+          });
+          const videoElement = this.$refs['videoElement' + n];
+          this.createVideo(videoElement, n);
+        });
+      };
+    },
+    reloadVideo(videoElement, n, flvPlayer) {
+      videoElement.src = "";
+      // this.destoryVideo(flvPlayer);
+      // this.createVideo(videoElement, n);
+    },
+    goabormalList() {
+      this.$router.push({
+        path: "/system/abnormalInfo",
+      });
+    },
+    gocamera() {
+      this.$router.push({
+        path: "/system/config/cameraInfo",
+      });
+    },
+    destoryVideo(flvPlayer) {
+      try {
+        if (flvPlayer) {
+          console.log("close flvPlayer......");
+          flvPlayer.pause();
+          flvPlayer.unload();
+          flvPlayer.detachMediaElement();
+          flvPlayer.destroy();
+          flvPlayer = null;
+        }
+      } catch (err) {
+        console.error(err);
+        flvPlayer = null;
+      }
+    },
+    //中断直播播放流
+    closePlayer() {
+      for (let i in this.flvPlayerList) {
+        console.log(i);
+        this.destoryVideo(this.flvPlayerList[i]);
+      }
+      this.flvPlayerList = [];
     },
   },
 };
 </script>
 
 <style scoped>
-.wrap {
-  position: relative;
-  height: 100%;
-  /*  background: url('../images/bg.png') no-repeat;*/
-  background-size: 100% 100%;
-  background-color: rgb(3, 20, 52);
-  /* background:-webkit-linear-gradient(); */
+#echart2 {
+  zoom: 1.25;
 }
+#echarts_box {
+  zoom: 1.25;
+}
+.content {
+  /*margin-left: -7%;*/
+  width: 800px;
+  background-image: url("../../assets/images/listitembg.png");
+  height: 40px;
+  padding-top: 10px;
+}
+.content li {
+  display: inline;
+  padding-left: 3%;
+  padding-right: 3%;
+  white-space: nowrap;
+}
+.th {
+  flex-direction: row;
+  margin-left: -5%;
+  width: 800px;
+  color: #00dcfd;
+}
+.th li {
+  display: inline;
+  padding-left: 6%;
+  padding-right: 6%;
+  white-space: nowrap;
+  font-size: 23px;
+  font-family: HuXiaoBoNanShenTi-2-Regular;
+}
+.seamless-wrap {
+  height: 329px;
+  width: 100%;
+  overflow: hidden;
+}
+.wrap {
+  position: absolute;
+  z-index: 1005;
+  height: 100%;
+  top: 0px;
+  bottom: 0px;
+  background-size: 100% 100%;
+  width: 100%;
+  height: 100%;
+  background-image: url("../../assets/images/bgimg2.png");
 
+  background: -webkit-linear-gradient();
+}
 .header-wrap {
-  /* position: absolute; */
   position: absolute;
   top: 10;
   left: 0;
@@ -1065,71 +1089,247 @@ export default {
   text-align: center;
   line-height: 80px;
   font-size: 30px;
-  /* color: #fff; */
   font-weight: bold;
-  background-image: -webkit-linear-gradient(left, rgb(0, 121, 255), rgb(0, 255, 255), rgb(0, 121, 255));
+  background-image: -webkit-linear-gradient(
+    left,
+    rgb(0, 121, 255),
+    rgb(0, 255, 255),
+    rgb(0, 121, 255)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
 }
 
 .box-card {
-  background-color: rgb(3, 20, 52);
-  /* border-color: rgb(2, 19, 49);  */
-  border: 1px solid rgb(56, 98, 145);
+  background-color: rgba(3, 20, 52, 0.1);
+  /*两侧框线条*/
+  /*box-shadow:inset 0px 0px 15px 8px #626F93;*/
+  /*box-shadow:inset 0 0 10px raba(255,255,255,0.5);*/
   color: #fff;
-  border-radius: 10px;
-  overflow-y:auto;/* 开启滚动显示溢出内容 */
+  /*overflow-y:auto;!* 开启滚动显示溢出内容 *!*/
+  /*animation: blink-border 2s infinite alternate;*/
+  /*animation-delay: 0.5s;*/
+  /* background-image: url("../../assets/images/index_card_bg.png"); */
+  background-image: url("../../assets/images/loginbg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(32, 254, 255, 0.3);
+  position: relative;
+  transform: scale(0.95);
 }
 
+.box-card::before {
+  content: " ";
+  position: absolute;
+  width: 3px;
+  height: 100%;
+  top: -100%;
+  left: 0;
+  background-image: linear-gradient(0deg, transparent, #66b1ff, transparent);
+  animation: two 4s linear infinite;
+  /*infinite:指定动画无限次播放；linear：运行曲线，匀速运动；two动画名称；4s：花费一个周期所需要的时间*/
+}
+
+.box-card::after {
+  content: " ";
+  position: absolute;
+  width: 3px;
+  height: 100%;
+  bottom: -100%;
+  right: 0;
+  background-image: linear-gradient(360deg, transparent, #66b1ff, transparent);
+  animation: four 4s linear 2s infinite;
+  /*2s延迟2秒播放*/
+}
+.box-card i {
+  position: absolute;
+  display: inline-block;
+  height: 3px;
+  width: 100%;
+}
+.box-card .bottom {
+  bottom: 0;
+  left: -100%;
+  background-image: linear-gradient(270deg, transparent, #66b1ff, transparent);
+  animation: one 4s linear 1s infinite;
+}
+
+.box-card .top {
+  top: 0;
+  right: -100%;
+  background-image: linear-gradient(270deg, transparent, #66b1ff, transparent);
+  animation: three 4s linear 3s infinite;
+}
+.slidleft_01 {
+  animation-name: leftslide, blink-border;
+  animation-duration: 0.5s, 2s;
+  animation-iteration-count: 1, infinite;
+  animation-delay: 0s, 0.5s;
+}
+.slidleft_02 {
+  animation-name: leftslide, blink-border;
+  animation-duration: 1s, 2s;
+  animation-iteration-count: 1, infinite;
+  animation-delay: 0s, 1.5s;
+}
+.slidleft_03 {
+  animation-name: leftslide, blink-border;
+  animation-duration: 1.5s, 2s;
+  animation-iteration-count: 1, infinite;
+  animation-delay: 0s, 2s;
+}
+.slidup {
+  animation-name: upslide, blink-border;
+  animation-duration: 1.5s, 2s;
+  animation-iteration-count: 1, infinite;
+  animation-delay: 0s, 1.5s;
+}
+.slidright_01 {
+  animation-name: rightslide, blink-border;
+  animation-duration: 0.5s, 2s;
+  animation-iteration-count: 1, infinite;
+  animation-delay: 0s, 0.5s;
+}
+.slidright_02 {
+  animation-name: rightslide, blink-border;
+  animation-duration: 1s, 2s;
+  animation-iteration-count: 1, infinite;
+  animation-delay: 0s, 1.5s;
+}
+.slidright_03 {
+  animation-name: rightslide, blink-border;
+  animation-duration: 1.5s, 2s;
+  animation-iteration-count: 1, infinite;
+  animation-delay: 0s, 2s;
+}
+
+@keyframes leftslide {
+  from {
+    margin-left: -100%;
+  }
+  to {
+    margin-left: 0%;
+  }
+}
+@keyframes upslide {
+  from {
+    margin-top: 40%;
+  }
+  to {
+    margin-top: 8px;
+  }
+}
+@keyframes rightslide {
+  from {
+    margin-left: 100%;
+  }
+  to {
+    margin-left: 0%;
+  }
+}
+@keyframes one {
+  0% {
+    left: -100%;
+  }
+  50%,
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes two {
+  0% {
+    top: -100%;
+  }
+  50%,
+  100% {
+    top: 100%;
+  }
+}
+
+@keyframes three {
+  0% {
+    right: -100%;
+  }
+  50%,
+  100% {
+    right: 100%;
+  }
+}
+
+@keyframes four {
+  0% {
+    bottom: -100%;
+  }
+  50%,
+  100% {
+    bottom: 100%;
+  }
+}
+/*两侧标题*/
 .title_style {
   text-align: center;
   display: block;
-  color: #00ffff;
-  font-size: 18px;
+  /*color: #00ffff;*/
+  color: #ffffff;
+  font-size: 24px;
+  font-family: HuXiaoBoNanShenTi-2-Regular;
 }
-
+.title_style::before {
+  content: " ";
+  background-image: url("../../assets/images/left.png");
+  background-size: cover;
+  display: inline-block;
+  width: 19px;
+  height: 16px;
+  margin-right: 10px;
+}
+.title_style::after {
+  content: " ";
+  background-image: url("../../assets/images/right.png");
+  background-size: cover;
+  display: inline-block;
+  width: 19px;
+  height: 16px;
+  margin-left: 10px;
+}
+/*左侧*/
 .content_style {
   text-align: center;
   display: block;
-  color: #00ffff;
+  /*color: #00ffff;*/
+  color: #ffffff;
   font-size: 15px;
-
 }
 
-/* .progressBar >>> .el-progress-bar__outer {
-  background-color: #386291;
-}  */
 .el-progress--line >>> .el-progress-bar__outer {
   background-color: rgb(56, 98, 145);
 }
-
+/*两侧标题内容中间线条*/
 .box-card /deep/ .el-card__header {
   border-bottom: 1px solid rgb(56, 98, 145);
+  padding: 5px 18px;
+  background-image: url("../../assets/images/lightwhite.png");
+  background-repeat: no-repeat;
+  text-align: center;
+  background-position-x: center;
+  background-position-y: top;
 }
 
 .el-progress-circle__track {
   stroke: #386291;
 }
-
-/* .el-progress-bar__outer {
-  stroke: #386291;
-} */
-/* .el-card__header{
-  border-bottom: 1px solid rgb(56,98,145);
-} */
 .el-font-color {
   color: #fff;
 }
-
+/*违规背景*/
 .background_color {
-  background-color: rgb(3, 20, 52);
+  background-color: rgba(3, 20, 52, 0.1);
 }
 
 .el-header {
   height: 10%;
 }
-
 .el-container {
   /*设置内部填充为0，几个布局元素之间没有间距*/
   padding: 0px;
@@ -1139,34 +1339,25 @@ export default {
   height: 100%;
   width: 100%;
 }
-
 .el-aside {
-  width: 10%;
+  width: 25%;
   padding: 0px;
   /*外部间距也是如此设置*/
   margin: 0px;
 }
 
 .box-card {
-  height: 32%;
+  height: 30%;
+  width: 100%;
+  margin: 5px 0px;
 }
-
-/* .el-row{
-    background-color: coral;
-
-  }
-  .el-col{
-    background-color: cornflowerblue;
-    color: #ffffff;
-    padding: 10px 0;
-  } */
 .pie-bar {
   float: left;
   position: relative;
   width: 33%;
-  height: 100%;
+  margin-top: 10%;
+  /*background-image:url("../../assets/images/bgpie.png") no-repeat;*/
 }
-
 .pie-bar span {
   position: absolute;
   left: 50%;
@@ -1201,7 +1392,6 @@ export default {
 .fault-box {
   height: 100%;
 }
-
 .fault-box li .fault-icon {
   float: left;
   width: 16px;
@@ -1218,4 +1408,41 @@ export default {
   margin-top: 4px;
   width: 55%;
 }
+#my-object::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+}
 </style>
+
+<style scoped>
+.video-wrapper {
+  /*position: relative;*/
+  /*top: 0px;*/
+  /*bottom: 0px;*/
+  /*left: 0px;*/
+  /*right: 0px;*/
+  padding: 0px;
+}
+/*@keyframes blink-border {*/
+/*  from {*/
+/*    !*border-color: transparent;*!*/
+/*    border: 2px solid transparent;*/
+/*    border-radius: 10px;*/
+/*  }*/
+/*  to {*/
+/*    !*border-color: #00ffff; !* 使用你喜欢的颜色 *!*!*/
+/*    border: 2px solid #00ffff;*/
+/*    border-radius: 10px;*/
+/*  }*/
+/*}*/
+/*
+css 注释：
+只对table td设置左与上边框；
+对table设置右与下边框；
+为了便于截图，我们将css 注释说明换行排版
+*/
+.player-wrapper {
+  padding-bottom: 0px;
+}
+</style>
+

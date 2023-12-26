@@ -6,8 +6,8 @@ module.exports = {
     //build打包时直接打包到spring-boot项目中，根据自己项目存储位置修改
     // index: path.resolve(__dirname, '../dist/index.html'),
     //assetsRoot: path.resolve(__dirname, '../dist'),
-    index: path.resolve(__dirname, '../../IMDP-springboot/src/main/resources/static/index.html'),
-    assetsRoot: path.resolve(__dirname, '../../IMDP-springboot/src/main/resources/static'),
+    index: path.resolve(__dirname, '../dist/index.html'),
+    assetsRoot: path.resolve(__dirname, '../dist/static'),
     assetsSubDirectory: 'static',
     assetsPublicPath: './',
     productionSourceMap: true,
@@ -34,9 +34,19 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/api': {
-        target: 'http://localhost:8080',
+        // target: 'http://localhost:8080',
+        target: 'http://10.235.0.109:8080',
         pathRewrite: {
           '^/api': '/'
+        }
+      },
+      '/api/test': {
+        target: 'https://www.baidu.com',
+        changeOrigin: true,
+        ws: true,
+        secure: false,
+        pathRewrite: {
+          '^/api/test': '/'
         }
       }
     },

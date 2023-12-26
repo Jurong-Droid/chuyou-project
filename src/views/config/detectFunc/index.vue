@@ -85,6 +85,11 @@ export default {
         }
     },
     created() {
+      document.body.style.zoom = "80%";
+      if (location.href.indexOf("#reloaded") == -1) {
+        location.href = location.href + "#reloaded";
+        location.reload();
+      }
         this.getList();
     },
     methods: {
