@@ -60,7 +60,7 @@ class FlvExtend {
     this._bindPlayerMethods()
     this._bindPlayerEvents()
     this._handleStuck()
-
+    this.player.play();
     return this.player
   }
 

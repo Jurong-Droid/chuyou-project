@@ -116,7 +116,7 @@
                   @click="splitScreen(9)"
                   >九分屏</el-button
                 >
-                <!--                <el-button size="mini" :type="classtype4" @click="splitScreen(16)">十六分屏</el-button>-->
+                <!--<el-button size="mini" :type="classtype4" @click="splitScreen(16)">十六分屏</el-button>-->
               </el-button-group>
             </div>
           </el-col>
@@ -129,7 +129,7 @@
 
 <script>
 import _ from "lodash";
-import flvjs from "flv.js";
+// import flvjs from "flv.js";
 import FlvExtend from "@/utils/flvExtend.js";
 
 export default {
@@ -405,40 +405,66 @@ export default {
       }
     },
     createVideo(videoElement, n) {
-      this.flvPlayer = flvjs.createPlayer(
+      console.log(videoElement, n);
+
+      // 配置需要的功能
+      const flv = new FlvExtend({
+        element: videoElement, // *必传
+        frameTracking: true, // 开启追帧设置
+        updateOnStart: true, // 点击播放后更新视频
+        updateOnFocus: false, // 获得焦点后更新视频
+        reconnect: true, // 开启断流重连
+        reconnectInterval: 2000, // 断流重连间隔
+      });
+
+      this.flvPlayer = flv.init(
         {
           type: "flv",
-          enableWorker: true, //浏览器端开启flv.js的worker,多进程运行flv.js
-          isLive: true, //直播模式
-          // hasAudio: true, //开启音频
-          // hasVideo: true,
-          // stashInitialSize: 128,
-          enableStashBuffer: false, //播放flv时，设置是否启用播放缓存，只在直播起作用。
           url: this.listObj[n].httpUrl,
+          isLive: true, // 直播模式
         },
         {
-          enableWorker: false, //不启用分离线程
-          enableStashBuffer: false, //关闭IO隐藏缓冲区
-          reuseRedirectedURL: true, //重用301/302重定向url，用于随后的请求，如查找、重新连接等。
-          autoCleanupSourceBuffer: true, //自动清除缓存
+          enableWorker: false, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
+          enableStashBuffer: true, //播放flv时，设置是否启用播放缓存，只在直播起作用。
+          stashInitialSize: "300KB", // 指示IO暂存缓冲区的初始大小。默认值为384KB。指出合适的尺寸可以改善视频负载/搜索时间。
+          lazyLoad: true, // 懒加载 数据足够播放 终止http请求
+          lazyLoadMaxDuration: 3, // 懒加载保留3秒
+          accurateSeek: false, // 精确查找任何帧，加载会变慢
+          autoCleanupSourceBuffer: true, // 自动清理缓存
+          rangeLoadZeroStart: true, // Range: bytes=0-如果使用范围查找，则发送首次负载
         }
       );
-      this.flvPlayer.attachMediaElement(videoElement);
-      this.flvPlayer.load();
-      if (
-        this.listObj[n] &&
-        this.listObj[n].httpUrl !== null &&
-        this.listObj[n].httpUrl !== ""
-      ) {
-        this.flvPlayer.play();
-      }
-      this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
-        if (errType === flvjs.ErrorTypes.NETWORK_ERROR) {
-          //this.reloadVideo(videoElement, n, this.flvPlayer);
-        }
-        // errType是 NetworkError时，对应errDetail有：Exception、HttpStatusCodeInvalid、ConnectingTimeout、EarlyEof、UnrecoverableEarlyEof
-        // errType是 MediaError时，对应errDetail是MediaMSEError   或MEDIA_SOURCE_ENDED
-      });
+      flv.onError = (errorObj, player) => {
+        const id = this.getUrlParams(player._statisticsInfo.url)["stream"];
+        console.log("播放失败...", player);
+
+        this.api({
+          url: "/cameraLive/alistCameraLive",
+          method: "post",
+          data: {
+            id: id,
+            level: 2,
+            pageNum: 1,
+            pageRow: 4,
+          },
+        }).then((data) => {
+          this.listObj[n] = data[0];
+          const videoElement = vieoElementList[n];
+          this.createVideo(videoElement, n);
+          this.flvPlayerList.push(this.flvPlayer);
+        });
+      };
+    },
+    getUrlParams(url) {
+      const _url = url || window.location.href;
+      const _urlParams = _url.match(/([?&])(.+?=[^&]+)/gim);
+      return _urlParams
+        ? _urlParams.reduce((a, b) => {
+            const value = b.slice(1).split("=");
+            a[value[0]] = value[1];
+            return a;
+          }, {})
+        : {};
     },
     reloadVideo(videoElement, n, flvPlayer) {
       videoElement.src = "";

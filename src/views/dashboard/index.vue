@@ -12,10 +12,10 @@
     "
   >
     <div class="wrap">
-      <el-container style="margin-top: 3%">
-        <el-header style="height: 10px">
+      <el-container style="margin-top: 4%">
+        <!-- <el-header style="height: 10px">
           <span class="header-wrap"></span>
-        </el-header>
+        </el-header> -->
         <el-container>
           <el-aside style="width: 25%">
             <el-card

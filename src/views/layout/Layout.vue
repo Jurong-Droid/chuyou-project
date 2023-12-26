@@ -1,9 +1,15 @@
 <template>
-
-
-  <div v-if="this.$route.path.includes('/dashboard')" class="app-wrapper" :class="{hideSidebar:!sidebar.opened}" style="overflow:hidden;background-image: url(../../assets/images/bgimg2.jpg);">
-    <div  style="height: 70px; width: 100%; position: absolute;">
-      <sidebar class="sidebar-container" style="display:inline;"></sidebar>
+  <div
+    v-if="this.$route.path.includes('/dashboard')"
+    class="app-wrapper"
+    :class="{ hideSidebar: !sidebar.opened }"
+    style="
+      overflow: hidden;
+      background-image: url(../../assets/images/bgimg2.jpg);
+    "
+  >
+    <div style="height: 70px; width: 100%; position: absolute">
+      <sidebar class="sidebar-container" style="display: inline"></sidebar>
     </div>
     <div class="main-container">
       <navbar class="header"></navbar>
@@ -11,32 +17,31 @@
     </div>
   </div>
 
-  <div v-else class="app-wrapper" :class="{hideSidebar:!sidebar.opened}" >
-    <div  style="height: 70px; width: 100%; position: absolute;">
-      <sidebar class="sidebar-container" style="display:inline"></sidebar>
+  <div v-else class="app-wrapper" :class="{ hideSidebar: !sidebar.opened }">
+    <div style="height: 70px; width: 100%; position: absolute">
+      <sidebar class="sidebar-container" style="display: inline"></sidebar>
     </div>
     <div class="main-container">
       <navbar></navbar>
       <app-main></app-main>
     </div>
   </div>
-
 </template>
 
 <script>
-import { Navbar, Sidebar, AppMain } from '@/views/layout/components'
+import { Navbar, Sidebar, AppMain } from "@/views/layout/components";
 
 export default {
-  name: 'layout',
+  name: "layout",
   components: {
     Navbar,
     Sidebar,
-    AppMain
+    AppMain,
   },
   computed: {
     sidebar() {
-      return this.$store.state.app.sidebar
-    }
+      return this.$store.state.app.sidebar;
+    },
   },
   // mounted() {
   //   let browerWidth = window.innerWidth; //浏览器可视宽度
@@ -49,7 +54,7 @@ export default {
   //     document.getElementById("mainContainer").style.transform = "scale(" + zoomValue + "," + zoomValue + ")";
   //   }
   // }
-}
+};
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
@@ -60,16 +65,16 @@ export default {
   height: 100%;
   width: 100%;
 }
-.header{
+.header {
   position: absolute;
   z-index: 1003;
   animation: headdowm 1.5s;
 }
 @keyframes headdowm {
-  from{
+  from {
     margin-top: -3%;
   }
-  to{
+  to {
     margin-top: 0%;
   }
 }
