@@ -408,6 +408,7 @@ export default {
     }
   },
   async mounted() {
+    console.log('提交')
     document.body.style.zoom = 0.8;
     this.listLoading = false;
 
