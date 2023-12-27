@@ -18,7 +18,7 @@
   </div>
 
   <div v-else class="app-wrapper" :class="{ hideSidebar: !sidebar.opened }">
-    <div style="height: 70px; width: 100%; position: absolute">
+    <div style="height: 70px; width: 100%; position: absolute; z-index: 1;">
       <sidebar class="sidebar-container" style="display: inline"></sidebar>
     </div>
     <div class="main-container">

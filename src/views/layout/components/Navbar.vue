@@ -315,6 +315,7 @@ export default {
       font-size: 18px;
       color: #5a5e66;
       vertical-align: text-bottom;
+      z-index: 2;
 
       &.hover-effect {
         cursor: pointer;
