@@ -69,6 +69,7 @@ export default {
   position: absolute;
   z-index: 1003;
   animation: headdowm 1.5s;
+  top: 14px;
 }
 @keyframes headdowm {
   from {

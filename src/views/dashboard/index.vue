@@ -1071,11 +1071,10 @@ export default {
   height: 100%;
   top: 0px;
   bottom: 0px;
-  background-size: 100% 100%;
   width: 100%;
   height: 100%;
   background-image: url("../../assets/images/bgimg2.png");
-
+  background-size: 100% 100%;
   background: -webkit-linear-gradient();
 }
 .header-wrap {

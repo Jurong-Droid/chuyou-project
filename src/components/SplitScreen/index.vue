@@ -4,124 +4,87 @@
       <el-main
         v-loading.body="listLoading"
         element-loading-text="拼命加载中"
-        style="overflow-y: hidden; padding-left: 0px; padding-right: 1px"
+        style="overflow-y: hidden; padding: 0"
       >
-        <el-row :gutter="10">
-          <el-col
-            v-for="(n, index) in fornum"
-            :xs="24"
-            :sm="24"
-            :md="clonum"
-            :lg="clonum"
-            :xl="clonum"
-            :class="videoclass"
-            :key="index"
-            style="padding: 0"
-          >
-            <div
-              class="player-wrapper"
-              element-loading-text="加载中..."
-              element-loading-background="#000"
+        <div id="container_max">
+          <el-row :gutter="10" style="margin: 0 !important">
+            <el-col
+              v-for="(n, index) in fornum"
+              :xs="24"
+              :sm="24"
+              :md="clonum"
+              :lg="clonum"
+              :xl="clonum"
+              :class="videoclass"
+              :key="index"
+              style="padding: 0"
             >
-              <div class="video-wrapper" :style="videoclass">
-                <div
-                  class="video-inner live hide-waiting"
-                  style="
-                    position: absolute;
-                    top: 0px;
-                    bottom: 0px;
-                    left: 0px;
-                    right: 0px;
-                    margin-bottom: -5px;
-                  "
-                >
-                  <el-button
-                    v-if="seReplace == n - 1"
+              <div
+                class="player-wrapper"
+                element-loading-text="加载中..."
+                element-loading-background="#000"
+              >
+                <div class="video-wrapper" :style="videoclass">
+                  <div
+                    class="video-inner live hide-waiting"
                     style="
                       position: absolute;
-                      z-index: 1002;
-                      left: 20px;
-                      font-size: 25px;
+                      top: 0px;
+                      bottom: 0px;
+                      left: 0px;
+                      right: 0px;
+                      margin-bottom: -5px;
                     "
-                    type="text"
-                    circle
-                    @click="replaceVideo(n - 1)"
-                    icon="el-icon-success"
-                  ></el-button>
-                  <el-button
-                    v-else
-                    style="
-                      position: absolute;
-                      z-index: 1002;
-                      left: 20px;
-                      font-size: 25px;
-                    "
-                    type="text"
-                    circle
-                    @click="replaceVideo(n - 1)"
-                    icon="el-icon-circle-check"
-                  ></el-button>
-                  <el-button
-                    id="demo"
-                    style="position: absolute; z-index: 1002; right: 20px"
-                    type="text"
-                    circle
-                    @click="SclosePlayer(n - 1)"
-                    >×</el-button
                   >
-                  <!--                  <el-button style="position: absolute;z-index: 1002;left: 20px;font-size: 25px" type="text" circle @click="(n-1)" icon="el-icon-refresh-right"></el-button>-->
-                  <video
-                    :id="`videoid${n}`"
-                    ref="videoElement"
-                    muted
-                    controls
-                    width="101%"
-                    height="100%"
-                    style="object-fit: fill"
-                  ></video>
+                    <el-button
+                      v-if="seReplace == n - 1"
+                      style="
+                        position: absolute;
+                        z-index: 1002;
+                        left: 20px;
+                        font-size: 25px;
+                      "
+                      type="text"
+                      circle
+                      @click="replaceVideo(n - 1)"
+                      icon="el-icon-success"
+                    ></el-button>
+                    <el-button
+                      v-else
+                      style="
+                        position: absolute;
+                        z-index: 1002;
+                        left: 20px;
+                        font-size: 25px;
+                      "
+                      type="text"
+                      circle
+                      @click="replaceVideo(n - 1)"
+                      icon="el-icon-circle-check"
+                    ></el-button>
+                    <el-button
+                      id="demo"
+                      style="position: absolute; z-index: 1002; right: 20px"
+                      type="text"
+                      circle
+                      @click="SclosePlayer(n - 1)"
+                      >×</el-button
+                    >
+                    <video
+                      :id="`videoid${n}`"
+                      ref="videoElement"
+                      muted
+                      controls
+                      width="100%"
+                      height="100%"
+                      style="object-fit: fill"
+                    ></video>
+                  </div>
                 </div>
               </div>
-            </div>
-          </el-col>
-        </el-row>
-        <el-row
-          type="flex"
-          :gutter="10"
-          justify="center"
-          v-show="!fullscreen"
-          style="height: 10%; margin-left: -15%; margin-top: 0.5%"
-        >
-          <el-col :span="8"></el-col>
-          <el-col :span="14">
-            <div
-              class="grid-content bg-purple"
-              style="text-align: center; width: 100%"
-            >
-              <el-button-group>
-                <el-button
-                  size="mini"
-                  :type="classtype1"
-                  @click="splitScreen(1)"
-                  >单屏</el-button
-                >
-                <el-button
-                  size="mini"
-                  :type="classtype2"
-                  @click="splitScreen(4)"
-                  >四分屏</el-button
-                >
-                <el-button
-                  size="mini"
-                  :type="classtype3"
-                  @click="splitScreen(9)"
-                  >九分屏</el-button
-                >
-                <!--<el-button size="mini" :type="classtype4" @click="splitScreen(16)">十六分屏</el-button>-->
-              </el-button-group>
-            </div>
-          </el-col>
-          <el-col :span="4"> </el-col>
-        </el-row>
+            </el-col>
+          </el-row>
+        </div>
       </el-main>
     </el-container>
   </div>
@@ -129,8 +92,9 @@
 
 <script>
 import _ from "lodash";
-// import flvjs from "flv.js";
+import flvjs from "flv.js";
 import FlvExtend from "@/utils/flvExtend.js";
+import screenfull from "screenfull";
 
 export default {
   inject: ["searchParam"],
@@ -168,6 +132,7 @@ export default {
   created() {
     document.body.style.zoom = "80%";
   },
+  mounted() {},
   computed: {
     param() {
       return this.searchParam();
@@ -241,6 +206,12 @@ export default {
   },
 
   methods: {
+    screenfullFn() {
+      const element = document.getElementById("container_max"); //指定全屏区域元素
+      if (screenfull.isEnabled) {
+        screenfull.request(element);
+      }
+    },
     replaceVideo(n) {
       if (this.seReplace == n) {
         this.seReplace = -1;
@@ -436,19 +407,21 @@ export default {
       );
       flv.onError = (errorObj, player) => {
         const id = this.getUrlParams(player._statisticsInfo.url)["stream"];
+        console.log(id, "id");
         console.log("播放失败...", player);
 
         this.api({
           url: "/cameraLive/alistCameraLive",
           method: "post",
           data: {
-            id: id,
+            id: [Number(id)],
             level: 2,
             pageNum: 1,
             pageRow: 4,
           },
         }).then((data) => {
           this.listObj[n] = data[0];
+          const vieoElementList = this.$refs.videoElement;
           const videoElement = vieoElementList[n];
           this.createVideo(videoElement, n);
           this.flvPlayerList.push(this.flvPlayer);
@@ -561,7 +534,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .video-wrapper {
   position: relative;
   top: 0px;
