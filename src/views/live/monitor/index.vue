@@ -33,7 +33,12 @@
               default-expand-all
             >
               <span class="custom-tree-node" slot-scope="{ node }">
-                <span>{{ node.label.slice(0, -2) }}</span>
+                <span>{{
+                  node.label.slice(-2) === "在线" ||
+                  node.label.slice(-2) === "离线"
+                    ? node.label.slice(0, -2)
+                    : node.label
+                }}</span>
                 <span>
                   <el-tag
                     style="font-size: 14px"
@@ -75,7 +80,7 @@
           >
         </div>
       </el-col>
-      <el-col :span="20">
+      <el-col :span="21">
         <div>
           <splitScreen
             @custom-event="closetree"

@@ -65,40 +65,33 @@
         zoom: 1.25;
       "
     >
-      <div
-        style="
-          display: flex;
-          flex-direction: column;
-          position: absolute;
-          margin-left: 90%;
-          z-index: 9900;
-          left: 20%;
-          height: 30%;
-          justify-content: space-around;
-          width: 15%;
-        "
-      >
-        <el-button type="danger" @click="ismaker = false" style="width: 80%"
+      <div class="mark-control">
+        <el-button
+          type="danger"
+          @click="ismaker = false"
+          style="width: 80%; margin-bottom: 10px"
+          size="mini"
           >关闭</el-button
         >
         <el-button
           type="primary"
           @click="saveImage"
-          style="width: 80%; margin-left: 0px"
+          style="width: 80%; margin-left: 0px; margin-bottom: 10px"
+          size="mini"
           >保存</el-button
         >
         <el-button
           size="mini"
           icon="el-icon-zoom-out"
           @click="zoomOut"
-          style="width: 80%; margin-left: 0px"
+          style="width: 80%; margin-left: 0px; margin-bottom: 10px"
           >缩小</el-button
         >
         <el-button
           size="mini"
           icon="el-icon-zoom-in"
           @click="zoomIn"
-          style="width: 80%; margin-left: 0px"
+          style="width: 80%; margin-left: 0px; margin-bottom: 10px"
           >放大</el-button
         >
         <el-select
@@ -106,13 +99,15 @@
           placeholder="选择标签"
           @change="setTag"
           :popper-append-to-body="false"
+          style="margin-bottom: 10px"
+          size="mini"
         >
           <el-option
             v-for="item in detectTypes"
             :key="item.id"
             :label="item.name"
             :value="item.id"
-            style="margin-left: 30%; width: 80%"
+            style="width: 80%; margin-bottom: 10px"
           />
         </el-select>
         <el-select
@@ -120,13 +115,14 @@
           placeholder="选择模型类型"
           @change="setMoType"
           :popper-append-to-body="false"
+          size="mini"
         >
           <el-option
             v-for="item in moduleTypes"
             :key="item.id"
             :label="item.name"
             :value="item.id"
-            style="margin-left: 30%; width: 80%"
+            style="width: 80%; margin-bottom: 10px"
           />
         </el-select>
       </div>
@@ -702,5 +698,21 @@ export default {
 
 .filter-container {
   margin-bottom: 10px;
+}
+
+.mark-control {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  margin-left: 90%;
+  z-index: 9900;
+  left: 20%;
+  justify-content: space-around;
+  width: 20%;
+  background: rgb(255, 255, 255);
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.19),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 </style>

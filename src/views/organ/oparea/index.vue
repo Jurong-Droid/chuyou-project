@@ -1,49 +1,111 @@
 <template>
   <div class="app-container">
-    <div>
-      <el-input size="mini" v-model="listLoading" placeholder="输入单位" style="width:15%"></el-input>
-      <el-button size="mini" v-waves type="primary" icon="el-icon-search">搜索</el-button>
-      <br>
+    <div style="margin-bottom: 14px">
+      <el-input
+        size="mini"
+        v-model="listLoading"
+        placeholder="输入单位"
+        style="width: 15%"
+      ></el-input>
+      <el-button
+        style="margin-left: 14px"
+        size="mini"
+        v-waves
+        type="primary"
+        icon="el-icon-search"
+        >搜索</el-button
+      >
+      <br />
     </div>
     <div>
-      <el-table :data="leftlist" border fit highlight-current-row style="font-size: 16px" :header-cell-style="{background:'#f5f7fa',color:'#409EFF'}" >
-        <el-table-column align="center" label="单位" prop="oparea" min-width="12"></el-table-column>
-        <el-table-column align="center" label="所属采油厂" prop="oilplant" min-width="12"></el-table-column>
-        <el-table-column align="center" label="所属油田" prop="oilfield" min-width="12"></el-table-column>
+      <el-table
+        :data="leftlist"
+        border
+        fit
+        highlight-current-row
+        style="font-size: 16px"
+        :header-cell-style="{ background: '#f5f7fa', color: '#3c3c3c' }"
+      >
+        <el-table-column
+          align="center"
+          label="单位"
+          prop="oparea"
+          min-width="12"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="所属采油厂"
+          prop="oilplant"
+          min-width="12"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="所属油田"
+          prop="oilfield"
+          min-width="12"
+        ></el-table-column>
         <el-table-column align="center" label="管理" min-width="20">
           <template slot-scope="scope">
-            <el-button type="primary" size="mini" @click="listdelete(scope.row.id)" >删除</el-button>
+            <el-popconfirm
+              title="请确认是否删除？"
+              @confirm="listdelete(scope.row.id)"
+            >
+              <el-button type="primary" size="mini" slot="reference"
+                >删除</el-button
+              ></el-popconfirm
+            >
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <div align="center"><br>
-      <el-button type="primary" @click="addlist()"  >添加</el-button>
+    <div align="center">
+      <br />
+      <el-button type="primary" @click="addlist()">添加</el-button>
     </div>
 
-    <el-dialog title="添加" :visible.sync="dialogFormVisible">
-      <el-form class="small-space" :model="tempinfo" label-position="left" label-width="15%">
+    <el-dialog title="添加" :visible.sync="dialogFormVisible" width="600px">
+      <el-form
+        class="small-space"
+        :model="tempinfo"
+        label-position="right"
+        label-width="100px"
+      >
         <el-form-item label="油田名称" required>
-          <el-select @change="handleSelectChange()" v-model="oilfieldid" placeholder="请选择油田" style="width: 40%">
-            <el-option v-for="item in oilfieldlist" :key="item.id" :label="item.oilfield" :value="item.id" >
+          <el-select
+            @change="handleSelectChange()"
+            v-model="oilfieldid"
+            placeholder="请选择油田"
+          >
+            <el-option
+              v-for="item in oilfieldlist"
+              :key="item.id"
+              :label="item.oilfield"
+              :value="item.id"
+            >
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="采油厂名称" required>
-          <el-select v-model="tempinfo.fid" placeholder="请选择采油厂" style="width: 40%">
-            <el-option v-for="item in tempoilplantlist" :key="item.id" :label="item.oilplant" :value="item.id"
+          <el-select
+            v-model="tempinfo.fid"
+            placeholder="请选择采油厂"
+          >
+            <el-option
+              v-for="item in tempoilplantlist"
+              :key="item.id"
+              :label="item.oilplant"
+              :value="item.id"
             >
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="单位名称" required>
-          <el-input type="text" v-model="tempinfo.name" style="width: 40%"/>
+          <el-input type="text" v-model="tempinfo.name" />
         </el-form-item>
-
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="success" @click="addCamera">创 建</el-button>
+        <el-button type="primary" @click="addCamera">创 建</el-button>
       </div>
     </el-dialog>
   </div>
@@ -51,118 +113,117 @@
 
 
 <script>
-import waves from '@/directives/waves/index.js' // 水波纹指令
+import waves from "@/directives/waves/index.js"; // 水波纹指令
 export default {
   directives: {
-    waves
+    waves,
   },
   data() {
     return {
-      oilfieldid:null,
-      tempoilplantlist:[],
-      oilplantlist:[],
-      oilplant:[],
-      oilfieldlist:[],
-      oilfield:[],
-      tempinfo:{
-        oname:3,
-        fid:null,
-        name:null
+      oilfieldid: null,
+      tempoilplantlist: [],
+      oilplantlist: [],
+      oilplant: [],
+      oilfieldlist: [],
+      oilfield: [],
+      tempinfo: {
+        oname: 3,
+        fid: null,
+        name: null,
       },
-      dialogFormVisible:false,
-      listLoading :null,
-      leftlist:[]
-    }
+      dialogFormVisible: false,
+      listLoading: null,
+      leftlist: [],
+    };
   },
-  methods:{
-    getoilfield(){
+  methods: {
+    getoilfield() {
       this.api({
-        url:"/organizationInfo/getoilfield",
-        method:"get",
-      }).then(data=>{
-        data.forEach(temp=>{
+        url: "/organizationInfo/getoilfield",
+        method: "get",
+      }).then((data) => {
+        data.forEach((temp) => {
           this.oilfieldlist.push({
-            id:temp.oilfieldId,
+            id: temp.oilfieldId,
             oilfield: temp.oilfieldName,
-          })
-        })
-      })
+          });
+        });
+      });
     },
-    getoilplant(){
+    getoilplant() {
       this.api({
-        url:"/organizationInfo/getoilplant",
-        method:"get",
-      }).then(data=>{
-        data.forEach(temp=>{
+        url: "/organizationInfo/getoilplant",
+        method: "get",
+      }).then((data) => {
+        data.forEach((temp) => {
           this.oilplantlist.push({
-            id:temp.oilplantId,
-            fid:temp.oilfieldId,
+            id: temp.oilplantId,
+            fid: temp.oilfieldId,
             oilfield: temp.oilfieldName,
-            oilplant:temp.oilplantName,
-          })
-        })
-      })
+            oilplant: temp.oilplantName,
+          });
+        });
+      });
     },
-    listdelete(n){
-      const index=this.leftlist.findIndex(item=>item.id===n);
-      this.leftlist.splice(index,1)
+    listdelete(n) {
+      const index = this.leftlist.findIndex((item) => item.id === n);
+      this.leftlist.splice(index, 1);
       this.api({
-        url:"/organizationInfo/deletelist",
-        method:"post",
-        data:{
-          oname:3,
-          fid:n,
-          name:null
-        }
-      }).then(data=>{
-      })
+        url: "/organizationInfo/deletelist",
+        method: "post",
+        data: {
+          oname: 3,
+          fid: n,
+          name: null,
+        },
+      }).then((data) => {});
     },
-    addlist(){
-      this.dialogFormVisible=true;
+    addlist() {
+      this.dialogFormVisible = true;
     },
-    handleSelectChange(){
-      this.tempinfo.fid=null,
-      this.tempoilplantlist=[],
-      this.oilplantlist.forEach(temp=>{
-        if(temp.fid===this.oilfieldid){
-        this.tempoilplantlist.push(temp);
-        }
-      })
+    handleSelectChange() {
+      (this.tempinfo.fid = null),
+        (this.tempoilplantlist = []),
+        this.oilplantlist.forEach((temp) => {
+          if (temp.fid === this.oilfieldid) {
+            this.tempoilplantlist.push(temp);
+          }
+        });
     },
     handleFilter() {
       //搜索
-      this.listLoading = true
+      this.listLoading = true;
       setTimeout(() => {
-        this.listLoading = false
-      }, 1000)
+        this.listLoading = false;
+      }, 1000);
     },
-    getlist(){
+    getlist() {
       this.api({
-        url:"/organizationInfo/getoparea",
-        method:"get",
-      }).then(data=>{
-        data.forEach(temp=>{
+        url: "/organizationInfo/getoparea",
+        method: "get",
+      }).then((data) => {
+        data.forEach((temp) => {
           this.leftlist.push({
-            id:temp.opareaId,
+            id: temp.opareaId,
             oilfield: temp.oilfieldName,
-            oilplant:temp.oilplantName,
-            oparea: temp.opareaName
-          })
-        })
-      })
+            oilplant: temp.oilplantName,
+            oparea: temp.opareaName,
+          });
+        });
+      });
     },
-    addCamera(){
-      let _vue= this;
+    addCamera() {
+      let _vue = this;
       this.api({
-        url:"/organizationInfo/addlist",
-        method:"post",
-        data:this.tempinfo
-      }).then(data=>{
-        this.leftlist=[];
+        url: "/organizationInfo/addlist",
+        method: "post",
+        data: this.tempinfo,
+      }).then((data) => {
+        this.leftlist = [];
         this.getlist();
-      })
+      });
 
-      this.dialogFormVisible=false;
+      this.dialogFormVisible = false;
     },
   },
   mounted() {
@@ -174,6 +235,6 @@ export default {
     this.getlist();
     this.getoilfield();
     this.getoilplant();
-  }
-}
+  },
+};
 </script>
