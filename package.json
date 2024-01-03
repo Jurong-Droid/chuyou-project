@@ -21,6 +21,7 @@
     "devui-theme": "^0.0.7",
     "echarts": "^5.1.2",
     "element-ui": "^2.15.6",
+    "flv-extend": "^0.3.0",
     "flv.js": "^1.6.1",
     "js-cookie": "2.2.0",
     "node-sass": "^9.0.0",

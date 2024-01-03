@@ -25,57 +25,47 @@
                 element-loading-background="#000"
               >
                 <div class="video-wrapper" :style="videoclass">
-                  <div
-                    class="video-inner live hide-waiting"
+                  <el-button
+                    v-if="seReplace == index"
                     style="
                       position: absolute;
-                      top: 0px;
-                      bottom: 0px;
-                      left: 0px;
-                      right: 0px;
-                      margin-bottom: -5px;
+                      z-index: 1002;
+                      left: 20px;
+                      font-size: 25px;
                     "
+                    type="text"
+                    circle
+                    @click="replaceVideo(index)"
+                    icon="el-icon-success"
+                  ></el-button>
+                  <el-button
+                    v-else
+                    style="
+                      position: absolute;
+                      z-index: 1002;
+                      left: 20px;
+                      font-size: 25px;
+                    "
+                    type="text"
+                    circle
+                    @click="replaceVideo(index)"
+                    icon="el-icon-circle-check"
+                  ></el-button>
+                  <el-button
+                    id="demo"
+                    style="position: absolute; z-index: 1002; right: 20px"
+                    type="text"
+                    circle
+                    @click="SclosePlayer(index)"
+                    >×</el-button
                   >
-                    <el-button
-                      v-if="seReplace == n - 1"
-                      style="
-                        position: absolute;
-                        z-index: 1002;
-                        left: 20px;
-                        font-size: 25px;
-                      "
-                      type="text"
-                      circle
-                      @click="replaceVideo(n - 1)"
-                      icon="el-icon-success"
-                    ></el-button>
-                    <el-button
-                      v-else
-                      style="
-                        position: absolute;
-                        z-index: 1002;
-                        left: 20px;
-                        font-size: 25px;
-                      "
-                      type="text"
-                      circle
-                      @click="replaceVideo(n - 1)"
-                      icon="el-icon-circle-check"
-                    ></el-button>
-                    <el-button
-                      id="demo"
-                      style="position: absolute; z-index: 1002; right: 20px"
-                      type="text"
-                      circle
-                      @click="SclosePlayer(n - 1)"
-                      >×</el-button
-                    >
+                  <div class="video-inner live hide-waiting">
                     <video
                       :id="`videoid${n}`"
                       ref="videoElement"
                       muted
                       controls
-                      width="100%"
+                      width="101%"
                       height="100%"
                       style="object-fit: fill"
                     ></video>
@@ -92,8 +82,9 @@
 
 <script>
 import _ from "lodash";
-import flvjs from "flv.js";
-import FlvExtend from "@/utils/flvExtend.js";
+import flvjs from "mpegts.js";
+// import FlvExtend from "@/utils/flvExtend.js";
+// import FlvExtend from 'flv-extend'
 import screenfull from "screenfull";
 
 export default {
@@ -127,6 +118,7 @@ export default {
       listObj: [],
       listVideo: [],
       flvPlayerList: [],
+      videoElementList: [],
     };
   },
   created() {
@@ -152,7 +144,6 @@ export default {
         this.listQuery.id = Array.from(new Set(this.listQuery.id));
         this.selectOpen = 0;
         const addid = this.findExtraElement(nid, this.listQuery.id);
-
         if (
           this.seReplace != -1 ||
           this.listQuery.id.length == 4 ||
@@ -177,7 +168,6 @@ export default {
             return;
           }
         }
-
         const dropid = this.findExtraElement(this.listQuery.id, nid);
         console.log("新家+" + addid);
         console.log("键+" + dropid);
@@ -195,7 +185,6 @@ export default {
           op = 1;
           id = addid;
         }
-
         this.selectOpen = 1;
         this.listQuery.id = nid;
         this.listQuery.level = e.level;
@@ -363,11 +352,18 @@ export default {
         console.log("关闭成功");
       });
     },
+
+    flvUnload() {
+      this.flvPlayer.unload();
+      this.flvPlayer.detachMediaElement();
+      this.flvPlayer.destroy();
+      this.flvPlayer = null;
+    },
+
     //加载视频播放
     initPlayer() {
       if (flvjs.isSupported()) {
         const videoElementList = this.$refs.videoElement;
-
         for (let n = 0; n < this.listObj.length; n++) {
           const videoElement = videoElementList[n];
           this.createVideo(videoElement, n);
@@ -376,23 +372,24 @@ export default {
       }
     },
     createVideo(videoElement, n) {
-      console.log(videoElement, n);
+      // console.log(videoElement, n);
 
       // 配置需要的功能
-      const flv = new FlvExtend({
-        element: videoElement, // *必传
-        frameTracking: true, // 开启追帧设置
-        updateOnStart: true, // 点击播放后更新视频
-        updateOnFocus: false, // 获得焦点后更新视频
-        reconnect: true, // 开启断流重连
-        reconnectInterval: 2000, // 断流重连间隔
-      });
+      // const flv = new FlvExtend({
+      //   element: videoElement, // *必传
+      //   frameTracking: true, // 开启追帧设置
+      //   updateOnStart: true, // 点击播放后更新视频
+      //   updateOnFocus: false, // 获得焦点后更新视频
+      //   reconnect: true, // 开启断流重连
+      //   reconnectInterval: 2000, // 断流重连间隔
+      // });
 
-      this.flvPlayer = flv.init(
+      this.flvPlayer = flvjs.createPlayer(
         {
           type: "flv",
           url: this.listObj[n].httpUrl,
           isLive: true, // 直播模式
+          hasAudio: false,
         },
         {
           enableWorker: false, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
@@ -402,42 +399,31 @@ export default {
           lazyLoadMaxDuration: 3, // 懒加载保留3秒
           accurateSeek: false, // 精确查找任何帧，加载会变慢
           autoCleanupSourceBuffer: true, // 自动清理缓存
+          autoCleanupMinBackwardDuration: 60,
           rangeLoadZeroStart: true, // Range: bytes=0-如果使用范围查找，则发送首次负载
+          fixAudioTimestampGap: false, //false
+          reuseRedirectedURL: true,
         }
       );
-      flv.onError = (errorObj, player) => {
-        const id = this.getUrlParams(player._statisticsInfo.url)["stream"];
-        console.log(id, "id");
-        console.log("播放失败...", player);
 
-        this.api({
-          url: "/cameraLive/alistCameraLive",
-          method: "post",
-          data: {
-            id: [Number(id)],
-            level: 2,
-            pageNum: 1,
-            pageRow: 4,
-          },
-        }).then((data) => {
-          this.listObj[n] = data[0];
-          const vieoElementList = this.$refs.videoElement;
-          const videoElement = vieoElementList[n];
-          this.createVideo(videoElement, n);
-          this.flvPlayerList.push(this.flvPlayer);
-        });
-      };
-    },
-    getUrlParams(url) {
-      const _url = url || window.location.href;
-      const _urlParams = _url.match(/([?&])(.+?=[^&]+)/gim);
-      return _urlParams
-        ? _urlParams.reduce((a, b) => {
-            const value = b.slice(1).split("=");
-            a[value[0]] = value[1];
-            return a;
-          }, {})
-        : {};
+      this.flvPlayer.attachMediaElement(videoElement);
+      this.flvPlayer.load();
+      if (
+        this.listObj[n] &&
+        this.listObj[n].httpUrl !== null &&
+        this.listObj[n].httpUrl !== ""
+      ) {
+        this.flvPlayer.play();
+      }
+
+      this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
+        console.log(errType, errDetail);
+        if (errType === flvjs.ErrorTypes.NETWORK_ERROR) {
+          //this.reloadVideo(videoElement, n, this.flvPlayer);
+        }
+        // errType是 NetworkError时，对应errDetail有：Exception、HttpStatusCodeInvalid、ConnectingTimeout、EarlyEof、UnrecoverableEarlyEof
+        // errType是 MediaError时，对应errDetail是MediaMSEError   或MEDIA_SOURCE_ENDED
+      });
     },
     reloadVideo(videoElement, n, flvPlayer) {
       videoElement.src = "";
@@ -535,6 +521,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.video-inner {
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  margin-bottom: -5px;
+}
 .video-wrapper {
   position: relative;
   top: 0px;

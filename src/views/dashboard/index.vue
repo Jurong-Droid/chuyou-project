@@ -329,8 +329,8 @@ echarts.use([
 // import MTLLoader from  'three-mtl-loader';
 // import OBJLoader from  'three-obj-loader';
 // import {CSS2DObject, CSS2DRenderer} from "three-css2drender";
-import flvjs from "flv.js";
-import FlvExtend from "@/utils/flvExtend.js";
+import flvjs from "mpegts.js";
+// import FlvExtend from "@/utils/flvExtend.js";
 
 // const OrbitControls = require("three-orbit-controls")(THREE);
 export default {
@@ -408,7 +408,7 @@ export default {
     }
   },
   async mounted() {
-    console.log('提交')
+    console.log("提交");
     document.body.style.zoom = 0.8;
     this.listLoading = false;
 
@@ -924,21 +924,20 @@ export default {
     },
 
     createVideo(videoElement, n) {
-
-      console.log(videoElement, n)
+      // console.log(videoElement, n);
       this.listLoading = false;
 
       // 配置需要的功能
-      const flv = new FlvExtend({
-        element: videoElement, // *必传
-        frameTracking: true, // 开启追帧设置
-        updateOnStart: true, // 点击播放后更新视频
-        updateOnFocus: false, // 获得焦点后更新视频
-        reconnect: true, // 开启断流重连
-        reconnectInterval: 2000, // 断流重连间隔
-      });
+      // const flv = new FlvExtend({
+      //   element: videoElement, // *必传
+      //   frameTracking: true, // 开启追帧设置
+      //   updateOnStart: true, // 点击播放后更新视频
+      //   updateOnFocus: false, // 获得焦点后更新视频
+      //   reconnect: true, // 开启断流重连
+      //   reconnectInterval: 2000, // 断流重连间隔
+      // });
 
-      this.flvPlayer = flv.init(
+      this.flvPlayer = flvjs.createPlayer(
         {
           type: "flv",
           url: this.listObj[n].httpUrl,
@@ -952,37 +951,32 @@ export default {
           lazyLoadMaxDuration: 3, // 懒加载保留3秒
           accurateSeek: false, // 精确查找任何帧，加载会变慢
           autoCleanupSourceBuffer: true, // 自动清理缓存
+          autoCleanupMinBackwardDuration: 60,
           rangeLoadZeroStart: true, // Range: bytes=0-如果使用范围查找，则发送首次负载
+          fixAudioTimestampGap: false, //false
+          reuseRedirectedURL: true,
         }
       );
 
-      flv.onError = (errorObj, player) => {
-        // const id = this.getUrlParams(player._statisticsInfo.url)["stream"];
-        console.log("播放失败...", player);
-
-        this.api({
-          url: "/cameraLive/alistCameraLive",
-          method: "post",
-          data: {
-            pageNum: 1, //页码
-            pageRow: 4, //每页条数
-            id: [],
-            level: "1",
-          },
-        }).then((data) => {
-          this.listObjTest = data;
-          this.listObjTest.forEach((item) => {
-            this.listObj.push({
-              id: 11,
-              cameraName: item.cameraName,
-              ip: "",
-              httpUrl: item.httpUrl,
-            });
-          });
-          const videoElement = this.$refs['videoElement' + n];
-          this.createVideo(videoElement, n);
-        });
-      };
+      this.flvPlayer.attachMediaElement(videoElement);
+      this.flvPlayer.load();
+      if (
+        this.listObj[n] &&
+        this.listObj[n].httpUrl !== null &&
+        this.listObj[n].httpUrl !== ""
+      ) {
+        if (this.flvPlayer) {
+          this.flvPlayer.play();
+        }
+      }
+      this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
+        // alert("网络波动,正在尝试连接中...");
+        if (this.flvPlayer) {
+          this.reloadVideo(videoElement, n, this.flvPlayer);
+        }
+        // errType是 NetworkError时，对应errDetail有：Exception、HttpStatusCodeInvalid、ConnectingTimeout、EarlyEof、UnrecoverableEarlyEof
+        // errType是 MediaError时，对应errDetail是MediaMSEError   或MEDIA_SOURCE_ENDED
+      });
     },
     reloadVideo(videoElement, n, flvPlayer) {
       videoElement.src = "";

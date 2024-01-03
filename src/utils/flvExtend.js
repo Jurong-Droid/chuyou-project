@@ -3,7 +3,7 @@
  * 特性：追帧、断流重连、实时更新、解决stuck问题
  * author：Xia
  */
-import flvjs from 'mpegts.js'
+import flvjs from 'flv.js'
 
 const DEFAULT_OPTIONS = {
   element: '', // video element
@@ -41,9 +41,7 @@ class FlvExtend {
    * @returns FlvJs.Player
    */
   init(mediaDataSource, config = {}) {
-    if (this.player) {
-      this.destroy()
-    }
+    this.destroy()
 
     this.mediaDataSource = mediaDataSource
     this.config = config
@@ -51,18 +49,22 @@ class FlvExtend {
     this.forcedClose = false
 
     if (this.videoElement) {
-      this.player = flvjs.createPlayer(mediaDataSource, config)
-      this.player.attachMediaElement(this.videoElement)
-      this.player.load()
+      this.player = flvjs.createPlayer(mediaDataSource, config);
+      this.player.attachMediaElement(this.videoElement);
+      this.player.load();
     }
+
 
     this._bindPlayerOptions()
     this._bindPlayerMethods()
     this._bindPlayerEvents()
     this._handleStuck()
-    this.player.play();
+
+    // this.player.play();
+
     return this.player
   }
+
 
   // 更新时间到最新
   update() {
@@ -86,6 +88,9 @@ class FlvExtend {
       this.player.destroy()
       this.player = null
     }
+
+    console.log('先销毁')
+
     this.interval && clearInterval(this.interval)
     this.timeout && clearTimeout(this.timeout)
     this.videoElement.removeEventListener('progress', this._onProgress.bind(this))
@@ -132,16 +137,16 @@ class FlvExtend {
     this.player.rebuild = this.rebuild.bind(this)
 
     // 从 v0.3.0 开始废弃
-    this.player.onerror = (e) => {}
-    this.player.onstats = (e) => {}
-    this.player.onmedia = (e) => {}
+    this.player.onerror = (e) => { }
+    this.player.onstats = (e) => { }
+    this.player.onmedia = (e) => { }
   }
 
   _bindPlayerEvents() {
     const events = flvjs.Events
     for (let i in events) {
       const eventCamelCase = this.toCamelCase(events[i])
-      this[`on${eventCamelCase}`] = (e, player) => {}
+      this[`on${eventCamelCase}`] = (e, player) => { }
 
       // 批量绑定mpegts事件回调
       if (events[i] !== 'error') {
@@ -181,7 +186,7 @@ class FlvExtend {
     if (!maxReconnectAttempts || (maxReconnectAttempts && this.reconnectAttempts < maxReconnectAttempts)) {
       this.timeout = setTimeout(() => {
         this.reconnectAttempts++
-        this.onReconnect({...e, reconnectAttempts: this.reconnectAttempts}, this.player)
+        this.onReconnect({ ...e, reconnectAttempts: this.reconnectAttempts }, this.player)
         this.rebuild()
       }, reconnectInterval)
 
@@ -274,10 +279,10 @@ class FlvExtend {
     return capitalizedArr.join('');
   }
 
-  onReconnect(e, player) {}
-  onReconnectFailed(e, player) {}
-  onProgress(e, player) {}
-  onStuck(player) {}
+  onReconnect(e, player) { }
+  onReconnectFailed(e, player) { }
+  onProgress(e, player) { }
+  onStuck(player) { }
 }
 
 export default FlvExtend
