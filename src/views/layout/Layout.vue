@@ -1,12 +1,8 @@
 <template>
   <div
     v-if="this.$route.path.includes('/dashboard')"
-    class="app-wrapper"
+    class="app-wrapper bgImg2"
     :class="{ hideSidebar: !sidebar.opened }"
-    style="
-      overflow: hidden;
-      background-image: url(../../assets/images/bgimg2.jpg);
-    "
   >
     <div style="height: 70px; width: 100%; position: absolute">
       <sidebar class="sidebar-container" style="display: inline"></sidebar>
@@ -18,7 +14,7 @@
   </div>
 
   <div v-else class="app-wrapper" :class="{ hideSidebar: !sidebar.opened }">
-    <div style="height: 70px; width: 100%; position: absolute; z-index: 1;">
+    <div style="height: 70px; width: 100%; position: absolute; z-index: 1">
       <sidebar class="sidebar-container" style="display: inline"></sidebar>
     </div>
     <div class="main-container">
@@ -64,6 +60,10 @@ export default {
   position: relative;
   height: 100%;
   width: 100%;
+}
+.bgImg2 {
+  overflow: hidden;
+  background-image: url("../../assets/images/bgimg2.png");
 }
 .header {
   position: absolute;

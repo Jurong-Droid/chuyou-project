@@ -84,6 +84,5 @@ export default {
   width: 1330px;
   height: 70px;
   line-height: 70px;
-  margin-left: -50px;
 }
 </style>

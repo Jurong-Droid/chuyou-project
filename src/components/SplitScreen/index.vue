@@ -83,8 +83,7 @@
 <script>
 import _ from "lodash";
 import flvjs from "mpegts.js";
-// import FlvExtend from "@/utils/flvExtend.js";
-// import FlvExtend from 'flv-extend'
+import FlvExtend from "flv-extend";
 import screenfull from "screenfull";
 
 export default {
@@ -375,24 +374,24 @@ export default {
       // console.log(videoElement, n);
 
       // 配置需要的功能
-      // const flv = new FlvExtend({
-      //   element: videoElement, // *必传
-      //   frameTracking: true, // 开启追帧设置
-      //   updateOnStart: true, // 点击播放后更新视频
-      //   updateOnFocus: false, // 获得焦点后更新视频
-      //   reconnect: true, // 开启断流重连
-      //   reconnectInterval: 2000, // 断流重连间隔
-      // });
+      const flv = new FlvExtend({
+        element: videoElement, // *必传
+        frameTracking: true, // 开启追帧设置
+        updateOnStart: true, // 点击播放后更新视频
+        updateOnFocus: true, // 获得焦点后更新视频
+        reconnect: true, // 开启断流重连
+        reconnectInterval: 0, // 断流重连间隔
+      });
 
-      this.flvPlayer = flvjs.createPlayer(
+      this.flvPlayer = flv.init(
         {
-          type: "flv",
+          type: "mse",
           url: this.listObj[n].httpUrl,
           isLive: true, // 直播模式
           hasAudio: false,
         },
         {
-          enableWorker: false, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
+          enableWorker: true, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
           enableStashBuffer: true, //播放flv时，设置是否启用播放缓存，只在直播起作用。
           stashInitialSize: "300KB", // 指示IO暂存缓冲区的初始大小。默认值为384KB。指出合适的尺寸可以改善视频负载/搜索时间。
           lazyLoad: true, // 懒加载 数据足够播放 终止http请求
@@ -402,7 +401,7 @@ export default {
           autoCleanupMinBackwardDuration: 60,
           rangeLoadZeroStart: true, // Range: bytes=0-如果使用范围查找，则发送首次负载
           fixAudioTimestampGap: false, //false
-          reuseRedirectedURL: true,
+          reuseRedirectedURL: true
         }
       );
 
@@ -419,7 +418,7 @@ export default {
       this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
         console.log(errType, errDetail);
         if (errType === flvjs.ErrorTypes.NETWORK_ERROR) {
-          //this.reloadVideo(videoElement, n, this.flvPlayer);
+          // this.reloadVideo(videoElement, n, this.flvPlayer);
         }
         // errType是 NetworkError时，对应errDetail有：Exception、HttpStatusCodeInvalid、ConnectingTimeout、EarlyEof、UnrecoverableEarlyEof
         // errType是 MediaError时，对应errDetail是MediaMSEError   或MEDIA_SOURCE_ENDED

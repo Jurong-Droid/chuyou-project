@@ -330,6 +330,7 @@ echarts.use([
 // import OBJLoader from  'three-obj-loader';
 // import {CSS2DObject, CSS2DRenderer} from "three-css2drender";
 import flvjs from "mpegts.js";
+import FlvExtend from 'flv-extend'
 // import FlvExtend from "@/utils/flvExtend.js";
 
 // const OrbitControls = require("three-orbit-controls")(THREE);
@@ -928,23 +929,23 @@ export default {
       this.listLoading = false;
 
       // 配置需要的功能
-      // const flv = new FlvExtend({
-      //   element: videoElement, // *必传
-      //   frameTracking: true, // 开启追帧设置
-      //   updateOnStart: true, // 点击播放后更新视频
-      //   updateOnFocus: false, // 获得焦点后更新视频
-      //   reconnect: true, // 开启断流重连
-      //   reconnectInterval: 2000, // 断流重连间隔
-      // });
+      const flv = new FlvExtend({
+        element: videoElement, // *必传
+        frameTracking: true, // 开启追帧设置
+        updateOnStart: true, // 点击播放后更新视频
+        updateOnFocus: false, // 获得焦点后更新视频
+        reconnect: true, // 开启断流重连
+        reconnectInterval: 2000, // 断流重连间隔
+      });
 
-      this.flvPlayer = flvjs.createPlayer(
+      this.flvPlayer = flv.init(
         {
-          type: "flv",
+          type: "mse",
           url: this.listObj[n].httpUrl,
           isLive: true, // 直播模式
         },
         {
-          enableWorker: false, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
+          enableWorker: true, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
           enableStashBuffer: true, //播放flv时，设置是否启用播放缓存，只在直播起作用。
           stashInitialSize: "300KB", // 指示IO暂存缓冲区的初始大小。默认值为384KB。指出合适的尺寸可以改善视频负载/搜索时间。
           lazyLoad: true, // 懒加载 数据足够播放 终止http请求

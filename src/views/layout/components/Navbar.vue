@@ -14,12 +14,12 @@
           cursor: pointer;
           font-family: HuXiaoBoNanShenTi-2-Regular;
           letter-spacing: 8px;
-          font-size: 35px;
+          font-size: 36px;
           width: 30%;
           text-align: center;
           margin-left: -8.1%;
         "
-        >井间站智能监控平台</span
+        >井间站智能监控系统</span
       >
     </div>
     <div class="right-menu">
@@ -55,7 +55,7 @@
         font-family: HuXiaoBoNanShenTi-2-Regular;
         letter-spacing: 5px;
       "
-      >井间站智能监控平台</span
+      >井间站智能监控系统</span
     >
     <div class="right-menu">
       <template>

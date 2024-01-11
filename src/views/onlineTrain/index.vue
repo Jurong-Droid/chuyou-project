@@ -1,415 +1,265 @@
 <template>
   <div class="app-container">
-    <div
-      v-if="showImage"
-      style="
-        width: 50%;
-        height: 55%;
-        margin-left: 10%;
-        position: fixed;
-        top: 10%;
-        z-index: 9900;
-      "
-    >
-      <el-button type="danger" @click="showImage = false">关闭</el-button>
-      <img class="img" :src="ImageUrl" />
-    </div>
-    <div
-      v-if="setImage"
-      style="
-        width: 69%;
-        height: 70%;
-        margin-left: 10%;
-        position: fixed;
-        top: 10%;
-        z-index: 9900;
-        zoom: 1.25;
-      "
-    >
-      <el-button type="danger" @click="setImage = false">关闭</el-button>
-      <el-button type="primary" @click="saveImage">保存</el-button>
+    <div class="upload-card" style="display: flex">
+      <CurrentTitle name="数据上传" size="big" />
       <el-select
-        v-model="thetag"
-        placeholder="选择标签"
-        @change="setTag"
+        style="width: 20%"
+        v-model="moduleType"
+        placeholder="模型类型名称"
         :popper-append-to-body="false"
       >
         <el-option
-          v-for="item in detectTypes"
+          v-for="item in ModuleTypes"
           :key="item.id"
           :label="item.name"
           :value="item.id"
         />
       </el-select>
-      <ui-marker
-        ref="aiPanel-editor"
-        class="ai-observer"
-        :imgUrl="ImageUrl"
-      ></ui-marker>
     </div>
-    <!--    <div v-if="this.ModuleTypes[0].status!=-1">-->
-    <el-select
-      v-model="moduleType"
-      placeholder="选择模型类型"
-      :popper-append-to-body="false"
-    >
-      <el-option
-        v-for="item in ModuleTypes"
-        :key="item.id"
-        :label="item.name"
-        :value="item.id"
-      />
-    </el-select>
-    <el-button
-      size="mini"
-      :plain="true"
-      type="primary"
-      style="font-size: 18px"
-      @click="toEdge()"
-      >上传</el-button
-    >
-    <el-button
-      size="mini"
-      :plain="true"
-      type="primary"
-      style="font-size: 18px"
-      @click="toTrain()"
-      >训练</el-button
-    >
-    <el-button
-      size="mini"
-      :plain="true"
-      type="primary"
-      style="font-size: 18px"
-      @click="download()"
-      >下载</el-button
-    >
-    <el-button
-      size="mini"
-      :plain="true"
-      type="primary"
-      style="font-size: 18px"
-      @click=""
-      >转化</el-button
-    >
-    <!--    </div>-->
-    <br />&nbsp;
-    <el-table
-      :data="abnormalList"
-      element-loading-text="拼命加载中"
-      border
-      fit
-      :header-cell-style="{ background: '#f5f7fa', color: '#409EFF' }"
-    >
-      <el-table-column align="center" label="模型类型" min-width="8"
-        >工装检测</el-table-column
+    <br />
+    <div class="upload-card">
+      <el-descriptions class="margin-top" :column="3" size="default" border>
+        <template slot="title">
+          <CurrentTitle name="模型训练" size="big" />
+        </template>
+        <template slot="extra">
+          <el-button type="primary" size="small">数据上传</el-button>
+          <el-button type="primary" size="small">转化</el-button>
+        </template>
+        <el-descriptions-item>
+          <template slot="label">
+            <i class="el-icon-help"></i>
+            模型类型
+          </template>
+          工装检测模型
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template slot="label">
+            <i class="el-icon-time"></i>
+            训练时间
+          </template>
+          2024-01-20
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template slot="label">
+            <i class="el-icon-files"></i>
+            状态
+          </template>
+          <el-tag size="small">训练中</el-tag>
+        </el-descriptions-item>
+      </el-descriptions>
+    </div>
+    <br />
+
+    <div style="display: flex; justify-content: start; text-align: center">
+      <div style="width: 20%; display: flex; justify-content: start">
+        <el-input placeholder="样本搜索"></el-input>
+        <el-button
+          type="primary"
+          @click=""
+          style="
+            margin-left: 14px;
+            margin-right: 12px;
+            height: 40px;
+            line-height: 16px;
+          "
+          >搜索</el-button
+        >
+      </div>
+      <div style="text-align: center">
+        <el-select
+          v-model="moduleType"
+          placeholder="模型部署设备选择"
+          :popper-append-to-body="false"
+          style="margin-right: 14px"
+        >
+          <el-option
+            v-for="item in ModuleTypes"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+        <el-button
+          style="height: 40px; line-height: 16px"
+          type="primary"
+          @click=""
+          >上传数据</el-button
+        >
+      </div>
+    </div>
+    <br />
+
+    <div>
+      <el-table
+        :data="datas"
+        element-loading-text="拼命加载中"
+        border
+        fit
+        :header-cell-style="{ background: '#f5f7fa', color: '#3c3c3c' }"
       >
-      <el-table-column align="center" label="状态" min-width="8">
-        <template v-slot="scope">
-          <div v-if="scope.row.moduleTypeStatus == 2">未转化</div>
-          <div v-if="scope.row.moduleTypeStatus == 1">未训练</div>
-          <div v-if="scope.row.moduleTypeStatus == 0">未上传</div>
-          <div v-if="scope.row.moduleTypeStatus == -1">处理中</div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        align="center"
-        label="标签类别"
-        prop="tagName"
-        min-width="8"
-      />
-      <el-table-column
-        align="center"
-        label="标注框数量"
-        prop="tagNum"
-        min-width="8"
-      />
-      <el-table-column align="center" label="操作" min-width="8">
-        <template v-slot="scope">
-          <el-button
-            size="mini"
-            :plain="true"
-            type="primary"
-            style="font-size: 18px"
-            @click="openDimension(scope.$index)"
-            >标注</el-button
-          >
-          <el-button
-            size="mini"
-            :plain="true"
-            type="primary"
-            style="font-size: 18px"
-            @click="openImage(scope.$index)"
-            >查看</el-button
-          >
-        </template>
-      </el-table-column>
-    </el-table>
+        <el-table-column
+          align="center"
+          label="序号"
+          min-width="8"
+          prop="id"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="样本名称"
+          min-width="8"
+          prop="name"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="添加日期"
+          min-width="8"
+          prop="addDate"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="所属模型类型"
+          min-width="8"
+          prop="moduleType"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="样本属性(正/负)"
+          min-width="8"
+          prop="sampleSx"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="拥有标签类别"
+          min-width="8"
+          prop="tagType"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="模型标签类别总数"
+          min-width="8"
+          prop="tagTypeNum"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="样本标签数量"
+          min-width="8"
+          prop="tagNum"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          label="最近修改时间"
+          min-width="8"
+          prop="modifyDate"
+        ></el-table-column>
+        <el-table-column align="center" label="管理" min-width="12">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              type="primary"
+              style="font-size: 18px"
+              @click=""
+              >修改</el-button
+            >
+            <el-button
+              size="mini"
+              type="primary"
+              style="font-size: 18px"
+              @click=""
+              >查看</el-button
+            >
+            <el-button
+              size="mini"
+              type="primary"
+              style="font-size: 18px"
+              @click=""
+              >删除</el-button
+            >
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
   </div>
 </template>
 
 <script>
-import DatePicker from "@/components/DatePicker";
-import { AIMarker } from "vue-picture-bd-marker";
+import CurrentTitle from "@/components/CurrentTitle";
 export default {
+  name: "index",
   components: {
-    DatePicker,
-    "ui-marker": AIMarker,
+    CurrentTitle,
   },
   data() {
     return {
-      moduleType: null,
-      ModuleTypes: [],
-      annotation: {},
-      thetag: "",
-      setImage: false,
-      abnormalLists: [],
-      newDetectType: {
-        id: "",
-        name: "",
-      },
-      ImageUrl: null,
-      showImage: false,
-      abnormalList: [],
-      dialogFormVisible: false,
-      detectType: "",
-      detectTypes: [],
+      moduleType: "",
+      ModuleTypes: [
+        {
+          id: 1,
+          name: "工装检测",
+        },
+      ],
+      datas: [],
     };
   },
   created() {
-    if (location.href.indexOf("#reloaded") == -1) {
-      location.href = location.href + "#reloaded";
-      location.reload();
-    }
     document.body.style.zoom = "80%";
-    this.getModuleType();
     this.getList();
-    this.getTag();
   },
+  mounted() {},
   methods: {
-    download() {
-      if (this.moduleType == null) {
-        this.$message.warning("请先选择模型类型");
-        return;
-      }
-      if (this.ModuleTypes[0].status != 2) {
-        this.$message.warning("请先完成训练");
-        return;
-      }
-      let file_url = null;
-      if (process.env.NODE_ENV !== "production") {
-        file_url =
-          process.env.BASE_URL +
-          "/onlineTrainInfo/getModuleFile?id=" +
-          this.moduleType;
-      } else {
-        file_url =
-          window.location.origin +
-          "/onlineTrainInfo/getModuleFile?id=" +
-          this.moduleType;
-      }
-      const link = document.createElement("a");
-      link.href = file_url;
-      link.download = "best.pt"; // 设置下载的文件名
-      link.click();
-    },
-
-    toTrain() {
-      if (this.ModuleTypes[0].status == 0) {
-        this.$message.warning("请先进行上传");
-        return;
-      }
-      this.api({
-        url: "onlineTrainInfo/toTrain",
-        method: "get",
-      }).then((data) => {
-        this.$message.warning("训练中,稍后请刷新页面");
-      });
-    },
-    toEdge() {
-      this.api({
-        url: "onlineTrainInfo/toEdge",
-        method: "get",
-      }).then((data) => {
-        this.$message.warning("上传中,稍后请刷新页面");
-      });
-    },
-
-    getModuleType() {
-      this.api({
-        url: "onlineTrainInfo/getModuleType",
-        method: "get",
-      }).then((data) => {
-        this.ModuleTypes = data;
-        console.log(this.ModuleTypes);
-      });
-    },
-
-    //将标注好的图片上传到服务器
-    saveImage() {
-      if (this.thetag == "") {
-        this.$message.warning("请选择标签");
-        return;
-      }
-
-      // 获取标注信息，这取决于你的 ui-marker 组件如何提供这些信息
-      const markerDatas = this.$refs["aiPanel-editor"].getMarker().getData();
-
-      markerDatas.forEach((markerData) => {
-        // 创建一个新的 Image 对象并加载图片
-        console.log(markerData);
-        const x = (parseFloat(markerData.position.x) / 100).toFixed(6);
-        const y = (parseFloat(markerData.position.y) / 100).toFixed(6);
-        const x1 = (parseFloat(markerData.position.x1) / 100).toFixed(6);
-        const y1 = (parseFloat(markerData.position.y1) / 100).toFixed(6);
-
-        this.api({
-          url: "onlineTrainInfo/addAnnotation",
-          method: "post",
-          data: {
-            id: this.annotation.id,
-            tagName: markerData.tagName,
-            tag: markerData.tag,
-            path: this.annotation.path,
-            moduleTypeId: this.annotation.moduleTypeId,
-            x: x,
-            y: y,
-            width: (x1 - x).toFixed(6),
-            height: (y1 - y).toFixed(6),
-          },
-        })
-          .then(() => {
-            this.$message.success("添加一项标签成功");
-            location.reload();
-          })
-          .catch(() => {
-            this.$message.warning("数据上传失败，请重试");
-          });
-      });
-    },
-
-    getFirstTagName(key) {
-      return this.abnormalList[key][0].tagName;
-    },
-    setTag() {
-      console.log(this.detectTypes);
-      const tag = this.detectTypes.find((item) => item.id == this.thetag);
-      this.$refs["aiPanel-editor"].getMarker().setTag({
-        tagName: tag.name,
-        tag: tag.id,
-      });
-    },
-    getTag() {
-      this.api({
-        url: "onlineTrainInfo/getTag",
-        methods: "get",
-      }).then((data) => {
-        this.detectTypes = data;
-      });
-    },
     getList() {
       this.api({
         url: "onlineTrainInfo/getList",
         method: "get",
       }).then((data) => {
+        console.log(data);
         data.forEach((temp) => {
-          if (this.abnormalLists != []) {
-            const trainData = this.abnormalLists.find(
+          if (this.datas != []) {
+            const trainData = this.datas.find(
               (atemp) => atemp[0].id == temp.id
             );
             if (trainData != null) {
               trainData.push(temp);
             } else {
-              this.abnormalLists.push([temp]);
+              this.datas.push([temp]);
             }
           } else {
-            this.abnormalLists.push([temp]);
+            this.datas.push([temp]);
           }
         });
 
-        this.abnormalLists.forEach((emm) => {
+        this.datas.forEach((emm) => {
           let tagName = [];
           emm.forEach((temp) => tagName.push(temp.tagName + " "));
           const tagNum = tagName.length;
           tagName = [...new Set(tagName)]; //去重
 
-          this.abnormalList.push({
+          this.datas.push({
             id: emm[0].id,
-            tagName: tagName,
+            tagTypeNum: tagName.length,
             tagNum: tagNum,
+            tagType: tagName,
             path: emm[0].path,
-            moduleTypeId: emm[0].moduleTypeId,
+            //  moduleType:emm[0].moduleTypeId,
+            moduleType: "工装检测",
             moduleTypeStatus: this.ModuleTypes[0].status,
+            sampleSx: emm[0].sampleSx,
+            addDate: emm[0].addDate,
+            modifyDate: emm[0].modifyDate,
+            name: emm[0].name,
           });
         });
       });
-    },
-
-    runOpenImage($index) {
-      const adata = this.abnormalList[$index];
-      this.api({
-        url: "onlineTrainInfo/getImage",
-        method: "post",
-        data: {
-          id: adata.id,
-          tagName: adata.tagName[0],
-          path: adata.path,
-        },
-      }).then((data) => {
-        this.ImageUrl = "data:image/jpeg;base64," + data;
-        const Datas = this.abnormalLists[$index];
-        const img = new Image();
-        img.onload = () => {
-          // 创建一个 canvas 元素并设置其大小
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          // 获取 canvas 的 2D 渲染上下文
-          const context = canvas.getContext("2d");
-          // 在 canvas 上绘制图片
-          context.drawImage(img, 0, 0);
-          // 设置画笔颜色为红色
-          context.strokeStyle = "red";
-          // 遍历标注信息并在对应位置画上红色的框
-          Datas.forEach((temp) => {
-            const x = temp.x;
-            const y = temp.y;
-            const width = temp.width;
-            const height = temp.height;
-            context.strokeRect(
-              x * canvas.width,
-              y * canvas.height,
-              width * canvas.width,
-              height * canvas.height
-            );
-            context.font = "25px Arial";
-            context.fillStyle = "red";
-            context.fillText(temp.tagName, x * canvas.width, y * canvas.height);
-          });
-
-          // 将 canvas 的内容转换为 data URL
-          const dataUrl = canvas.toDataURL();
-          // 将 data URL 设置为新的图片 URL
-          this.ImageUrl = dataUrl;
-        };
-        img.src = this.ImageUrl;
-      });
-    },
-
-    openImage($index) {
-      this.runOpenImage($index);
-      this.showImage = true;
-    },
-    openDimension($index) {
-      this.runOpenImage($index);
-      this.annotation = this.abnormalList[$index];
-      console.log(this.annotation);
-      this.setImage = true;
-      //this.dialogFormVisible=true;
     },
   },
 };
 </script>
 
 <style scoped>
+.upload-card {
+  padding: 18px;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.19),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-radius: 10px;
+}
 </style>
