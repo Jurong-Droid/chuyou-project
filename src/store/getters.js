@@ -9,6 +9,9 @@ const getters = {
   permissions: state => state.user.permissions,
 
   permission_routers: state => state.permission.routers,
-  addRouters: state => state.permission.addRouters
+  addRouters: state => state.permission.addRouters,
+
+  // rbt用户ID
+  rbtUserId: (state) => state.userInfo.id
 }
 export default getters

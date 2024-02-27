@@ -1,11 +1,11 @@
 {
-  root: '/Users/ethan_meng/Desktop/东油/rtsp-project/IMDP_vue',
+  root: '/Users/ethan_meng/Desktop/东油/chuyou-project/JingjianIntelligentPlatform',
   registry: 'https://registry.npmmirror.com',
   pkgs: [
     {
-      name: '',
-      version: 'svg-baker-runtime/browser-symbol',
-      type: 'git',
+      name: 'vue',
+      version: '2.6.11--save',
+      type: 'version',
       alias: undefined,
       arg: [Result]
     }
@@ -15,7 +15,7 @@
   cacheDir: '/Users/ethan_meng/.npminstall_tarball',
   env: {
     npm_config_registry: 'https://registry.npmmirror.com',
-    npm_config_argv: '{"remain":[],"cooked":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","--save","svg-baker-runtime/browser-symbol"],"original":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","--save","svg-baker-runtime/browser-symbol"]}',
+    npm_config_argv: '{"remain":[],"cooked":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","vue@2.6.11--save"],"original":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","vue@2.6.11--save"]}',
     npm_config_user_agent: 'npminstall/7.11.1 npm/? node/v16.20.2 darwin arm64',
     npm_config_cache: '/Users/ethan_meng/.npminstall_tarball',
     NODE: '/opt/homebrew/Cellar/node@16/16.20.2/bin/node',
@@ -49,8 +49,8 @@
     npm_config_sharp_binary_host: 'https://cdn.npmmirror.com/binaries/sharp',
     npm_config_sharp_libvips_binary_host: 'https://cdn.npmmirror.com/binaries/sharp-libvips',
     npm_config_robotjs_binary_host: 'https://cdn.npmmirror.com/binaries/robotjs',
-    npm_rootpath: '/Users/ethan_meng/Desktop/东油/rtsp-project/IMDP_vue',
-    INIT_CWD: '/Users/ethan_meng/Desktop/东油/rtsp-project/IMDP_vue'
+    npm_rootpath: '/Users/ethan_meng/Desktop/东油/chuyou-project/JingjianIntelligentPlatform',
+    INIT_CWD: '/Users/ethan_meng/Desktop/东油/chuyou-project/JingjianIntelligentPlatform'
   },
   binaryMirrors: {
     ENVS: {
@@ -185,7 +185,7 @@
   disableFallbackStore: false,
   workspacesMap: Map(0) {},
   enableWorkspace: false,
-  workspaceRoot: '/Users/ethan_meng/Desktop/东油/rtsp-project/IMDP_vue',
+  workspaceRoot: '/Users/ethan_meng/Desktop/东油/chuyou-project/JingjianIntelligentPlatform',
   isWorkspaceRoot: true,
   isWorkspacePackage: false,
   offline: false,

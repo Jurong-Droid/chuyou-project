@@ -14,15 +14,29 @@
           cursor: pointer;
           font-family: HuXiaoBoNanShenTi-2-Regular;
           letter-spacing: 8px;
-          font-size: 36px;
+          font-size: 24px;
           width: 30%;
           text-align: center;
           margin-left: -8.1%;
         "
-        >井间站智能监控系统</span
+        >原油库风险智能分析及预警管控系统</span
       >
     </div>
     <div class="right-menu">
+      <div class="collapse-btn">
+        <!-- <svg-icon icon-class="notice" /> -->
+        <img
+          style="
+            width: 30px;
+            padding-top: 14px;
+            padding-right: 4px;
+            cursor: pointer;
+          "
+          class="user-avatar"
+          :src="img_components"
+          @click="collapseClick"
+        />
+      </div>
       <template>
         <warnNotice class="right-menu-item hover-effect" />
       </template>
@@ -53,9 +67,9 @@
       style="
         cursor: pointer;
         font-family: HuXiaoBoNanShenTi-2-Regular;
-        letter-spacing: 5px;
+        letter-spacing: 3px;
       "
-      >井间站智能监控系统</span
+      >原油库风险智能分析及预警管控系统</span
     >
     <div class="right-menu">
       <template>
@@ -90,6 +104,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import Hamburger from "@/components/Hamburger";
 import WarnNotice from "@/components/WarnNotice";
 import img_user from "@/assets/user.png";
+import img_components from "@/assets/components.png";
 
 export default {
   components: {
@@ -100,12 +115,20 @@ export default {
   data() {
     return {
       img_user,
+      img_components,
     };
   },
   computed: {
     ...mapGetters(["sidebar"]),
   },
   methods: {
+    collapseClick() {
+      if (this.$store.state.isCollapse) {
+        this.$store.commit("hide"); //命名要相同
+      } else {
+        this.$store.commit("show"); //命名要相同
+      }
+    },
     toggleSideBar() {
       this.$store.dispatch("ToggleSideBar");
     },
@@ -129,6 +152,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.collapse-btn {
+  display: inline-block;
+  width: 40px;
+  line-height: 52px;
+  float: left;
+  font-size: 30px;
+}
 .navbar {
   height: 110px;
   line-height: 50px;
@@ -267,7 +297,7 @@ export default {
 .navbar_01 {
   height: 70px;
   line-height: 70px;
-  background: #3F9EFF;
+  background: #3f9eff;
   border-bottom: solid 0px;
   width: 100%;
 
@@ -290,7 +320,7 @@ export default {
     z-index: 222;
     text-align: center;
     line-height: 70px;
-    font-size: 24px;
+    font-size: 19px;
     font-weight: bold;
     color: #fff;
     display: inline;

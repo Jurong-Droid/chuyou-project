@@ -27,7 +27,7 @@ module.exports = {
   dev: {
     env: require('./dev.env'),
     host: 'localhost',
-    port: 9520,
+    port: 8080,
     autoOpenBrowser: true,
     autoOpenPage: '/login',
     assetsSubDirectory: 'static',
@@ -47,6 +47,13 @@ module.exports = {
         secure: false,
         pathRewrite: {
           '^/api/test': '/'
+        }
+      },
+      // rbp接口地址
+      '/api/sevnce': {
+        target: 'test.7tyun.com:444',
+        pathRewrite: {
+          '^/api/sevnce': '/'
         }
       }
     },

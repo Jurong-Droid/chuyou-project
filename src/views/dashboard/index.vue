@@ -19,6 +19,7 @@
         <el-container>
           <el-aside style="width: 25%">
             <el-card
+              v-show="$store.state.isCollapse"
               :body-style="{ padding: '5px', height: '100%', width: '100%' }"
               class="box-card slidleft_01"
               id="demo"
@@ -32,6 +33,7 @@
               <div id="echart2" style="height: 80%; width: 100%"></div>
             </el-card>
             <el-card
+              v-show="$store.state.isCollapse"
               :body-style="{ padding: '5px' }"
               class="box-card slidleft_02"
             >
@@ -65,8 +67,8 @@
                 </div>
               </div>
             </el-card>
-
             <el-card
+              v-show="$store.state.isCollapse"
               :body-style="{ padding: '5px', height: '600px' }"
               class="box-card slidleft_03"
               style="width: 100%; text-align: left; overflow: hidden"
@@ -144,10 +146,14 @@
               </template>
             </el-card>
           </el-aside>
-          <el-aside style="width: 50%; overflow: hidden">
+          <el-aside style="width: 50%; overflow: hidden; position: relative">
+            <img class="rbt_link_item item1" :src="rbt_link" @click="toRbt" />
+            <img class="rbt_link_item item2" :src="rbt_link" @click="toRbt" />
+            <img class="rbt_link_item item3" :src="rbt_link" @click="toRbt" />
             <div
               style="height: 60%; margin: 8px 2px 0px 2px; overflow: visible"
             >
+              <!-- 这里是锚点链接 -->
               <object
                 id="my-object"
                 type="text/html"
@@ -158,6 +164,7 @@
               ></object>
             </div>
             <el-card
+              v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '5px', height: '100%', width: '100%' }"
               class="box-card slidup"
               style="width: 100%; text-align: center; margin-top: 8px"
@@ -172,6 +179,7 @@
           </el-aside>
           <el-aside style="width: 25%">
             <el-card
+              v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '0px' }"
               class="box-card slidright_01"
             >
@@ -203,12 +211,7 @@
                         width="100%"
                         height="100%"
                         autoplay="autoplay"
-                        style="
-                          border-radius: 10px;
-                          width: 100%;
-                          height: 100%;
-                          margin: 0px;
-                        "
+                        style="width: 100%; height: 100%; margin: 0px"
                       >
                         1
                       </video>
@@ -218,6 +221,7 @@
               </el-main>
             </el-card>
             <el-card
+              v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '0px' }"
               class="box-card slidright_02"
             >
@@ -249,15 +253,15 @@
                         width="100%"
                         height="100%"
                         autoplay="autoplay"
-                        style="border-radius: 10px; width: 100%; height: 100%"
+                        style="width: 100%; height: 100%"
                       ></video>
-                      <!--<video :id="`video2`" src="src/assets/video/v2.mp4" muted autoplay loop controls width="100%" height="100%" autoplay="autoplay"  style="border-radius: 10px; width: 100%; height: 100%"></video>-->
                     </div>
                   </div>
                 </div>
               </el-main>
             </el-card>
             <el-card
+              v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '0px' }"
               class="box-card slidright_03"
             >
@@ -289,7 +293,7 @@
                         width="100%"
                         height="100%"
                         autoplay="autoplay"
-                        style="border-radius: 10px; width: 100%; height: 100%"
+                        style="width: 100%; height: 100%"
                       ></video>
                     </div>
                   </div>
@@ -330,14 +334,22 @@ echarts.use([
 // import OBJLoader from  'three-obj-loader';
 // import {CSS2DObject, CSS2DRenderer} from "three-css2drender";
 import flvjs from "mpegts.js";
-import FlvExtend from 'flv-extend'
+import FlvExtend from "flv-extend";
 // import FlvExtend from "@/utils/flvExtend.js";
 
 // const OrbitControls = require("three-orbit-controls")(THREE);
+
+import rbt_link from "@/assets/rbt_link.png";
+// rbt的http请求
+import sevnceApi from "@/api/sevnce";
+
 export default {
   name: "threeMap",
+  components: {},
   data() {
     return {
+      rbt_link,
+      isCollapse: true,
       randomTop: 0,
       randomLeft: 0,
       showVideo: false,
@@ -409,6 +421,8 @@ export default {
     }
   },
   async mounted() {
+    console.log(sevnceApi, "sevnceApi");
+
     console.log("提交");
     document.body.style.zoom = 0.8;
     this.listLoading = false;
@@ -446,6 +460,8 @@ export default {
     this.initPlayer2();
     this.initPlayer3();
     //this.switchTime();
+
+    this.getWarningList();
   },
   destroyed() {
     // 在页面销毁后，清除计时器
@@ -453,6 +469,33 @@ export default {
   },
 
   methods: {
+    getWarningList() {
+      let params = {
+          deviceId: process.env.VUE_APP_RBP_ID,
+          pageNo: "1",
+          pageSize: "20",
+          type: "EMERGENCY_TYPE_ALARM",
+        },
+        data = {
+          method: "selectPatrolResultEmergency",
+          params: [JSON.stringify(params)],
+        };
+      sevnceApi
+        .getRbp(data, localStorage.getItem("7ty-token"))
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.error(
+            "接口 'selectPatrolResultEmergency' 错误；错误信息：",
+            err
+          );
+        })
+        .finally(() => {});
+    },
+    toRbt() {
+      window.location.href = "https://rbp.7tyun.com/sevnce/largeScreen/project";
+    },
     rightfill(num, targetnum) {
       return num.toString().padEnd(targetnum, "s");
     },
@@ -895,33 +938,29 @@ export default {
         this.listN[i] =
           (this.listN[i] + this.listN.length) % this.listObj.length;
       }
-      this.initPlayer1();
-      this.initPlayer2();
-      this.initPlayer3();
-      this.initPlayer4();
+      if (flvjs.isSupported()) {
+        this.initPlayer1();
+        this.initPlayer2();
+        this.initPlayer3();
+      }
+      // this.initPlayer4();
     },
     //初始化
     initPlayer1() {
       this.closePlayer();
-      if (flvjs.isSupported()) {
-        const videoElement1 = this.$refs.videoElement1;
-        this.createVideo(videoElement1, this.listN[0]);
-        this.flvPlayerList.push(this.flvPlayer);
-      }
+      const videoElement1 = this.$refs.videoElement1;
+      this.createVideo(videoElement1, this.listN[0]);
+      this.flvPlayerList.push(this.flvPlayer);
     },
     initPlayer2() {
-      if (flvjs.isSupported()) {
-        const videoElement2 = this.$refs.videoElement2;
-        this.createVideo(videoElement2, this.listN[1]);
-        this.flvPlayerList.push(this.flvPlayer);
-      }
+      const videoElement2 = this.$refs.videoElement2;
+      this.createVideo(videoElement2, this.listN[1]);
+      this.flvPlayerList.push(this.flvPlayer);
     },
     initPlayer3() {
-      if (flvjs.isSupported()) {
-        const videoElement3 = this.$refs.videoElement3;
-        this.createVideo(videoElement3, this.listN[2]);
-        this.flvPlayerList.push(this.flvPlayer);
-      }
+      const videoElement3 = this.$refs.videoElement3;
+      this.createVideo(videoElement3, this.listN[2]);
+      this.flvPlayerList.push(this.flvPlayer);
     },
 
     createVideo(videoElement, n) {
@@ -1021,7 +1060,45 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+/* 锚点 */
+.rbt_link_item {
+  position: absolute;
+  width: 42px;
+  display: block;
+  border: none;
+  animation: float 2s ease-in-out infinite;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.item1 {
+  top: 340px;
+  left: 216px;
+}
+
+.item2 {
+  top: 122px;
+  left: 454px;
+}
+
+.item3 {
+  top: 300px;
+  right: 270px;
+}
+
+@keyframes float {
+  0% {
+    transform: translatey(0px);
+  }
+  50% {
+    transform: translatey(-20px);
+  }
+  100% {
+    transform: translatey(0px);
+  }
+}
+
 #echart2 {
   zoom: 1.25;
 }
@@ -1068,7 +1145,7 @@ export default {
   bottom: 0px;
   width: 100%;
   height: 100%;
-  background-image: url("../../assets/images/bgimg2.png");
+  background-image: url("../../assets/images/bgimg25D.png");
   background-size: 100% 100%;
   background: -webkit-linear-gradient();
 }
@@ -1096,7 +1173,7 @@ export default {
 }
 
 .box-card {
-  background-color: rgba(3, 20, 52, 0.1);
+  background-color: rgba(3, 20, 52, 0.4);
   /*两侧框线条*/
   /*box-shadow:inset 0px 0px 15px 8px #626F93;*/
   /*box-shadow:inset 0 0 10px raba(255,255,255,0.5);*/

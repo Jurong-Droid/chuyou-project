@@ -50,6 +50,7 @@ const user = {
     // 获取用户信息
     GetInfo({commit, state}) {
       return new Promise((resolve, reject) => {
+        
         api({
           url: '/login/getInfo',
           method: 'post'

@@ -5,7 +5,10 @@ const app = {
     sidebar: {
       opened: !+Cookies.get('sidebarStatus')
     },
-    visitedViews: []
+    visitedViews: [],
+    userInfo: {
+      userId: 10004,
+    }
   },
   mutations: {
     TOGGLE_SIDEBAR: state => {
