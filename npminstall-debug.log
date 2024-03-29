@@ -4,8 +4,8 @@
   pkgs: [
     {
       name: 'vue',
-      version: '2.6.11--save',
-      type: 'version',
+      version: 'next',
+      type: 'tag',
       alias: undefined,
       arg: [Result]
     }
@@ -15,7 +15,7 @@
   cacheDir: '/Users/ethan_meng/.npminstall_tarball',
   env: {
     npm_config_registry: 'https://registry.npmmirror.com',
-    npm_config_argv: '{"remain":[],"cooked":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","vue@2.6.11--save"],"original":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","vue@2.6.11--save"]}',
+    npm_config_argv: '{"remain":[],"cooked":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","vue@next"],"original":["--fix-bug-versions","--china","--userconfig=/Users/ethan_meng/.cnpmrc","--disturl=https://cdn.npmmirror.com/binaries/node","--registry=https://registry.npmmirror.com","vue@next"]}',
     npm_config_user_agent: 'npminstall/7.11.1 npm/? node/v16.20.2 darwin arm64',
     npm_config_cache: '/Users/ethan_meng/.npminstall_tarball',
     NODE: '/opt/homebrew/Cellar/node@16/16.20.2/bin/node',

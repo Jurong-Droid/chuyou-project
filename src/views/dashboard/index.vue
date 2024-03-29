@@ -7,17 +7,18 @@
       width: 100%;
       height: 100%;
       position: absolute;
-      z-index: 1;
+      z-index: 2;
       overflow: hidden;
     "
   >
     <div class="wrap">
+      <Container> </Container>
       <el-container style="margin-top: 4%">
         <!-- <el-header style="height: 10px">
           <span class="header-wrap"></span>
         </el-header> -->
         <el-container>
-          <el-aside style="width: 25%">
+          <el-aside style="width: 25%;z-index: 2;">
             <el-card
               v-show="$store.state.isCollapse"
               :body-style="{ padding: '5px', height: '100%', width: '100%' }"
@@ -146,10 +147,10 @@
               </template>
             </el-card>
           </el-aside>
-          <el-aside style="width: 50%; overflow: hidden; position: relative">
-            <img class="rbt_link_item item1" :src="rbt_link" @click="toRbt" />
+          <el-aside style="width: 50%; overflow: hidden; position: relative;">
+            <!-- <img class="rbt_link_item item1" :src="rbt_link" @click="toRbt" />
             <img class="rbt_link_item item2" :src="rbt_link" @click="toRbt" />
-            <img class="rbt_link_item item3" :src="rbt_link" @click="toRbt" />
+            <img class="rbt_link_item item3" :src="rbt_link" @click="toRbt" /> -->
             <div
               style="height: 60%; margin: 8px 2px 0px 2px; overflow: visible"
             >
@@ -167,7 +168,7 @@
               v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '5px', height: '100%', width: '100%' }"
               class="box-card slidup"
-              style="width: 100%; text-align: center; margin-top: 8px"
+              style="width: 100%; text-align: center; margin-top: 8px;z-index: 2;"
             >
               <i class="top"></i>
               <i class="bottom"></i>
@@ -177,7 +178,7 @@
               <div id="echarts_box" style="height: 85%; width: 100%"></div>
             </el-card>
           </el-aside>
-          <el-aside style="width: 25%">
+          <el-aside style="width: 25%;z-index: 2;">
             <el-card
               v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '0px' }"
@@ -329,6 +330,9 @@ echarts.use([
   DatasetComponent,
 ]);
 // import * as THREE from "three";
+// import * as Stats from "stats.js";
+// const OrbitControls = require("three-orbit-controls")(THREE);
+
 // import {MTLLoader, OBJLoader} from "three-obj-mtl-loader";
 // import MTLLoader from  'three-mtl-loader';
 // import OBJLoader from  'three-obj-loader';
@@ -337,15 +341,14 @@ import flvjs from "mpegts.js";
 import FlvExtend from "flv-extend";
 // import FlvExtend from "@/utils/flvExtend.js";
 
-// const OrbitControls = require("three-orbit-controls")(THREE);
-
 import rbt_link from "@/assets/rbt_link.png";
 // rbt的http请求
 import sevnceApi from "@/api/sevnce";
+import Container from "@/components/Container";
 
 export default {
   name: "threeMap",
-  components: {},
+  components: { Container },
   data() {
     return {
       rbt_link,
@@ -412,6 +415,7 @@ export default {
       data: [],
       url: "",
       listObjTest: [],
+      scene: null,
     };
   },
   created() {
@@ -421,8 +425,6 @@ export default {
     }
   },
   async mounted() {
-    console.log(sevnceApi, "sevnceApi");
-
     console.log("提交");
     document.body.style.zoom = 0.8;
     this.listLoading = false;
@@ -1145,9 +1147,9 @@ export default {
   bottom: 0px;
   width: 100%;
   height: 100%;
-  background-image: url("../../assets/images/bgimg25D.png");
+  // background-image: url("../../assets/images/bgimg25D.png");
   background-size: 100% 100%;
-  background: -webkit-linear-gradient();
+  background: #0D1C2F;
 }
 .header-wrap {
   position: absolute;

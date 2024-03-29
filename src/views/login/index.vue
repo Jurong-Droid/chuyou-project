@@ -1,5 +1,7 @@
 <template>
+
   <div class="login-container">
+    <!-- <Container> </Container> -->
     <el-form
       autoComplete="on"
       :model="loginForm"
@@ -44,6 +46,8 @@
 <script>
 import loginApi from "@/api/login";
 
+import Container from "@/components/Container";
+
 // OpenLayers.js
 import "ol/ol.css";
 import { Map, View } from "ol";
@@ -63,6 +67,9 @@ import { LineString } from "ol/geom";
 
 export default {
   name: "login",
+  components: {
+    Container
+  },
   data() {
     return {
       loginForm: {
@@ -116,20 +123,35 @@ export default {
                   };
                 userInfo.token = token;
                 localStorage.setItem("7ty-token", token);
-                console.log("rbt的token存储");
-                
-                this.$store
-                  .dispatch("Login", this.loginForm)
-                  .then((data) => {
-                    this.loading = false;
-                    this.$router.push({
-                      path: "/",
-                    });
-                  })
-                  .catch((e) => {
-                    this.loading = false;
-                    console.error(e);
+                localStorage.setItem("7ty-userInfo", JSON.stringify(userInfo));
+
+                let expirationTime = Number(userInfo.expirationTime), // 用户过期时间（毫秒时间戳）
+                  currentTimestamp = Date.parse(new Date()), // 当前时间戳
+                  expirationFlag = currentTimestamp > expirationTime; // token是否过期 true：过期 false：未过期
+                if (!expirationFlag) {
+                  loginApi.checkToken({ token }).then(async (res) => {
+                    let { ok, result } = res;
+                    if (ok) {
+                      console.log(result, "验证token结果");
+                      this.$store
+                        .dispatch("Login", this.loginForm)
+                        .then((data) => {
+                          this.loading = false;
+                          this.$router.push({
+                            path: "/",
+                          });
+                        })
+                        .catch((e) => {
+                          this.loading = false;
+                          console.error(e);
+                        });
+                    } else {
+                      console.log("token验证失败");
+                    }
                   });
+                } else {
+                  console.log("登录过期了");
+                }
               } else {
                 console.error(errmsg);
               }

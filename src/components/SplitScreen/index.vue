@@ -459,17 +459,14 @@ export default {
     },
 
     //中断直播播放流
-
     closeVideo(id) {
       let video = this.listObj.find((temp) => temp.id == id);
-
       let location = this.listObj.indexOf(video);
       this.destoryVideo(this.flvPlayerList[location]);
       console.log("我执行了id：" + id + " 位置：" + location);
     },
     SclosePlayer(n) {
       console.log("我执行啦");
-
       this.closeTree([0, this.listObj[n].id]);
     },
 

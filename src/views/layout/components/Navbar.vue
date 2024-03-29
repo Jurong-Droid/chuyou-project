@@ -106,6 +106,8 @@ import WarnNotice from "@/components/WarnNotice";
 import img_user from "@/assets/user.png";
 import img_components from "@/assets/components.png";
 
+import loginApi from "@/api/login";
+
 export default {
   components: {
     Breadcrumb,
@@ -133,9 +135,26 @@ export default {
       this.$store.dispatch("ToggleSideBar");
     },
     logout() {
-      this.$store.dispatch("LogOut").then(() => {
-        location.reload(); // 为了重新实例化vue-router对象 避免bug
-      });
+      loginApi
+        .logOut({
+          userId: "wangliangze",
+          systemCode: "1001",
+          userName: "wangliangze",
+          client: "PC",
+          clientSys: "0",
+        })
+        .then((res) => {
+          if (res.ok) {
+            localStorage.removeItem("7ty-token");
+            localStorage.removeItem("7ty-userInfo");
+            this.$store.dispatch("LogOut").then(() => {
+              location.reload(); // 为了重新实例化vue-router对象 避免bug
+            });
+          }
+        })
+        .catch((err) => {
+          console.log("退出登录失败", err);
+        });
     },
     goCamera() {
       this.$router.push({

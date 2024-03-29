@@ -51,7 +51,7 @@ module.exports = {
       },
       // rbp接口地址
       '/api/sevnce': {
-        target: 'test.7tyun.com:444',
+        target: process.env.VUE_APP_BASE_URL,
         pathRewrite: {
           '^/api/sevnce': '/'
         }

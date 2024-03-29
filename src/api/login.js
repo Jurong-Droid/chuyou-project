@@ -16,6 +16,25 @@ let loginApi = {
       }
     });
   },
+  // 校验token是否过期
+  checkToken: (params) => {
+    return http({
+      method: 'post',
+      url: `${IP}/checkToken`,
+      data: qs.stringify(params)
+    });
+  },
+  // 退出登录；目前需前端删除localStorage储存的token数据
+  logOut: (params) => {
+    return http({
+      method: 'post',
+      url: `${IP}/logOut`,
+      data: JSON.stringify(params),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  }
 };
 export default loginApi;
 
