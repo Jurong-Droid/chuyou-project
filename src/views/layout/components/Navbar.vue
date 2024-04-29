@@ -316,7 +316,7 @@ export default {
 .navbar_01 {
   height: 70px;
   line-height: 70px;
-  background: #3f9eff;
+  background: #0d1c2f;
   border-bottom: solid 0px;
   width: 100%;
 

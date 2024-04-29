@@ -1,0 +1,25 @@
+<template>
+
+  
+</template>
+
+<script>
+export default {};
+</script>
+
+<style scoped>
+.popover {
+  position: absolute;
+  background-color: rgb(29 78 216 / 0.6);
+  border-radius: 5px;
+  font-size: 0.2rem;
+  color: #fff;
+}
+.popover-title {
+  padding: 12px;
+  border-bottom: 1px solid #fff;
+}
+.popover-content {
+  padding: 24px;
+}
+</style>

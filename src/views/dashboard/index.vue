@@ -18,7 +18,7 @@
           <span class="header-wrap"></span>
         </el-header> -->
         <el-container>
-          <el-aside style="width: 25%;z-index: 2;">
+          <el-aside style="width: 25%; z-index: 2">
             <el-card
               v-show="$store.state.isCollapse"
               :body-style="{ padding: '5px', height: '100%', width: '100%' }"
@@ -50,7 +50,7 @@
                     :id="'pieBar' + index"
                     style="height: 200px; margin-left: 3%; padding-top: 5%"
                     class="echartpie"
-                    @click="gocamera"
+                    @click="goCamera"
                   ></div>
                   <span
                     style="
@@ -147,7 +147,7 @@
               </template>
             </el-card>
           </el-aside>
-          <el-aside style="width: 50%; overflow: hidden; position: relative;">
+          <el-aside style="width: 50%; overflow: hidden; position: relative">
             <!-- <img class="rbt_link_item item1" :src="rbt_link" @click="toRbt" />
             <img class="rbt_link_item item2" :src="rbt_link" @click="toRbt" />
             <img class="rbt_link_item item3" :src="rbt_link" @click="toRbt" /> -->
@@ -168,7 +168,12 @@
               v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '5px', height: '100%', width: '100%' }"
               class="box-card slidup"
-              style="width: 100%; text-align: center; margin-top: 8px;z-index: 2;"
+              style="
+                width: 100%;
+                text-align: center;
+                margin-top: 8px;
+                z-index: 2;
+              "
             >
               <i class="top"></i>
               <i class="bottom"></i>
@@ -178,7 +183,7 @@
               <div id="echarts_box" style="height: 85%; width: 100%"></div>
             </el-card>
           </el-aside>
-          <el-aside style="width: 25%;z-index: 2;">
+          <el-aside style="width: 25%; z-index: 2">
             <el-card
               v-show="this.$store.state.isCollapse"
               :body-style="{ padding: '0px' }"
@@ -203,7 +208,7 @@
                     element-loading-background="#000"
                     style="width: 100%; height: 100%"
                   >
-                    <div class="video-wrapper" :style="videoclass">
+                    <div class="video-wrapper" :style="videoClass">
                       <video
                         :id="`video1`"
                         ref="videoElement1"
@@ -245,7 +250,7 @@
                     element-loading-background="#000"
                     style="width: 100%; height: 100%"
                   >
-                    <div class="video-wrapper" :style="videoclass">
+                    <div class="video-wrapper" :style="videoClass">
                       <video
                         :id="`video2`"
                         ref="videoElement2"
@@ -285,7 +290,7 @@
                     element-loading-background="#000"
                     style="width: 100%; height: 100%"
                   >
-                    <div class="video-wrapper" :style="videoclass">
+                    <div class="video-wrapper" :style="videoClass">
                       <video
                         :id="`video3`"
                         ref="videoElement3"
@@ -337,7 +342,7 @@ echarts.use([
 // import MTLLoader from  'three-mtl-loader';
 // import OBJLoader from  'three-obj-loader';
 // import {CSS2DObject, CSS2DRenderer} from "three-css2drender";
-import flvjs from "mpegts.js";
+import flvJs from "mpegts.js";
 import FlvExtend from "flv-extend";
 // import FlvExtend from "@/utils/flvExtend.js";
 
@@ -397,7 +402,7 @@ export default {
       fornum: 4,
       clonum: 12,
       dialogFormVisible: false,
-      videoclass:
+      videoClass:
         " position: relative; margin: 0px auto; overflow: hidden;width: 100%; height: 100%",
       listN: [0, 1, 2, 3], //监控
       videoStatus: true, //开启轮播状态
@@ -940,7 +945,7 @@ export default {
         this.listN[i] =
           (this.listN[i] + this.listN.length) % this.listObj.length;
       }
-      if (flvjs.isSupported()) {
+      if (flvJs.isSupported()) {
         this.initPlayer1();
         this.initPlayer2();
         this.initPlayer3();
@@ -970,30 +975,34 @@ export default {
       this.listLoading = false;
 
       // 配置需要的功能
-      const flv = new FlvExtend({
-        element: videoElement, // *必传
-        frameTracking: true, // 开启追帧设置
-        updateOnStart: true, // 点击播放后更新视频
-        updateOnFocus: false, // 获得焦点后更新视频
-        reconnect: true, // 开启断流重连
-        reconnectInterval: 2000, // 断流重连间隔
-      });
+      // const flv = new FlvExtend({
+      //   element: videoElement, // *必传
+      //   frameTracking: true, // 开启追帧设置
+      //   updateOnStart: true, // 点击播放后更新视频
+      //   updateOnFocus: false, // 获得焦点后更新视频
+      //   reconnect: true, // 开启断流重连
+      //   reconnectInterval: 2000, // 断流重连间隔
+      // });
 
-      this.flvPlayer = flv.init(
+      this.flvPlayer = flvJs.createPlayer(
         {
           type: "mse",
           url: this.listObj[n].httpUrl,
           isLive: true, // 直播模式
+          hasAudio: false,
+          enableWorker: false,
+          enableStashBuffer: false, // 启用数据缓存机制，提高视频的流畅度和稳定性。
+          stashInitialSize: 32 * 1024, // 初始缓存大小。单位：字节。建议针对直播：调整为1024kb
+          stashInitialTime: 0.2, // 缓存初始时间。单位：秒。建议针对直播：调整为200毫秒
+          seekType: "range", // 建议将其设置为“range”模式，以便更快地加载视频数据，提高视频的实时性。
+          lazyLoad: false, //关闭懒加载模式，从而提高视频的实时性。建议针对直播：调整为false
+          lazyLoadMaxDuration: 0.2, // 懒加载的最大时长。单位：秒。建议针对直播：调整为200毫秒
+          deferLoadAfterSourceOpen: false,
         },
         {
-          enableWorker: true, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
-          enableStashBuffer: true, //播放flv时，设置是否启用播放缓存，只在直播起作用。
-          stashInitialSize: "300KB", // 指示IO暂存缓冲区的初始大小。默认值为384KB。指出合适的尺寸可以改善视频负载/搜索时间。
-          lazyLoad: true, // 懒加载 数据足够播放 终止http请求
-          lazyLoadMaxDuration: 3, // 懒加载保留3秒
           accurateSeek: false, // 精确查找任何帧，加载会变慢
           autoCleanupSourceBuffer: true, // 自动清理缓存
-          autoCleanupMinBackwardDuration: 60,
+          autoCleanupMinBackwardDuration: 60, // 指示进行自动清除时为反向缓冲区保留的持续时间（以秒为单位）。
           rangeLoadZeroStart: true, // Range: bytes=0-如果使用范围查找，则发送首次负载
           fixAudioTimestampGap: false, //false
           reuseRedirectedURL: true,
@@ -1011,7 +1020,7 @@ export default {
           this.flvPlayer.play();
         }
       }
-      this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
+      this.flvPlayer.on(flvJs.Events.ERROR, (errType, errDetail) => {
         // alert("网络波动,正在尝试连接中...");
         if (this.flvPlayer) {
           this.reloadVideo(videoElement, n, this.flvPlayer);
@@ -1030,7 +1039,7 @@ export default {
         path: "/system/abnormalInfo",
       });
     },
-    gocamera() {
+    goCamera() {
       this.$router.push({
         path: "/system/config/cameraInfo",
       });
@@ -1149,7 +1158,8 @@ export default {
   height: 100%;
   // background-image: url("../../assets/images/bgimg25D.png");
   background-size: 100% 100%;
-  background: #0D1C2F;
+  background: #0d1c2f;
+  // background: #3F9EFF;
 }
 .header-wrap {
   position: absolute;

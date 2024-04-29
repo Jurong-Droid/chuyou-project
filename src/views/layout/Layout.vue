@@ -63,7 +63,9 @@ export default {
 }
 .bgImg2 {
   overflow: hidden;
-  background-image: url("../../assets/images/bgimg25D.png");
+  //background-image: url("../../assets/images/bgimg25D.png");
+  background-size: 100% 100%;
+  background: #0d1c2f;
 }
 .header {
   position: absolute;

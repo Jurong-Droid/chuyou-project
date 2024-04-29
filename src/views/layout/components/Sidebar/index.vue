@@ -7,7 +7,7 @@
       unique-opened
       :default-active="$route.path"
       :collapse="isCollapse"
-      background-color="#3F9EFF"
+      background-color="#0d1c2f"
       text-color="#fff"
       active-text-color="#fff"
       style="width: 100%;"

@@ -9,13 +9,13 @@
         <div id="container_max">
           <el-row :gutter="10" style="margin: 0 !important">
             <el-col
-              v-for="(n, index) in fornum"
+              v-for="(n, index) in forNum"
               :xs="24"
               :sm="24"
-              :md="clonum"
-              :lg="clonum"
-              :xl="clonum"
-              :class="videoclass"
+              :md="cloNum"
+              :lg="cloNum"
+              :xl="cloNum"
+              :class="videoClass"
               :key="index"
               style="padding: 0"
             >
@@ -24,7 +24,7 @@
                 element-loading-text="加载中..."
                 element-loading-background="#000"
               >
-                <div class="video-wrapper" :style="videoclass">
+                <div class="video-wrapper" :style="videoClass">
                   <el-button
                     v-if="seReplace == index"
                     style="
@@ -56,16 +56,16 @@
                     style="position: absolute; z-index: 1002; right: 20px"
                     type="text"
                     circle
-                    @click="SclosePlayer(index)"
+                    @click="sClosePlayer(index)"
                     >×</el-button
                   >
                   <div class="video-inner live hide-waiting">
                     <video
-                      :id="`videoid${n}`"
+                      :id="`videoId${n}`"
                       ref="videoElement"
                       muted
                       controls
-                      width="101%"
+                      width="100%"
                       height="100%"
                       style="object-fit: fill"
                     ></video>
@@ -82,8 +82,7 @@
 
 <script>
 import _ from "lodash";
-import flvjs from "mpegts.js";
-import FlvExtend from "flv-extend";
+import flvJs from "mpegts.js";
 import screenfull from "screenfull";
 
 export default {
@@ -105,10 +104,10 @@ export default {
       },
       title: "",
       fullscreen: false,
-      fornum: 4,
-      clonum: 12,
+      forNum: 4,
+      cloNum: 12,
       dialogFormVisible: false,
-      videoclass:
+      videoClass:
         "padding-bottom: 54.25%; position: relative; margin: 0px auto; overflow: hidden;",
       classtype1: "",
       classtype2: "primary",
@@ -150,8 +149,8 @@ export default {
         ) {
           if (
             this.seReplace != -1 ||
-            (nid.length == 5 && this.fornum == 4) ||
-            (nid.length == 10 && this.fornum == 9)
+            (nid.length == 5 && this.forNum == 4) ||
+            (nid.length == 10 && this.forNum == 9)
           ) {
             const id = addid;
             if (id == "") {
@@ -243,8 +242,8 @@ export default {
         },
       }).then((data) => {
         this.listObj[location] = data[0];
-        const vieoElementList = this.$refs.videoElement;
-        const videoElement = vieoElementList[location];
+        const videoElementList = this.$refs.videoElement;
+        const videoElement = videoElementList[location];
         this.createVideo(videoElement, location);
         this.flvPlayerList.push(this.flvPlayer);
       });
@@ -262,7 +261,7 @@ export default {
         closeNum = this.closeNum;
       }
 
-      this.SclosePlayer(closeNum);
+      this.sClosePlayer(closeNum);
       console.log("替换位置：" + closeNum);
       this.api({
         url: "/cameraLive/alistCameraLive",
@@ -275,8 +274,8 @@ export default {
         },
       }).then((data) => {
         this.listObj[closeNum] = data[0];
-        const vieoElementList = this.$refs.videoElement;
-        const videoElement = vieoElementList[closeNum];
+        const videoElementList = this.$refs.videoElement;
+        const videoElement = videoElementList[closeNum];
         this.createVideo(videoElement, closeNum);
         this.closeNum = this.closeNum + 1;
         this.flvPlayerList.push(this.flvPlayer);
@@ -308,38 +307,38 @@ export default {
     }, 700),
 
     splitScreen(fnum) {
-      this.selecttype(fnum);
+      this.selectType(fnum);
       this.listQuery.pageRow = fnum;
       this.listQuery.pageNum = 1;
       this.getList();
     },
 
-    selecttype(fnum) {
-      this.fornum = fnum;
+    selectType(fnum) {
+      this.forNum = fnum;
       if (fnum == 1) {
         this.classtype1 = "primary";
         this.classtype2 = "";
         this.classtype3 = "";
         this.classtype4 = "";
-        this.clonum = 24;
+        this.cloNum = 24;
       } else if (fnum == 4) {
         this.classtype1 = "";
         this.classtype2 = "primary";
         this.classtype3 = "";
         this.classtype4 = "";
-        this.clonum = 12;
+        this.cloNum = 12;
       } else if (fnum == 9) {
         this.classtype1 = "";
         this.classtype2 = "";
         this.classtype3 = "primary";
         this.classtype4 = "";
-        this.clonum = 8;
+        this.cloNum = 8;
       } else if (fnum == 16) {
         this.classtype1 = "";
         this.classtype2 = "";
         this.classtype3 = "";
         this.classtype4 = "primary";
-        this.clonum = 6;
+        this.cloNum = 6;
       }
     },
     CloseCameraLive() {
@@ -361,7 +360,7 @@ export default {
 
     //加载视频播放
     initPlayer() {
-      if (flvjs.isSupported()) {
+      if (flvJs.isSupported()) {
         const videoElementList = this.$refs.videoElement;
         for (let n = 0; n < this.listObj.length; n++) {
           const videoElement = videoElementList[n];
@@ -371,37 +370,29 @@ export default {
       }
     },
     createVideo(videoElement, n) {
-      // console.log(videoElement, n);
 
-      // 配置需要的功能
-      const flv = new FlvExtend({
-        element: videoElement, // *必传
-        frameTracking: true, // 开启追帧设置
-        updateOnStart: true, // 点击播放后更新视频
-        updateOnFocus: true, // 获得焦点后更新视频
-        reconnect: true, // 开启断流重连
-        reconnectInterval: 0, // 断流重连间隔
-      });
-
-      this.flvPlayer = flv.init(
+      this.flvPlayer = flvJs.createPlayer(
         {
           type: "mse",
           url: this.listObj[n].httpUrl,
           isLive: true, // 直播模式
           hasAudio: false,
+          enableWorker: false,
+          enableStashBuffer: false, // 启用数据缓存机制，提高视频的流畅度和稳定性。
+          stashInitialSize: 32 * 1024, // 初始缓存大小。单位：字节。建议针对直播：调整为1024kb
+          stashInitialTime: 0.2, // 缓存初始时间。单位：秒。建议针对直播：调整为200毫秒
+          seekType: "range", // 建议将其设置为“range”模式，以便更快地加载视频数据，提高视频的实时性。
+          lazyLoad: false, //关闭懒加载模式，从而提高视频的实时性。建议针对直播：调整为false
+          lazyLoadMaxDuration: 0.2, // 懒加载的最大时长。单位：秒。建议针对直播：调整为200毫秒
+          deferLoadAfterSourceOpen: false,
         },
         {
-          enableWorker: true, // 浏览器端开启flv.js的worker,多进程运行flv.js 不稳定
-          enableStashBuffer: true, //播放flv时，设置是否启用播放缓存，只在直播起作用。
-          stashInitialSize: "300KB", // 指示IO暂存缓冲区的初始大小。默认值为384KB。指出合适的尺寸可以改善视频负载/搜索时间。
-          lazyLoad: true, // 懒加载 数据足够播放 终止http请求
-          lazyLoadMaxDuration: 3, // 懒加载保留3秒
           accurateSeek: false, // 精确查找任何帧，加载会变慢
           autoCleanupSourceBuffer: true, // 自动清理缓存
-          autoCleanupMinBackwardDuration: 60,
+          autoCleanupMinBackwardDuration: 60, // 指示进行自动清除时为反向缓冲区保留的持续时间（以秒为单位）。
           rangeLoadZeroStart: true, // Range: bytes=0-如果使用范围查找，则发送首次负载
           fixAudioTimestampGap: false, //false
-          reuseRedirectedURL: true
+          reuseRedirectedURL: true,
         }
       );
 
@@ -415,9 +406,9 @@ export default {
         this.flvPlayer.play();
       }
 
-      this.flvPlayer.on(flvjs.Events.ERROR, (errType, errDetail) => {
+      this.flvPlayer.on(flvJs.Events.ERROR, (errType, errDetail) => {
         console.log(errType, errDetail);
-        if (errType === flvjs.ErrorTypes.NETWORK_ERROR) {
+        if (errType === flvJs.ErrorTypes.NETWORK_ERROR) {
           // this.reloadVideo(videoElement, n, this.flvPlayer);
         }
         // errType是 NetworkError时，对应errDetail有：Exception、HttpStatusCodeInvalid、ConnectingTimeout、EarlyEof、UnrecoverableEarlyEof
@@ -465,13 +456,13 @@ export default {
       this.destoryVideo(this.flvPlayerList[location]);
       console.log("我执行了id：" + id + " 位置：" + location);
     },
-    SclosePlayer(n) {
+    sClosePlayer(n) {
       console.log("我执行啦");
       this.closeTree([0, this.listObj[n].id]);
     },
 
-    SclosePlayer2(n) {
-      //this.closeTree(this.listObj[n].id);
+    sClosePlayer2(n) {
+      // this.closeTree(this.listObj[n].id);
       for (let i in this.flvPlayerList) {
         if (n == i) {
           this.destoryVideo(this.flvPlayerList[i]);
@@ -498,7 +489,7 @@ export default {
 
     handleSizeChange(val) {
       //改变每页数量
-      this.selecttype(val);
+      this.selectType(val);
       this.listQuery.pageRow = val;
       this.handleFilter();
     },
